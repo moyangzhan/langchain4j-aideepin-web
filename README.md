@@ -32,14 +32,6 @@
 * 额度控制
 * 自定义openai secret_key
 
-环境变量：
-
-全部参数变量请查看或[这里](#环境变量)
-
-```
-/service/.env.example
-```
-
 ## 前置要求
 
 ### Node
