@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  aideepin-web:
+    container_name: aideepin-web
+    image: aideepin-web
+    build:
+      context: ../              #表示dockerfile文件存在的目录
+      dockerfile: dockerfile    #表示dockerfile的文件名
+    ports:
+      - 1002:1002
+  nginx:
+    container_name: nginx
+    image: nginx:alpine
+    ports:
+      - '80:80'
+    expose:
+      - '80'
+    volumes:
+      - ./nginx/html:/usr/share/nginx/html
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
