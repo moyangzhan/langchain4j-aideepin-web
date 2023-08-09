@@ -1,6 +1,18 @@
 # AIDeepIn Web
 
-> 声明：此项目只发布于 Github，基于 MIT 协议，免费且作为开源学习使用。并且不会有任何形式的卖号、付费服务、讨论群、讨论组等行为。谨防受骗。
+> 声明：此项目只发布于 Github，基于 MIT 协议，免费且作为开源学习使用。并且不会有任何形式的卖号等行为，谨防受骗。
+
+![1691582252468](image/README/1691582252468.png)
+
+![1691583184761](image/README/1691583184761.png)
+
+![1691583124744](image/README/1691583124744.png)
+
+![1691583329105](image/README/1691583329105.png)
+
+
+
+此仓库为aideepin的前端，后端服务代码见[**aideepin**](https://github.com/moyangzhan/aideepin)
 
 - [AIDeepIn Web](#aideepin-web)
   - [介绍](#介绍)
@@ -31,6 +43,14 @@
 * 提示词
 * 额度控制
 * 自定义openai secret_key
+
+环境变量：
+
+全部参数变量请查看或[这里](#环境变量)
+
+```
+/service/.env.example
+```
 
 ## 前置要求
 
