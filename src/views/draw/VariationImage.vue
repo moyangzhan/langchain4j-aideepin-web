@@ -84,7 +84,7 @@ async function handleSubmit() {
       checkProcess(uuid)
     }, 5000)
   } catch (error) {
-    let e = error as { message: string }
+    const e = error as { message: string }
     ms.error(e.message)
   }
 }
@@ -98,8 +98,10 @@ async function handleSubmit() {
         原图
       </NCol>
       <NCol :span="12">
-        <NUpload action="/api/file/upload" :max="1" response-type="text" list-type="image-card"
-          @before-upload="beforeUpload" @finish="handleOriginalFinish" @remove="removeOriginalImage">
+        <NUpload
+          action="/api/file/upload" :max="1" response-type="text" list-type="image-card"
+          @before-upload="beforeUpload" @finish="handleOriginalFinish" @remove="removeOriginalImage"
+        >
           上传小于4MB的PNG图片
         </NUpload>
       </NCol>

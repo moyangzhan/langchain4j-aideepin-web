@@ -19,6 +19,7 @@
     - [PNPM](#pnpm)
   - [安装依赖](#安装依赖)
   - [测试环境运行](#测试环境运行)
+  - [环境变量](#环境变量)
   - [打包](#打包)
     - [使用 Docker](#使用-docker)
 
@@ -34,6 +35,8 @@
 
 本仓库代码基于[chatgpt-web](https://github.com/Chanzhaoyu/chatgpt-web)
 
+接入的模型：ChatGPT 3.5，DALL-E 2
+
 功能列表：
 
 * 注册&登录
@@ -42,6 +45,14 @@
 * 提示词
 * 额度控制
 * 自定义openai secret_key
+
+环境变量：
+
+全部参数变量请查看或[这里](#环境变量)
+
+```
+/service/.env.example
+```
 
 ## 前置要求
 

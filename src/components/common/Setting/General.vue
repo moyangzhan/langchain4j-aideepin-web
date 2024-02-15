@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { NButton, NImage, NSelect, NSpace } from 'naive-ui'
+import { NButton, NImage, NSpace } from 'naive-ui'
 import type { Language, Theme } from '@/store/modules/app/helper'
 import { SvgIcon } from '@/components/common'
 import { useAppStore, useAuthStore, useUserStore } from '@/store'
@@ -118,15 +118,15 @@ async function logout() {
           </template>
         </div>
       </div>
-      <div class="flex items-center space-x-4">
+      <!-- <div class="flex items-center space-x-4">
         <span class="flex-shrink-0 w-[100px]">{{ $t('setting.language') }}</span>
         <div class="flex flex-wrap items-center gap-4">
           <NSelect
             style="width: 140px" :value="language" :options="languageOptions"
-            @update-value="value => appStore.setLanguage(value)"
+            @update-value="(value: Language) => appStore.setLanguage(value)"
           />
         </div>
-      </div>
+      </div> -->
       <div class="flex items-center space-x-4">
         <NButton size="small" type="primary" @click="logout">
           退出

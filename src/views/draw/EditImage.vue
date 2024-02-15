@@ -105,10 +105,9 @@ async function handleSubmit(prompt: string) {
       checkProcess(uuid)
     }, 5000)
   } catch (error) {
-    let e = error as { message: string }
+    const e = error as { message: string }
     ms.error(e.message)
   }
-
 }
 </script>
 
@@ -214,9 +213,11 @@ async function handleSubmit(prompt: string) {
         </NTooltip>
       </NCol>
       <NCol :span="12">
-        <NUpload action="/api/file/upload" :max="1" response-type="text" list-type="image-card"
+        <NUpload
+          action="/api/file/upload" :max="1" response-type="text" list-type="image-card"
           :default-file-list="originalImageList" @before-upload="beforeUpload" @finish="handleOriginalFinish"
-          @remove="removeOriginalImage">
+          @remove="removeOriginalImage"
+        >
           上传小于4MB的PNG图片
         </NUpload>
       </NCol>
@@ -234,9 +235,11 @@ async function handleSubmit(prompt: string) {
         </NTooltip>
       </NCol>
       <NCol :span="12">
-        <NUpload action="/api/file/upload" :max="1" response-type="text" list-type="image-card"
+        <NUpload
+          action="/api/file/upload" :max="1" response-type="text" list-type="image-card"
           :default-file-list="maskImageList" @before-upload="beforeUpload" @finish="handleMaskFinish"
-          @remove="removeMaskImage">
+          @remove="removeMaskImage"
+        >
           上传小于4MB的PNG图片
         </NUpload>
       </NCol>

@@ -5,6 +5,7 @@ import type { Component } from 'vue'
 import { defineAsyncComponent, h, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { ChatboxEllipsesOutline, ImagesOutline, LibraryOutline, SettingsOutline } from '@vicons/ionicons5'
+import { Prompt as PromptIcon } from '@vicons/tabler'
 import { NaiveProvider, PromptStore } from '@/components/common'
 import { useTheme } from '@/hooks/useTheme'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -46,6 +47,23 @@ const menuOptions: MenuOption[] = [
         { default: () => '画图' },
       ),
   },
+  {
+    key: 'knowledge-base',
+    icon: renderIcon(LibraryOutline),
+    label: () =>
+      h(
+        RouterLink,
+        {
+          to: {
+            name: 'QADetail',
+            params: {
+              kbUuid: 'default',
+            },
+          },
+        },
+        { default: () => '知识库' },
+      ),
+  },
 ]
 function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) })
@@ -63,7 +81,7 @@ function renderIcon(icon: Component) {
               <template #trigger>
                 <NButton text style="font-size: 26px;" class="cursor-pointer" @click="showPrompt = true">
                   <NIcon>
-                    <LibraryOutline />
+                    <PromptIcon />
                   </NIcon>
                 </NButton>
               </template>

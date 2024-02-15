@@ -222,6 +222,88 @@ function messageDel<T = any>(uuid: string) {
   })
 }
 
+function knowledgeBaseSearch<T>(keyword: string, includeOthersPublic: boolean, currentPage: number, pageSize: number) {
+  const search = keyword === undefined ? '' : `keyword=${keyword}&`
+  return get<T>({
+    url: `/knowledge-base/search?${search}currentPage=${currentPage}&pageSize=${pageSize}&includeOthersPublic=${includeOthersPublic}`,
+  })
+}
+
+function knowledgeBaseSaveOrUpdate<T = any>(obj: KnowledgeBase.Info) {
+  return post<T>({
+    url: '/knowledge-base/saveOrUpdate',
+    data: obj,
+  })
+}
+
+function knowledgeBaseInfo<T = any>(uuid: string) {
+  return get<T>({
+    url: `/knowledge-base/info/${uuid}`,
+  })
+}
+
+function knowledgeBaseDelete<T = any>(uuid: string) {
+  return post<T>({
+    url: `/knowledge-base/del/${uuid}`,
+  })
+}
+
+function knowledgeBaseItemSearch<T>(currentPage: number, pageSize: number, kbUuid: string, keyword?: string) {
+  const search = keyword === undefined ? '' : `keyword=${keyword}&`
+  return get<T>({
+    url: `/knowledge-base-item/search?${search}kbUuid=${kbUuid}&currentPage=${currentPage}&pageSize=${pageSize}`,
+  })
+}
+
+function knowledgeBaseItemSaveOrUpdate<T = any>(obj: KnowledgeBase.Item) {
+  return post<T>({
+    url: '/knowledge-base-item/saveOrUpdate',
+    data: obj,
+  })
+}
+
+function knowledgeBaseItemDelete<T = any>(uuid: string) {
+  return post<T>({
+    url: `/knowledge-base-item/del/${uuid}`,
+  })
+}
+
+function knowledgeBaseItemEmbedding<T = any>(uuids: string[]) {
+  return post<T>({
+    url: '/knowledge-base-item/embedding-list',
+    data: {
+      uuids,
+    },
+  })
+}
+
+function knowledgeBaseEmbedding<T = any>(kbItemUuid: string, currentPage: number, pageSize: number) {
+  return get<T>({
+    url: `/knowledge-base-embedding/list/${kbItemUuid}?currentPage=${currentPage}&pageSize=${pageSize}`,
+  })
+}
+
+function knowledgeBaseQaAsk<T = any>(kbUuid: string, question: string) {
+  return post<T>({
+    url: `/knowledge-base/qa/ask/${kbUuid}`,
+    data: {
+      question,
+    },
+  })
+}
+
+function knowledgeBaseQaRecordSearch<T = any>(kbUuid: string, keyword: string, currentPage: number, pageSize: number) {
+  return get<T>({
+    url: `/knowledge-base/qa/record/search?kbUuid=${kbUuid}&keyword=${keyword}&currentPage=${currentPage}&pageSize=${pageSize}`,
+  })
+}
+
+function knowledgeBaseQaRecordDel<T = any>(uuid: string) {
+  return post<T>({
+    url: `/knowledge-base/qa/record/del/${uuid}`,
+  })
+}
+
 export default {
   login,
   register,
@@ -250,4 +332,16 @@ export default {
   imageVariation,
   imageDel,
   messageDel,
+  knowledgeBaseInfo,
+  knowledgeBaseSearch,
+  knowledgeBaseSaveOrUpdate,
+  knowledgeBaseDelete,
+  knowledgeBaseItemSaveOrUpdate,
+  knowledgeBaseItemSearch,
+  knowledgeBaseItemDelete,
+  knowledgeBaseItemEmbedding,
+  knowledgeBaseEmbedding,
+  knowledgeBaseQaAsk,
+  knowledgeBaseQaRecordSearch,
+  knowledgeBaseQaRecordDel,
 }

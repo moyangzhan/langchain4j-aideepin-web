@@ -135,7 +135,7 @@ export const useChatStore = defineStore('chat-store', {
 
     addMessage(uuid: string, message: Chat.ChatMessage, tail?: boolean) {
       if (undefined === message.inversion)
-        message.inversion = message.messageRole !== 'assistant'
+        message.inversion = message.messageRole !== 3
 
       if (this.conversations.length === 0) {
         this.conversations.push(defaultConv())
@@ -162,7 +162,7 @@ export const useChatStore = defineStore('chat-store', {
         tail ? this.chats[chatIndex].data.push(message) : this.chats[chatIndex].data.unshift(message)
 
       if (this.conversations.find(item => item.uuid === uuid)?.title === 'New Chat')
-        this.conversations[chatIndex].title = message.content
+        this.conversations[chatIndex].title = message.remark
 
       this.recordState()
     },
@@ -200,7 +200,7 @@ export const useChatStore = defineStore('chat-store', {
       if (chatIndex !== -1 && this.chats.length) {
         const oldChat = findMessageFromConv(this.chats[chatIndex], answerUuid)
         if (oldChat)
-          oldChat.content = oldChat.content + chunk
+          oldChat.remark = oldChat.remark + chunk
 
         this.recordState()
       }

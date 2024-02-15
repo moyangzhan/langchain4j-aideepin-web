@@ -51,7 +51,7 @@ async function loadNextPage(event?: any) {
   loadingms && loadingms.destroy()
   loadingms = ms.loading(
     '加载中...', {
-      duration: 0,
+      duration: 3000,
     },
   )
   let scrollPosition = 0

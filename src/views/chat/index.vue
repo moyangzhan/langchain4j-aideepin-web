@@ -128,7 +128,7 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
       } else {
         question = messages.value[messages.value.length - 1]
       }
-      updateMessageSomeFields(curConvUuid, question.children[0].uuid, { content: `系统提示：${error}`, loading: false })
+      updateMessageSomeFields(curConvUuid, question.children[0].uuid, { remark: `系统提示：${error}`, loading: false })
     },
   })
 }
@@ -152,11 +152,11 @@ async function createChatTask() {
     {
       uuid: questionUuid,
       createTime: new Date().toLocaleString(),
-      content: message,
+      remark: message,
       children: [{
         uuid: answerUuid,
         createTime: new Date().toLocaleString(),
-        content: '',
+        remark: '',
         children: [],
         loading: true,
         inversion: false,
@@ -206,7 +206,7 @@ async function onRegenerate(questionUuid: string) {
     {
       uuid: answerUuid,
       createTime: new Date().toLocaleString(),
-      content: '',
+      remark: '',
       children: [],
       inversion: false,
       error: false,
@@ -244,7 +244,7 @@ async function loadMoreMessage(event: any) {
   loadingMsgs.value = true
   loadingms = ms.loading(
     '加载中...', {
-      duration: 10000,
+      duration: 3000,
     })
   try {
     const scrollPosition = event.target.scrollHeight - event.target.scrollTop
@@ -457,7 +457,7 @@ onDeactivated(() => {
           <template v-else>
             <div v-for="(question, index) of messages" :key="index">
               <Message
-                :date-time="question.createTime" :text="question.content" type="text"
+                :date-time="question.createTime" :text="question.remark" type="text"
                 :inversion="question.inversion" :error="question.error" :loading="false"
                 @regenerate="onRegenerate(question.uuid)" @delete="handleDelete(question.uuid, '', true)"
               />
@@ -472,7 +472,7 @@ onDeactivated(() => {
                     :name="`tab_${answer.uuid}`" :tab="`答案${index + 1}`"
                   >
                     <Message
-                      :show-avatar="false" :date-time="answer.createTime" :text="answer.content" type="text"
+                      :show-avatar="false" :date-time="answer.createTime" :text="answer.remark" type="text"
                       :inversion="answer.inversion" :error="answer.error" :loading="answer.loading"
                       @regenerate="onRegenerate(question.uuid)" @delete="handleDelete(question.uuid, answer.uuid)"
                     />
@@ -481,7 +481,7 @@ onDeactivated(() => {
               </template>
               <template v-if="question.children.length === 1">
                 <Message
-                  :date-time="question.children[0].createTime" :text="question.children[0].content" type="text"
+                  :date-time="question.children[0].createTime" :text="question.children[0].remark" type="text"
                   :inversion="question.children[0].inversion" :error="question.children[0].error"
                   :loading="question.children[0].loading" @regenerate="onRegenerate(question.uuid)"
                   @delete="handleDelete(question.uuid, question.children[0].uuid)"

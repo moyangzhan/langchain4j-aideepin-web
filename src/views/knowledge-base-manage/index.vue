@@ -1,0 +1,214 @@
+<script setup lang='ts'>
+import type { DataTableColumns } from 'naive-ui'
+import { computed, h, reactive, ref, watch } from 'vue'
+import { NButton, NDataTable, NInput, NModal, NRadio, NRadioGroup, NSpace, useMessage } from 'naive-ui'
+import { RouterLink } from 'vue-router'
+import { useBasicLayout } from '@/hooks/useBasicLayout'
+import { useAuthStore } from '@/store'
+import { knowledgeBaseEmptyInfo } from '@/utils/functions'
+import { t } from '@/locales'
+import api from '@/api'
+
+const ms = useMessage()
+const loading = ref(false)
+const submitting = ref(false)
+const showModal = ref(false)
+const infoList = ref<KnowledgeBase.Info[]>([])
+const paginationReactive = reactive({
+  page: 1,
+  pageSize: 20,
+  itemCount: 0,
+})
+const searchValue = ref<string>('')
+const tmpKb = reactive<KnowledgeBase.Info>(knowledgeBaseEmptyInfo())
+// 控制 input 按钮
+const inputStatus = computed(() => tmpKb.title.trim().length < 1 && !submitting.value)
+const { isMobile } = useBasicLayout()
+const authStore = useAuthStore()
+const token = ref<string>(authStore.token)
+
+const changeShowModal = (selected: KnowledgeBase.Info = knowledgeBaseEmptyInfo()) => {
+  Object.assign(tmpKb, selected)
+  showModal.value = !showModal.value
+}
+// table相关
+const createColumns = (): DataTableColumns<KnowledgeBase.Info> => {
+  return [
+    {
+      title: '标题',
+      key: 'title',
+      width: 200,
+      render(row) {
+        return h(
+          RouterLink,
+          {
+            class: 'hljs-link',
+            to: {
+              name: 'KnowledgeBaseManageDetail',
+              params: {
+                kbUuid: row.uuid,
+              },
+            },
+          },
+          { default: () => row.title },
+        )
+      },
+    },
+    {
+      title: '描述',
+      key: 'remark',
+    },
+    {
+      title: '是否公开',
+      key: 'isPublic',
+      width: 100,
+      render(row) {
+        return row.isPublic ? '是' : '否'
+      },
+    },
+    {
+      title: t('common.action'),
+      key: 'actions',
+      width: 100,
+      align: 'center',
+      render(row) {
+        return h('div', { class: 'flex items-center flex-col gap-2' }, {
+          default: () => [h(
+            NButton,
+            {
+              tertiary: true,
+              size: 'small',
+              type: 'info',
+              onClick: () => changeShowModal(row),
+            },
+            { default: () => t('common.edit') },
+          ),
+          h(
+            NButton,
+            {
+              tertiary: true,
+              size: 'small',
+              type: 'error',
+              onClick: () => deleteKb(row),
+            },
+            { default: () => t('common.delete') },
+          ),
+          ],
+        })
+      },
+    },
+  ]
+}
+
+const columns = createColumns()
+
+async function onHandlePageChange(currentPage: number) {
+  loading.value = true
+  search(currentPage)
+  loading.value = false
+}
+
+async function onKeyUpSearch(event: KeyboardEvent) {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault()
+    search(1)
+  }
+}
+
+async function search(currentPage: number) {
+  if (currentPage === 1)
+    infoList.value = []
+
+  const resp = await api.knowledgeBaseSearch<KnowledgeBase.InfoListResp>(searchValue.value, false, currentPage, paginationReactive.pageSize)
+  infoList.value.push(...resp.data.records)
+  paginationReactive.page = currentPage
+  paginationReactive.itemCount = resp.data.total
+}
+
+async function saveOrUpdateKb() {
+  try {
+    submitting.value = true
+    const res = await api.knowledgeBaseSaveOrUpdate<KnowledgeBase.Info>(tmpKb)
+    if (tmpKb.id) {
+      const hit = infoList.value.find(item => item.id === tmpKb.id)
+      if (hit)
+        Object.assign(hit, res.data)
+    } else {
+      infoList.value.push(res.data)
+    }
+    Object.assign(tmpKb, res.data)
+  } finally {
+    submitting.value = false
+    showModal.value = false
+  }
+}
+
+function deleteKb(row: KnowledgeBase.Info) {
+  api.knowledgeBaseDelete(row.uuid)
+  const index = infoList.value.findIndex(item => item.uuid === row.uuid)
+  if (index !== -1)
+    infoList.value.splice(index, 1)
+  ms.success('删除成功')
+}
+
+async function initData() {
+  search(1)
+}
+
+watch(
+  () => token,
+  () => {
+    if (token.value)
+      initData()
+  },
+  { immediate: true },
+)
+</script>
+
+<template>
+  <div class="flex flex-col w-full h-full p-4">
+    <main class="flex-1 overflow-hidden">
+      <div class="flex gap-3 mb-2" :class="[isMobile ? 'flex-col' : 'flex-row justify-between']">
+        <div class="flex items-center space-x-4">
+          <NButton type="primary" size="small" @click="changeShowModal()">
+            {{ $t('common.add') }}
+          </NButton>
+        </div>
+        <div class="flex justify-between">
+          <NInput v-model:value="searchValue" style="width: 100%" @keyup="onKeyUpSearch" />
+          <NButton type="primary" ghost @click="search(1)">
+            搜索
+          </NButton>
+        </div>
+      </div>
+      <NDataTable
+        remote :loading="loading" :max-height="400" :columns="columns" :data="infoList"
+        :pagination="paginationReactive" :single-line="false" :bordered="true" @update:page="onHandlePageChange"
+      />
+    </main>
+  </div>
+
+  <NModal v-model:show="showModal" title="编辑" style="width: 90%; max-width: 600px;" preset="card">
+    <NSpace vertical>
+      {{ t('store.title') }}
+      <NInput v-model:value="tmpKb.title" maxlength="100" show-count />
+      是否公开
+      <NRadioGroup v-model:value="tmpKb.isPublic" name="radiogroup">
+        <NRadio key="public_yes" :value="true">
+          公开
+        </NRadio>
+        <NRadio key="public_no" :value="false">
+          私有
+        </NRadio>
+      </NRadioGroup>
+      {{ t('store.description') }}
+      <NInput
+        v-model:value="tmpKb.remark" type="textarea" maxlength="500" show-count
+        :autosize="{ minRows: 10, maxRows: 40 }"
+      />
+      <NButton block type="primary" :disabled="inputStatus" @click="() => { saveOrUpdateKb() }">
+        {{ t('common.confirm') }}
+      </NButton>
+    </NSpace>
+  </NModal>
+</template>

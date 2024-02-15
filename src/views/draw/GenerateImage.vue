@@ -1,11 +1,11 @@
 <script setup lang='ts'>
 import { ref } from 'vue'
 import format from 'date-fns/format'
+import { useMessage } from 'naive-ui'
 import CommonSetting from './components/CommonSetting.vue'
 import SearchInput from './components/SearchInput.vue'
 import { checkProcess } from './helper'
 import { useDrawStore } from '@/store'
-import { useMessage } from 'naive-ui'
 import api from '@/api'
 
 interface Emit {
@@ -48,10 +48,9 @@ async function handleSubmit(prompt: string) {
       checkProcess(uuid)
     }, 5000)
   } catch (error: any) {
-    let e = error as { message: string }
+    const e = error as { message: string }
     ms.error(e.message)
   }
-
 }
 </script>
 

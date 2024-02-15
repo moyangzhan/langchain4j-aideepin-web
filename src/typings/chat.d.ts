@@ -3,8 +3,8 @@ declare namespace Chat {
 	interface ChatMessage {
 		uuid: string | '',
 		createTime: string
-		content: string
-		messageRole?: string
+		remark: string
+		messageRole?: number
 		children: ChatMessage[]
 		inversion?: boolean
 		error?: boolean

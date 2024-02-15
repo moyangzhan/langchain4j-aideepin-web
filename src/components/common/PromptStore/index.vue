@@ -1,10 +1,8 @@
 <script setup lang='ts'>
 import type { DataTableColumns } from 'naive-ui'
 import { computed, h, reactive, ref, watch } from 'vue'
-import { NAlert, NButton, NCard, NDataTable, NDivider, NIcon, NInput, NInputGroup, NList, NListItem, NModal, NSpace, NTabPane, NTabs, NThing, useMessage } from 'naive-ui'
+import { NAlert, NButton, NDataTable, NIcon, NInput, NInputGroup, NList, NListItem, NModal, NSpace, NThing, useMessage } from 'naive-ui'
 import { Note24Regular } from '@vicons/fluent'
-import PromptRecommend from '../../../assets/recommend.json'
-import { SvgIcon } from '..'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAuthStore } from '@/store'
 import { t } from '@/locales'
@@ -27,13 +25,10 @@ const show = computed({
 })
 const loading = ref(false)
 const showModal = ref(false)
-const importLoading = ref(false)
 const exportLoading = ref(false)
 const searchValue = ref<string>('')
 // 移动端自适应相关
 const { isMobile } = useBasicLayout()
-// Prompt在线导入推荐List,根据部署者喜好进行修改(assets/recommend.json)
-const promptRecommendList = PromptRecommend
 const promptList = ref<Chat.Prompt[]>([])
 const paginationReactive = reactive({
   page: 1,
@@ -41,9 +36,9 @@ const paginationReactive = reactive({
   itemCount: 0,
 })
 // 用于添加修改的临时prompt参数
-const tempPromptKey = ref('')
-const tempPromptValue = ref('')
-const tempPromptId = ref(0)
+const tmpPromptKey = ref('')
+const tmpPromptValue = ref('')
+const tmpPromptId = ref(0)
 // Modal模式，根据不同模式渲染不同的Modal内容
 const modalMode = ref('')
 // 这个是为了后期的修改Prompt内容考虑，因为要针对无uuid的list进行修改，且考虑到不能出现标题和内容的冲突，所以就需要一个临时item来记录一下
@@ -51,44 +46,37 @@ const tempModifiedItem = ref<any>({})
 // 添加修改导入都使用一个Modal, 临时修改内容占用tempPromptKey,切换状态前先将内容都清楚
 const changeShowModal = (mode: 'add' | 'modify' | 'local_import', selected = { act: '', prompt: '', id: 0 }) => {
   if (mode === 'add') {
-    tempPromptKey.value = ''
-    tempPromptValue.value = ''
+    tmpPromptKey.value = ''
+    tmpPromptValue.value = ''
   } else if (mode === 'modify') {
     tempModifiedItem.value = { ...selected }
-    tempPromptId.value = selected.id
-    tempPromptKey.value = selected.act
-    tempPromptValue.value = selected.prompt
+    tmpPromptId.value = selected.id
+    tmpPromptKey.value = selected.act
+    tmpPromptValue.value = selected.prompt
   } else if (mode === 'local_import') {
-    tempPromptKey.value = 'local_import'
-    tempPromptValue.value = ''
+    tmpPromptKey.value = 'local_import'
+    tmpPromptValue.value = ''
   }
   showModal.value = !showModal.value
   modalMode.value = mode
 }
 
-// 在线导入相关
-const downloadURL = ref('')
-const downloadDisabled = computed(() => downloadURL.value.trim().length < 1)
-const setDownloadURL = (url: string) => {
-  downloadURL.value = url
-}
-
 // 控制 input 按钮
-const inputStatus = computed(() => tempPromptKey.value.trim().length < 1 || tempPromptValue.value.trim().length < 1)
+const inputStatus = computed(() => tmpPromptKey.value.trim().length < 1 || tmpPromptValue.value.trim().length < 1)
 
 // Prompt模板相关操作
 const addPromptTemplate = () => {
   for (const i of promptList.value) {
-    if (i.act === tempPromptKey.value) {
+    if (i.act === tmpPromptKey.value) {
       message.error(t('store.addRepeatTitleTips'))
       return
     }
-    if (i.prompt === tempPromptValue.value) {
-      message.error(t('store.addRepeatContentTips', { msg: tempPromptKey.value }))
+    if (i.prompt === tmpPromptValue.value) {
+      message.error(t('store.addRepeatContentTips', { msg: tmpPromptKey.value }))
       return
     }
   }
-  api.promptsSave([{ act: tempPromptKey.value, prompt: tempPromptValue.value }])
+  api.promptsSave([{ act: tmpPromptKey.value, prompt: tmpPromptValue.value }])
   message.success(t('common.addSuccess'))
   changeShowModal('add')
 }
@@ -107,20 +95,20 @@ const modifyPromptTemplate = () => {
 
   // 搜索有冲突的部分
   for (const i of tempList) {
-    if (i.act === tempPromptKey.value) {
+    if (i.act === tmpPromptKey.value) {
       message.error(t('store.editRepeatTitleTips'))
       return
     }
-    if (i.prompt === tempPromptValue.value) {
+    if (i.prompt === tmpPromptValue.value) {
       message.error(t('store.editRepeatContentTips', { msg: i.act }))
       return
     }
   }
 
-  promptList.value = [{ id: tempPromptId.value, act: tempPromptKey.value, prompt: tempPromptValue.value, renderKey: tempPromptKey.value, renderValue: tempPromptValue.value }, ...tempList]
+  promptList.value = [{ id: tmpPromptId.value, act: tmpPromptKey.value, prompt: tmpPromptValue.value, renderKey: tmpPromptKey.value, renderValue: tmpPromptValue.value }, ...tempList]
   message.success(t('common.editSuccess'))
   changeShowModal('modify')
-  api.promptEdit(tempPromptId.value, tempModifiedItem.value.key, tempModifiedItem.value.value)
+  api.promptEdit(tmpPromptId.value, tempModifiedItem.value.key, tempModifiedItem.value.value)
 }
 
 const deletePromptTemplate = (row: { id: number; act: string; prompt: string }) => {
@@ -133,7 +121,7 @@ const deletePromptTemplate = (row: { id: number; act: string; prompt: string }) 
 
 const importPromptTemplate = async (from = 'online') => {
   try {
-    const jsonData = JSON.parse(tempPromptValue.value)
+    const jsonData = JSON.parse(tmpPromptValue.value)
     let key = ''
     let value = ''
     // 可以扩展加入更多模板字典的key
@@ -181,34 +169,6 @@ const exportPromptTemplate = async () => {
     URL.revokeObjectURL(url)
   } finally {
     exportLoading.value = false
-  }
-}
-
-// 模板在线导入
-const downloadPromptTemplate = async () => {
-  try {
-    importLoading.value = true
-    const response = await fetch(downloadURL.value)
-    const jsonData = await response.json()
-    if ('key' in jsonData[0] && 'value' in jsonData[0])
-      tempPromptValue.value = JSON.stringify(jsonData)
-    if ('act' in jsonData[0] && 'prompt' in jsonData[0]) {
-      const newJsonData = jsonData.map((item: { act: string; prompt: string }) => {
-        return {
-          key: item.act,
-          value: item.prompt,
-        }
-      })
-      tempPromptValue.value = JSON.stringify(newJsonData)
-    }
-    importPromptTemplate()
-    downloadURL.value = ''
-  } catch (error) {
-    console.error(error)
-    message.error(t('store.downloadError'))
-    downloadURL.value = ''
-  } finally {
-    importLoading.value = false
   }
 }
 
@@ -321,93 +281,55 @@ watch(
 <template>
   <NModal v-model:show="show" style="width: 90%; max-width: 900px;" preset="card">
     <div class="space-y-4">
-      <NTabs type="segment">
-        <NTabPane name="local" :tab="$t('store.local')">
-          <div class="flex gap-3 mb-4" :class="[isMobile ? 'flex-col' : 'flex-row justify-between']">
-            <div class="flex items-center space-x-4">
-              <NButton type="primary" size="small" @click="changeShowModal('add')">
-                {{ $t('common.add') }}
-              </NButton>
-              <NButton size="small" @click="changeShowModal('local_import')">
-                {{ $t('common.import') }}
-              </NButton>
-              <NButton size="small" :loading="exportLoading" @click="exportPromptTemplate()">
-                {{ $t('common.export') }}
-              </NButton>
-            </div>
-            <div class="flex items-center">
-              <NInputGroup>
-                <NInput v-model:value="searchValue" style="width: 100%" @keyup="search" />
-                <NButton ghost @click="clickSearch">
-                  搜索
-                </NButton>
-              </NInputGroup>
-            </div>
-          </div>
-          <NDataTable
-            v-if="!isMobile" remote :loading="loading" :max-height="400" :columns="columns" :data="dataSource"
-            :pagination="paginationReactive" :bordered="false" @update:page="handlePageChange"
-          />
-          <NList v-if="isMobile" style="max-height: 400px; overflow-y: auto;">
-            <NListItem v-for="(item, index) of dataSource" :key="index">
-              <NThing :title="item.renderKey" :description="item.renderValue" />
-              <template #suffix>
-                <div class="flex flex-col items-center gap-2">
-                  <NButton tertiary size="small" type="info" @click="changeShowModal('modify', item)">
-                    {{ t('common.edit') }}
-                  </NButton>
-                  <NButton tertiary size="small" type="error" @click="deletePromptTemplate(item)">
-                    {{ t('common.delete') }}
-                  </NButton>
-                </div>
-              </template>
-            </NListItem>
-          </NList>
-        </NTabPane>
-        <NTabPane name="download" :tab="$t('store.online')">
-          <p class="mb-4">
-            {{ $t('store.onlineImportWarning') }}
-          </p>
-          <div class="flex items-center gap-4">
-            <NInput v-model:value="downloadURL" placeholder="" />
-            <NButton
-              strong secondary :disabled="downloadDisabled" :loading="importLoading"
-              @click="downloadPromptTemplate()"
-            >
-              {{ $t('common.download') }}
+      <div class="flex gap-3 mb-4" :class="[isMobile ? 'flex-col' : 'flex-row justify-between']">
+        <div class="flex items-center space-x-4">
+          <NButton type="primary" size="small" @click="changeShowModal('add')">
+            {{ $t('common.add') }}
+          </NButton>
+          <NButton size="small" @click="changeShowModal('local_import')">
+            {{ $t('common.import') }}
+          </NButton>
+          <NButton size="small" :loading="exportLoading" @click="exportPromptTemplate()">
+            {{ $t('common.export') }}
+          </NButton>
+        </div>
+        <div class="flex items-center">
+          <NInputGroup>
+            <NInput v-model:value="searchValue" style="width: 100%" @keyup="search" />
+            <NButton ghost @click="clickSearch">
+              搜索
             </NButton>
-          </div>
-          <NDivider />
-          <div class="max-h-[360px] overflow-y-auto space-y-4">
-            <NCard v-for="info in promptRecommendList" :key="info.key" :title="info.key" :bordered="true" embedded>
-              <p class="overflow-hidden text-ellipsis whitespace-nowrap" :title="info.desc">
-                {{ info.desc }}
-              </p>
-              <template #footer>
-                <div class="flex items-center justify-end space-x-4">
-                  <NButton text>
-                    <a :href="info.url" target="_blank">
-                      <SvgIcon class="text-xl" icon="ri:link" />
-                    </a>
-                  </NButton>
-                  <NButton text @click="setDownloadURL(info.downloadUrl)">
-                    <SvgIcon class="text-xl" icon="ri:add-fill" />
-                  </NButton>
-                </div>
-              </template>
-            </NCard>
-          </div>
-        </NTabPane>
-      </NTabs>
+          </NInputGroup>
+        </div>
+      </div>
+      <NDataTable
+        v-if="!isMobile" remote :loading="loading" :max-height="400" :columns="columns" :data="dataSource"
+        :pagination="paginationReactive" :bordered="false" @update:page="handlePageChange"
+      />
+      <NList v-if="isMobile" style="max-height: 400px; overflow-y: auto;">
+        <NListItem v-for="(item, index) of dataSource" :key="index">
+          <NThing :title="item.renderKey" :description="item.renderValue" />
+          <template #suffix>
+            <div class="flex flex-col items-center gap-2">
+              <NButton tertiary size="small" type="info" @click="changeShowModal('modify', item)">
+                {{ t('common.edit') }}
+              </NButton>
+              <NButton tertiary size="small" type="error" @click="deletePromptTemplate(item)">
+                {{ t('common.delete') }}
+              </NButton>
+            </div>
+          </template>
+        </NListItem>
+      </NList>
     </div>
   </NModal>
 
   <NModal v-model:show="showModal" style="width: 90%; max-width: 600px;" preset="card">
     <NSpace v-if="modalMode === 'add' || modalMode === 'modify'" vertical>
       {{ t('store.title') }}
-      <NInput v-model:value="tempPromptKey" />
+      <NInput v-model:value="tmpPromptKey" />
       {{ t('store.description') }}
-      <NInput v-model:value="tempPromptValue" type="textarea" :autosize="{ minRows: 10, maxRows: 40 }" />
+      <NInput v-model:value="tmpPromptValue" type="textarea" :autosize="{ minRows: 10, maxRows: 40 }" />
       <NButton
         block type="primary" :disabled="inputStatus"
         @click="() => { modalMode === 'add' ? addPromptTemplate() : modifyPromptTemplate() }"
@@ -417,7 +339,7 @@ watch(
     </NSpace>
     <NSpace v-if="modalMode === 'local_import'" vertical>
       <NInput
-        v-model:value="tempPromptValue" :placeholder="t('store.importPlaceholder')"
+        v-model:value="tmpPromptValue" :placeholder="t('store.importPlaceholder')"
         :autosize="{ minRows: 10, maxRows: 50 }" type="textarea"
       />
       <NButton block type="primary" :disabled="inputStatus" @click="() => { importPromptTemplate('local') }">
