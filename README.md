@@ -1,6 +1,19 @@
 # AIDeepIn Web
 
-> 声明：此项目只发布于 Github，基于 MIT 协议，免费且作为开源学习使用。并且不会有任何形式的卖号等行为，谨防受骗。
+**LangChain4j-AIDeepin**
+基于 ChatGPT 等大语言模型与 Langchain4j 等应用框架实现，开源、可离线部署的检索增强生成(RAG)大模型知识库项目。
+
+此仓库为langchain4j-aideepin的前端，后端服务代码见[**langchain4j-aideepin**](https://github.com/moyangzhan/langchain4j-aideepin)
+
+### 功能点
+
+* 注册&登录
+* 多会话（多角色）
+* 图片生成（文生图、修图、图生图）
+* 提示词
+* 额度控制
+* 自定义openai secret_key
+* 基于大模型的知识库（RAG）
 
 ![1691585544443](image/README/1691585544443.png)
 
@@ -10,7 +23,10 @@
 
 ![1691583329105](image/README/1691583329105.png)
 
-此仓库为aideepin的前端，后端服务代码见[**aideepin**](https://github.com/moyangzhan/aideepin)
+![1691583329105](image/README/kbidx.png)
+![1691583329105](image/README/kb01.png)
+![1691583329105](image/README/kb02.png)
+![1691583329105](image/README/kb03.png)
 
 - [AIDeepIn Web](#aideepin-web)
   - [介绍](#介绍)
@@ -45,6 +61,7 @@
 * 提示词
 * 额度控制
 * 自定义openai secret_key
+* 基于大模型的知识库（RAG）
 
 环境变量：
 
