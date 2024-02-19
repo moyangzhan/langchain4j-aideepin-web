@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { NButton, NImage, NSpace } from 'naive-ui'
-import type { Language, Theme } from '@/store/modules/app/helper'
+import type { Theme } from '@/store/modules/app/helper'
 import { SvgIcon } from '@/components/common'
 import { useAppStore, useAuthStore, useUserStore } from '@/store'
 import api from '@/api'
@@ -19,14 +19,14 @@ const avatar = ref(userInfo.value.avatar ?? '')
 
 const name = ref(userInfo.value.name ?? '')
 
-const language = computed({
-  get() {
-    return appStore.language
-  },
-  set(value: Language) {
-    appStore.setLanguage(value)
-  },
-})
+// const language = computed({
+//   get() {
+//     return appStore.language
+//   },
+//   set(value: Language) {
+//     appStore.setLanguage(value)
+//   },
+// })
 
 const themeOptions: { label: string; key: Theme; icon: string }[] = [
   {
@@ -46,11 +46,11 @@ const themeOptions: { label: string; key: Theme; icon: string }[] = [
   },
 ]
 
-const languageOptions: { label: string; key: Language; value: Language }[] = [
-  { label: '简体中文', key: 'zh-CN', value: 'zh-CN' },
-  { label: '繁體中文', key: 'zh-TW', value: 'zh-TW' },
-  { label: 'English', key: 'en-US', value: 'en-US' },
-]
+// const languageOptions: { label: string; key: Language; value: Language }[] = [
+//   { label: '简体中文', key: 'zh-CN', value: 'zh-CN' },
+//   { label: '繁體中文', key: 'zh-TW', value: 'zh-TW' },
+//   { label: 'English', key: 'en-US', value: 'en-US' },
+// ]
 
 async function logout() {
   await api.logout()
