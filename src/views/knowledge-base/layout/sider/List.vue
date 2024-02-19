@@ -29,7 +29,7 @@ async function initList() {
 
   kbStore.setLoadingKbList(true)
   try {
-    const { data } = await api.knowledgeBaseSearch<KnowledgeBase.InfoListResp>('', false, currentPage.value, pageSize)
+    const { data } = await api.knowledgeBaseSearch<KnowledgeBase.InfoListResp>('', true, currentPage.value, pageSize)
     if (data.records) {
       kbStore.setKbInfos(data.records)
       nextTick(() => {
