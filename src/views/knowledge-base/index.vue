@@ -2,7 +2,7 @@
 import type { Ref } from 'vue'
 import { computed, nextTick, onActivated, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NIcon, NInput, useDialog, useMessage } from 'naive-ui'
+import { NButton, NIcon, NInput, NSelect, useDialog, useMessage } from 'naive-ui'
 import type { MessageReactive } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { v4 as uuidv4 } from 'uuid'
@@ -12,7 +12,7 @@ import { useCopyCode } from '../chat/hooks/useCopyCode'
 import HeaderComponent from '../chat/components/Header/index.vue'
 import { SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useKbStore } from '@/store'
+import { useAppStore, useKbStore } from '@/store'
 import api from '@/api'
 import { t } from '@/locales'
 import { debounce } from '@/utils/functions/debounce'
@@ -24,6 +24,7 @@ const route = useRoute()
 const router = useRouter()
 const ms = useMessage()
 const dialog = useDialog()
+const appStore = useAppStore()
 const kbStore = useKbStore()
 const { isMobile } = useBasicLayout()
 const { scrollRef, scrollToBottom, scrollTo } = useScroll()
@@ -42,6 +43,10 @@ useCopyCode()
 
 if (currKbUuid === 'default' && !!kbStore.activeKbUuid)
   router.replace({ name: 'QADetail', params: { kbUuid: kbStore.activeKbUuid } })
+
+function handleChangeModel(value: string) {
+  appStore.setSelectedLLM(value)
+}
 
 async function handleSubmit() {
   const message = prompt.value
@@ -68,7 +73,7 @@ async function handleSubmit() {
   kbStore.setLoadingRecords(currKbUuid, true)
   try {
     kbStore.appendRecord(currKbUuid, tmpRecord)
-    const resp = await api.knowledgeBaseQaAsk<KnowledgeBase.QaRecordInfo>(currKbUuid, message)
+    const resp = await api.knowledgeBaseQaAsk<KnowledgeBase.QaRecordInfo>(currKbUuid, message, appStore.selectedLLM)
     kbStore.updateRecord(currKbUuid, tmpUuid, resp.data)
   } catch (error: any) {
     const errorMessage = error?.message ?? t('common.wrong')
@@ -253,6 +258,9 @@ onActivated(async () => {
     <footer :class="footerClass">
       <div class="w-full max-w-screen-xl m-auto">
         <div class="flex items-center justify-between space-x-2">
+          <div class="w-48">
+            <NSelect :value="appStore.selectedLLM" :options="appStore.llms" @update:value="handleChangeModel" />
+          </div>
           <NInput
             ref="inputRef" v-model:value="prompt" type="textarea" :placeholder="placeholder"
             :autosize="{ minRows: 1, maxRows: isMobile ? 4 : 8 }" @keypress="handleEnter"

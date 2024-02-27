@@ -189,6 +189,7 @@ function onUploadFinish({
 }) {
   console.log(event)
   ms.success((event?.target as XMLHttpRequest).response)
+  search(1)
   return file
 }
 

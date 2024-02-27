@@ -48,7 +48,7 @@ function fetchMessages<T = any>(conversationUuid: string, maxMsgUuid: string, pa
 }
 
 function sseProcess(params: {
-  options: { prompt?: string; conversationUuid?: string; parentMessageId?: string; regenerateQuestionUuid?: string }
+  options: { prompt?: string; conversationUuid?: string; parentMessageId?: string; regenerateQuestionUuid?: string; modelName?: string }
   signal?: GenericAbortSignal
   messageRecived: (chunk: string) => void
   errorCallback: (error: string) => void
@@ -283,11 +283,12 @@ function knowledgeBaseEmbedding<T = any>(kbItemUuid: string, currentPage: number
   })
 }
 
-function knowledgeBaseQaAsk<T = any>(kbUuid: string, question: string) {
+function knowledgeBaseQaAsk<T = any>(kbUuid: string, question: string, modelName?: string) {
   return post<T>({
     url: `/knowledge-base/qa/ask/${kbUuid}`,
     data: {
       question,
+      modelName,
     },
   })
 }
@@ -301,6 +302,18 @@ function knowledgeBaseQaRecordSearch<T = any>(kbUuid: string, keyword: string, c
 function knowledgeBaseQaRecordDel<T = any>(uuid: string) {
   return post<T>({
     url: `/knowledge-base/qa/record/del/${uuid}`,
+  })
+}
+
+function loadLLMs<T = any>() {
+  return get<T>({
+    url: '/model/llms',
+  })
+}
+
+function loadImageModels<T = any>() {
+  return get<T>({
+    url: '/model/imageModels',
   })
 }
 
@@ -344,4 +357,6 @@ export default {
   knowledgeBaseQaAsk,
   knowledgeBaseQaRecordSearch,
   knowledgeBaseQaRecordDel,
+  loadLLMs,
+  loadImageModels,
 }

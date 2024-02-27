@@ -10,10 +10,21 @@ export interface AppState {
   siderCollapsed: boolean
   theme: Theme
   language: Language
+
+  selectedLLM: string
+  llms: AiModelInfo[]
+  imageModels: AiModelInfo[]
 }
 
 export function defaultSetting(): AppState {
-  return { siderCollapsed: false, theme: 'light', language: 'zh-CN' }
+  return {
+    siderCollapsed: false,
+    theme: 'light',
+    language: 'zh-CN',
+    selectedLLM: '',
+    llms: [],
+    imageModels: [],
+  }
 }
 
 export function getLocalSetting(): AppState {

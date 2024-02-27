@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 export const useKbStore = defineStore('kb-store', {
   state: (): KnowledgeBase.KbState => {
     return {
-      activeKbUuid: '',
+      activeKbUuid: 'default',
       kbInfos: [],
       kbUuidToQaRecords: new Map<string, KnowledgeBase.QaRecordInfo[]>(),
       loadingRecords: new Map<string, boolean>(),

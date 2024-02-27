@@ -3,8 +3,8 @@ import type { Ref } from 'vue'
 import { computed, nextTick, onActivated, onDeactivated, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { NAutoComplete, NButton, NIcon, NInput, NTabPane, NTabs, useDialog, useMessage } from 'naive-ui'
-import type { MessageReactive } from 'naive-ui'
+import { NAutoComplete, NButton, NIcon, NInput, NSelect, NTabPane, NTabs, useDialog, useMessage } from 'naive-ui'
+import type { MessageReactive, SelectOption } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { v4 as uuidv4 } from 'uuid'
 import { Message } from './components'
@@ -14,7 +14,7 @@ import { useCopyCode } from './hooks/useCopyCode'
 import HeaderComponent from './components/Header/index.vue'
 import { HoverButton, SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useChatStore, usePromptStore } from '@/store'
+import { useAppStore, useChatStore, usePromptStore } from '@/store'
 import { defaultConv } from '@/store/modules/chat/helper'
 import api from '@/api'
 import { t } from '@/locales'
@@ -26,6 +26,7 @@ const pageSize = 10
 const route = useRoute()
 const ms = useMessage()
 const dialog = useDialog()
+const appStore = useAppStore()
 const chatStore = useChatStore()
 const { isMobile } = useBasicLayout()
 const { addMessage, unshiftAnswer, updateMessageSomeFields, appendChunk } = useChat()
@@ -58,6 +59,10 @@ messages.value.forEach((item) => {
     updateMessageSomeFields(curConvUuid, item.uuid, { loading: false })
 })
 
+function handleChangeModel(value: string, option: SelectOption) {
+  appStore.setSelectedLLM(value)
+}
+
 function handleSubmit() {
   createChatTask()
 }
@@ -69,6 +74,7 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
       prompt: message,
       conversationUuid: curConvUuid,
       regenerateQuestionUuid,
+      modelName: appStore.selectedLLM,
     },
     signal: controller.signal,
     messageRecived: (chunk) => {
@@ -502,7 +508,7 @@ onDeactivated(() => {
     </main>
     <footer :class="footerClass">
       <div class="w-full max-w-screen-xl m-auto">
-        <div class="flex items-center justify-between space-x-2">
+        <div class="flex items-center space-x-2">
           <HoverButton
             v-if="!isMobile"
             :tooltip="currConv.understandContextEnable ? $t('chat.understandContextEnable') : $t('chat.understandContextDisable')"
@@ -515,7 +521,10 @@ onDeactivated(() => {
               <SvgIcon icon="ri:chat-history-line" />
             </span>
           </HoverButton>
-          <NAutoComplete v-model:value="prompt" :options="searchOptions" :get-show="getShow" :render-label="renderOption">
+          <div class="w-48">
+            <NSelect :value="appStore.selectedLLM" :options="appStore.llms" @update:value="handleChangeModel" />
+          </div>
+          <NAutoComplete v-model:value="prompt" class="grow" :options="searchOptions" :get-show="getShow" :render-label="renderOption">
             <template #default="{ handleInput, handleBlur, handleFocus }">
               <NInput
                 ref="inputRef" v-model:value="prompt" type="textarea" :placeholder="placeholder"
@@ -524,7 +533,7 @@ onDeactivated(() => {
               />
             </template>
           </NAutoComplete>
-          <NButton type="primary" :disabled="buttonDisabled" @click="handleSubmit">
+          <NButton class="flex-none" type="primary" :disabled="buttonDisabled" @click="handleSubmit">
             <template #icon>
               <span class="dark:text-black">
                 <SvgIcon icon="ri:send-plane-fill" />

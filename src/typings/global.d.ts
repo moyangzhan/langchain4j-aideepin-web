@@ -19,3 +19,15 @@ interface CreateImageResult{
 interface AuthState {
   token: string | ''
 }
+
+interface AiModelInfo{
+
+  //from api
+  modelName: string,
+  enable: boolean,
+
+  //for NSelector
+  value: string,
+  label: string,
+  disabled: boolean
+}

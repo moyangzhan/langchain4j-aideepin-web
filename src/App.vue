@@ -2,7 +2,7 @@
 import { NButton, NConfigProvider, NIcon, NLayout, NLayoutSider, NMenu, NSpace, NTooltip } from 'naive-ui'
 import type { MenuOption } from 'naive-ui'
 import type { Component } from 'vue'
-import { defineAsyncComponent, h, ref } from 'vue'
+import { defineAsyncComponent, h, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { ChatboxEllipsesOutline, ImagesOutline, LibraryOutline, SettingsOutline } from '@vicons/ionicons5'
 import { Prompt as PromptIcon } from '@vicons/tabler'
@@ -10,8 +10,13 @@ import { NaiveProvider, PromptStore } from '@/components/common'
 import { useTheme } from '@/hooks/useTheme'
 import { useLanguage } from '@/hooks/useLanguage'
 import { t } from '@/locales'
+import { useAppStore, useKbStore } from '@/store'
+import api from '@/api'
 
 const Setting = defineAsyncComponent(() => import('@/components/common/Setting/index.vue'))
+
+const appStore = useAppStore()
+const kbStore = useKbStore()
 const { theme, themeOverrides } = useTheme()
 const { language } = useLanguage()
 const activeKey = ref<string>('menu-chat')
@@ -57,7 +62,7 @@ const menuOptions: MenuOption[] = [
           to: {
             name: 'QADetail',
             params: {
-              kbUuid: 'default',
+              kbUuid: kbStore.activeKbUuid,
             },
           },
         },
@@ -68,6 +73,17 @@ const menuOptions: MenuOption[] = [
 function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) })
 }
+
+onMounted(async () => {
+  if (appStore.llms.length === 0) {
+    const llms = await api.loadLLMs<AiModelInfo[]>()
+    appStore.setLLMs(llms.data)
+  }
+  if (appStore.imageModels.length === 0) {
+    const imageModels = await api.loadImageModels<AiModelInfo[]>()
+    appStore.setImageModels(imageModels.data)
+  }
+})
 </script>
 
 <template>
