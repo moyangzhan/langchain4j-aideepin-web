@@ -75,14 +75,10 @@ function renderIcon(icon: Component) {
 }
 
 onMounted(async () => {
-  if (appStore.llms.length === 0) {
-    const llms = await api.loadLLMs<AiModelInfo[]>()
-    appStore.setLLMs(llms.data)
-  }
-  if (appStore.imageModels.length === 0) {
-    const imageModels = await api.loadImageModels<AiModelInfo[]>()
-    appStore.setImageModels(imageModels.data)
-  }
+  const llms = await api.loadLLMs<AiModelInfo[]>()
+  appStore.setLLMs(llms.data)
+  const imageModels = await api.loadImageModels<AiModelInfo[]>()
+  appStore.setImageModels(imageModels.data)
 })
 </script>
 
@@ -104,6 +100,7 @@ onMounted(async () => {
               {{ t('store.siderButton') }}
             </NTooltip>
             <NTooltip trigger="hover" placement="right" style="margin-left: 1.5rem;">
+
               <template #trigger>
                 <NButton text style="font-size: 26px;" class="cursor-pointer" @click="showSetting = true">
                   <NIcon>
@@ -120,7 +117,9 @@ onMounted(async () => {
             <RouterView :key="routePath" />
           </KeepAlive> -->
           <RouterView v-slot="{ Component, route }">
-            <KeepAlive><component :is="Component" :key="route.fullPath" /></KeepAlive>
+            <KeepAlive>
+              <component :is="Component" :key="route.fullPath" />
+            </KeepAlive>
           </RouterView>
         </NLayout>
       </NLayout>
