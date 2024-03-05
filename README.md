@@ -3,73 +3,33 @@
 **LangChain4j-AIDeepin**
 基于 ChatGPT 等大语言模型与 Langchain4j 等应用框架实现，开源、可离线部署的检索增强生成(RAG)大模型知识库项目。
 
-此仓库为langchain4j-aideepin的前端，后端服务代码见[**langchain4j-aideepin**](https://github.com/moyangzhan/langchain4j-aideepin)
 
-### 功能点
 
-* 注册&登录
-* 多会话（多角色）
-* 图片生成（文生图、修图、图生图）
-* 提示词
-* 额度控制
-* 自定义openai secret_key
-* 基于大模型的知识库（RAG）
+> **该项目如对您有帮助，欢迎点赞**
 
-![1691585544443](image/README/1691585544443.png)
-
-![1691583184761](image/README/1691583184761.png)
-
-![1691583124744](image/README/1691583124744.png)
-
-![1691583329105](image/README/1691583329105.png)
-
-![1691583329105](image/README/kbidx.png)
-![1691583329105](image/README/kb01.png)
-![1691583329105](image/README/kb02.png)
-![1691583329105](image/README/kb03.png)
-
-- [AIDeepIn Web](#aideepin-web)
-  - [介绍](#介绍)
-  - [前置要求](#前置要求)
-    - [Node](#node)
-    - [PNPM](#pnpm)
-  - [安装依赖](#安装依赖)
-  - [测试环境运行](#测试环境运行)
-  - [环境变量](#环境变量)
-  - [打包](#打包)
-    - [使用 Docker](#使用-docker)
-
-      - [Docker 参数示例](#docker-参数示例)
-      - [Docker build \& Run](#docker-build--run)
-    - [手动打包](#手动打包)
-
-      - [前端网页](#前端网页-1)
-  - [常见问题](#常见问题)
-  - [License](#license)
 
 ## 介绍
 
-本仓库代码基于[chatgpt-web](https://github.com/Chanzhaoyu/chatgpt-web)
+此仓库为langchain4j-aideepin的前端项目，后端服务代码见[**langchain4j-aideepin**](https://github.com/moyangzhan/langchain4j-aideepin)
 
-接入的模型：ChatGPT 3.5，DALL-E 2
+本仓库代码由chatgpt-web前端工程改造而来
 
-功能列表：
+## 功能点
 
 * 注册&登录
 * 多会话（多角色）
 * 图片生成（文生图、修图、图生图）
 * 提示词
 * 额度控制
-* 自定义openai secret_key
 * 基于大模型的知识库（RAG）
+* 多模型随意切换
 
-环境变量：
+## 接入的模型：
 
-全部参数变量请查看或[这里](#环境变量)
-
-```
-/service/.env.example
-```
+* ChatGPT 3.5
+* 通义千问
+* 文心一言
+* DALL-E 2
 
 ## 前置要求
 
@@ -95,6 +55,14 @@ npm install pnpm -g
 
 ```shell
 pnpm bootstrap
+```
+
+## 环境变量
+
+全部参数变量请查看或[这里](#环境变量)
+
+```
+/service/.env.example
 ```
 
 ## 测试环境运行
@@ -159,3 +127,22 @@ A: 一种可能原因是经过 Nginx 反向代理，开启了 buffer，则 Nginx
 ## License
 
 MIT
+
+## 截图
+
+![1691585544443](image/README/1691585544443.png)
+
+AI聊天：
+![1691583184761](image/README/1691583184761.png)
+
+AI绘图：
+![1691583124744](image/README/1691583124744.png)
+
+知识库：
+![1691583329105](image/README/kbidx.png)
+![1691583329105](image/README/kb01.png)
+![1691583329105](image/README/kb02.png)
+![1691583329105](image/README/kb03.png)
+
+token统计：
+![1691583329105](image/README/1691583329105.png)
