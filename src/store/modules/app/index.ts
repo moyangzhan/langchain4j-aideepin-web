@@ -22,23 +22,25 @@ export const useAppStore = defineStore('app-store', {
         this.recordState()
       }
     },
-
     recordState() {
       setLocalSetting(this.$state)
     },
     setSelectedLLM(selected: string) {
       this.selectedLLM = selected
+      this.recordState()
     },
     setLLMs(llms: AiModelInfo[]) {
       llms.forEach((item) => {
         item.disabled = !item.enable
         item.label = item.modelName
         item.value = item.modelName
-        if(!this.selectedLLM && item.enable){
-          this.selectedLLM = item.modelName
-        }
       })
       this.llms = llms
+      if (!this.selectedLLM) {
+        const selectedModelName = this.llms.find(item => item.enable)?.modelName
+        if (selectedModelName)
+          this.selectedLLM = selectedModelName
+      }
     },
     setImageModels(imageModels: AiModelInfo[]) {
       imageModels.forEach((item) => {

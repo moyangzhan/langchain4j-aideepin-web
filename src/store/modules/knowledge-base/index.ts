@@ -52,6 +52,14 @@ export const useKbStore = defineStore('kb-store', {
       }
       existRecords.push(...records.reverse())
     },
+    appendChunk(kbUuid: string, tmpRecordUuid: string, chunk: string) {
+      const existRecords = this.kbUuidToQaRecords.get(kbUuid)
+      if (!existRecords)
+        return
+      const hitRecord = existRecords.find(item => item.uuid === tmpRecordUuid)
+      if (hitRecord)
+        hitRecord.answer = hitRecord.answer + chunk
+    },
     updateRecord(kbUuid: string, tmpRecordUuid: string, source: KnowledgeBase.QaRecordInfo) {
       const existRecords = this.kbUuidToQaRecords.get(kbUuid)
       if (!existRecords)
@@ -60,7 +68,6 @@ export const useKbStore = defineStore('kb-store', {
       if (hitRecord)
         Object.assign(hitRecord, source)
     },
-
     updateFirst(kbUuid: string, source: KnowledgeBase.QaRecordInfo) {
       const existRecords = this.kbUuidToQaRecords.get(kbUuid)
       if (!existRecords || existRecords.length < 1)

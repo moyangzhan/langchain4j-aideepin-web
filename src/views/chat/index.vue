@@ -95,7 +95,9 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
         updateMessageSomeFields(curConvUuid, question.uuid, { ...metaData.question, loading: false })
         updateMessageSomeFields(curConvUuid, question.children[0].uuid, { ...metaData.answer, loading: false })
         selectedLatestAnswer(question.uuid)
-      } else if (chunk !== '[DONE]') {
+        scrollToBottomIfAtBottom()
+        loading.value = false
+      } else {
         if (!chunk)
           chunk = '\r\n'
         let question = null
@@ -117,13 +119,11 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
         } catch (error) {
           console.error(error)
         }
-      } else {
-        scrollToBottomIfAtBottom()
-        console.info(`end chunk:${chunk}`)
       }
     },
     errorCallback: (error) => {
       ms.warning(error)
+      loading.value = false
       let question = null
       if (regenerateQuestionUuid) {
         question = messages.value.find(q => q.uuid === regenerateQuestionUuid)
@@ -184,10 +184,9 @@ async function createChatTask() {
     fetchChatAPIOnce(message, '')
   } catch (error: any) {
     console.error(`fetchChatAPIOnce error:${error}`)
+    loading.value = false
     const errorMessage = error?.message ?? t('common.wrong')
     ms.error(errorMessage)
-  } finally {
-    loading.value = false
   }
 }
 
@@ -400,21 +399,6 @@ watch(
   { immediate: true },
 )
 
-// watch(
-//   messages,
-//   (newVal) => {
-//     nextTick(() => {
-//       console.log('nextTicknextTick' + newVal)
-//       const index = messages.value.findIndex(msg => msg.uuid === regenerateQuestionUuid.value)
-//       if (index !== -1) {
-//         tabsActiveTab.value[index] = 'tab_' + messages.value[index].children[0].uuid
-//         regenerateQuestionUuid.value = ''
-//       }
-//     })
-//   },
-//   { immediate: true }
-// )
-
 onMounted(() => {
   console.info('chat,onmounted')
   nextTick(() => {
@@ -460,6 +444,7 @@ onDeactivated(() => {
               <span class="pl-1">Roar~</span>
             </div>
           </template>
+
           <template v-else>
             <div v-for="(question, index) of messages" :key="index">
               <Message
@@ -479,31 +464,32 @@ onDeactivated(() => {
                   >
                     <Message
                       :show-avatar="false" :date-time="answer.createTime" :text="answer.remark" type="text"
-                      :inversion="answer.inversion" :error="answer.error" :loading="answer.loading"
+                      :inversion="answer.inversion" :regenerate="true" :error="answer.error" :loading="answer.loading"
                       @regenerate="onRegenerate(question.uuid)" @delete="handleDelete(question.uuid, answer.uuid)"
                     />
                   </NTabPane>
                 </NTabs>
               </template>
+
               <template v-if="question.children.length === 1">
                 <Message
                   :date-time="question.children[0].createTime" :text="question.children[0].remark" type="text"
-                  :inversion="question.children[0].inversion" :error="question.children[0].error"
+                  :inversion="question.children[0].inversion" :regenerate="true" :error="question.children[0].error"
                   :loading="question.children[0].loading" @regenerate="onRegenerate(question.uuid)"
                   @delete="handleDelete(question.uuid, question.children[0].uuid)"
                 />
               </template>
-              <div class="sticky bottom-0 left-0 flex justify-center">
-                <NButton v-if="loading" type="warning" @click="handleStop">
-                  <template #icon>
-                    <SvgIcon icon="ri:stop-circle-line" />
-                  </template>
-                  Stop Responding
-                </NButton>
-              </div>
             </div>
           </template>
         </div>
+      </div>
+      <div class="sticky bottom-0 left-0 flex justify-center">
+        <NButton v-if="loading" size="tiny" @click="handleStop">
+          <template #icon>
+            <SvgIcon icon="ri:stop-circle-line" />
+          </template>
+          Stop Responding
+        </NButton>
       </div>
     </main>
     <footer :class="footerClass">
@@ -524,7 +510,10 @@ onDeactivated(() => {
           <div class="w-48">
             <NSelect :value="appStore.selectedLLM" :options="appStore.llms" @update:value="handleChangeModel" />
           </div>
-          <NAutoComplete v-model:value="prompt" class="grow" :options="searchOptions" :get-show="getShow" :render-label="renderOption">
+          <NAutoComplete
+            v-model:value="prompt" class="grow" :options="searchOptions" :get-show="getShow"
+            :render-label="renderOption"
+          >
             <template #default="{ handleInput, handleBlur, handleFocus }">
               <NInput
                 ref="inputRef" v-model:value="prompt" type="textarea" :placeholder="placeholder"

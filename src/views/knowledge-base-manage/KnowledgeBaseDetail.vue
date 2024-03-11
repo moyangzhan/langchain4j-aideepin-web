@@ -189,7 +189,6 @@ function onUploadFinish({
 }) {
   console.log(event)
   ms.success((event?.target as XMLHttpRequest).response)
-  search(1)
   return file
 }
 
@@ -279,7 +278,7 @@ watch(
               点击或者拖动文件到该区域来上传
             </NText>
             <NP depth="3" style="margin: 8px 0 0 0">
-              支持的文件格式(单文件最大10MB): TXT、PDF、DOC、DOCX、XLS、XLXS、PPT、PPTX
+              支持的文件格式: TXT、PDF、DOC、DOCX、XLS、XLXS、PPT、PPTX
             </NP>
           </NUploadDragger>
         </NUpload>

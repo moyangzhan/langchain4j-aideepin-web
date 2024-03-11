@@ -27,13 +27,14 @@ const dialog = useDialog()
 const appStore = useAppStore()
 const kbStore = useKbStore()
 const { isMobile } = useBasicLayout()
-const { scrollRef, scrollToBottom, scrollTo } = useScroll()
+const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom, scrollTo } = useScroll()
 const { kbUuid: currKbUuid } = route.params as { kbUuid: string }
 console.log('currKbUUid', currKbUuid)
 const prompt = ref<string>('')
 const inputRef = ref<Ref | null>(null)
 
 const loadedAll = ref<boolean>(false)
+const loadingAnswer = ref<boolean>(false)
 const pageSize = 20
 let currentPage = 1
 let prevScrollTop: number
@@ -51,12 +52,13 @@ function handleChangeModel(value: string) {
 async function handleSubmit() {
   const message = prompt.value
 
-  if (kbStore.loadingRecords.get(currKbUuid))
-    return
-
   if (!message || message.trim() === '')
     return
 
+  if (loadingAnswer.value)
+    return
+
+  loadingAnswer.value = true
   controller = new AbortController()
 
   prompt.value = ''
@@ -70,19 +72,59 @@ async function handleSubmit() {
   tmpRecord.answer = '生成中...'
   tmpRecord.loading = true
 
-  kbStore.setLoadingRecords(currKbUuid, true)
   try {
     kbStore.appendRecord(currKbUuid, tmpRecord)
-    const resp = await api.knowledgeBaseQaAsk<KnowledgeBase.QaRecordInfo>(currKbUuid, message, appStore.selectedLLM)
-    kbStore.updateRecord(currKbUuid, tmpUuid, resp.data)
+
+    await api.knowledgeBaseQaSseAsk({
+      options: {
+        kbUuid: currKbUuid,
+        question: message,
+        modelName: appStore.selectedLLM,
+      },
+      signal: controller.signal,
+      messageRecived: (chunk) => {
+        if (tmpRecord.answer === '生成中...')
+          tmpRecord.answer = ''
+
+        // Always process the final line
+        if (chunk.includes('[META]')) {
+          const meta = chunk.replace('[META]', '')
+          const metaData: Chat.MetaData = JSON.parse(meta)
+          console.info('metaData', metaData)
+          tmpRecord.loading = false
+          tmpRecord.error = true
+          kbStore.updateRecord(currKbUuid, tmpUuid, tmpRecord)
+          loadingAnswer.value = false
+        } else {
+          if (!chunk)
+            chunk = '\r\n'
+          try {
+            kbStore.appendChunk(
+              currKbUuid,
+              tmpUuid,
+              chunk,
+            )
+          } catch (error) {
+            console.error(error)
+          }
+        }
+        scrollToBottomIfAtBottom()
+      },
+      errorCallback: (error) => {
+        loadingAnswer.value = false
+        ms.warning(`系统提示：${error}`)
+        tmpRecord.answer = `系统提示：${error}`
+        tmpRecord.loading = false
+        tmpRecord.error = true
+        kbStore.updateRecord(currKbUuid, tmpUuid, tmpRecord)
+      },
+    })
   } catch (error: any) {
     const errorMessage = error?.message ?? t('common.wrong')
     ms.error(errorMessage)
     tmpRecord.answer = errorMessage
     tmpRecord.error = true
-  } finally {
-    kbStore.setLoadingRecords(currKbUuid, false)
-    tmpRecord.loading = false
+    loadingAnswer.value = false
   }
 }
 
@@ -132,15 +174,14 @@ async function handleScroll(event: any) {
 function handleDelete(qaRecordUuid: string) {
   if (kbStore.loadingRecords.get(currKbUuid))
     return
-
-  const tip = '删除提问也会把答案一起删除'
   dialog.warning({
     title: t('chat.deleteMessage'),
-    content: tip,
+    content: '提问及对应的答案会一起删除，继续执行？',
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: () => {
-      api.knowledgeBaseDelete(qaRecordUuid)
+      api.knowledgeBaseQaRecordDel(qaRecordUuid)
+      kbStore.deleteRecord(currKbUuid, qaRecordUuid)
     },
   })
 }
@@ -162,7 +203,7 @@ function handleEnter(event: KeyboardEvent) {
 function handleStop() {
   if (kbStore.loadingRecords.get(currKbUuid)) {
     controller.abort()
-    kbStore.setLoadingRecords(currKbUuid, false)
+    loadingAnswer.value = false
   }
 }
 
@@ -178,7 +219,7 @@ const placeholder = computed(() => {
 })
 
 const buttonDisabled = computed(() => {
-  return !!kbStore.loadingRecords.get(currKbUuid) || !prompt.value || prompt.value.trim() === ''
+  return loadingAnswer.value || !prompt.value || prompt.value.trim() === ''
 })
 
 const footerClass = computed(() => {
@@ -232,27 +273,29 @@ onActivated(async () => {
               <span class="pl-1">Roar~</span>
             </div>
           </template>
+
           <template v-else>
             <div v-for="qaRecord of qaRecords" :key="qaRecord.uuid">
               <Message
-                :date-time="qaRecord.createTime" :text="qaRecord.question" type="text" :inversion="true"
+                :date-time="qaRecord.createTime" :text="qaRecord.question" :regenerate="false" type="text" :inversion="true"
                 :error="qaRecord.error" :loading="false" @delete="handleDelete(qaRecord.uuid)"
               />
               <Message
-                :date-time="qaRecord.createTime" :text="!!qaRecord.answer ? qaRecord.answer : '[无答案]'" type="text" :inversion="false"
-                :error="qaRecord.error" :loading="qaRecord.loading"
+                :date-time="qaRecord.createTime" :text="!!qaRecord.answer ? qaRecord.answer : '[无答案]'"
+                :regenerate="false" type="text" :inversion="false" :error="qaRecord.error" :loading="qaRecord.loading"
+                @delete="handleDelete(qaRecord.uuid)"
               />
-            </div>
-            <div class="sticky bottom-0 left-0 flex justify-center">
-              <NButton v-if="kbStore.loadingRecords.get(currKbUuid)" type="warning" @click="handleStop">
-                <template #icon>
-                  <SvgIcon icon="ri:stop-circle-line" />
-                </template>
-                Stop Responding
-              </NButton>
             </div>
           </template>
         </div>
+      </div>
+      <div class="sticky bottom-0 left-0 flex justify-center">
+        <NButton v-if="loadingAnswer" size="tiny" @click="handleStop">
+          <template #icon>
+            <SvgIcon icon="ri:stop-circle-line" />
+          </template>
+          Stop Responding
+        </NButton>
       </div>
     </main>
     <footer :class="footerClass">
@@ -263,7 +306,8 @@ onActivated(async () => {
           </div>
           <NInput
             ref="inputRef" v-model:value="prompt" type="textarea" :placeholder="placeholder"
-            :autosize="{ minRows: 1, maxRows: isMobile ? 4 : 8 }" @keypress="handleEnter"
+            :autosize="{ minRows: 1, maxRows: isMobile ? 4 : 8 }"
+            @keypress="handleEnter"
           />
           <NButton type="primary" :disabled="buttonDisabled" @click="handleSubmit">
             <template #icon>

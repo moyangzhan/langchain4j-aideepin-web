@@ -1,4 +1,3 @@
-import type { GenericAbortSignal } from 'axios'
 import { EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event-source'
 import { get, post } from '@/utils/request'
 import { useAuthStore, useUserStore } from '@/store'
@@ -49,7 +48,7 @@ function fetchMessages<T = any>(conversationUuid: string, maxMsgUuid: string, pa
 
 function sseProcess(params: {
   options: { prompt?: string; conversationUuid?: string; parentMessageId?: string; regenerateQuestionUuid?: string; modelName?: string }
-  signal?: GenericAbortSignal
+  signal?: AbortSignal
   messageRecived: (chunk: string) => void
   errorCallback: (error: string) => void
 }) {
@@ -58,6 +57,7 @@ function sseProcess(params: {
     headers: {
       'Content-Type': 'application/json',
     },
+    signal: params.signal,
     body: JSON.stringify({
       ...params.options,
     }),
@@ -72,12 +72,13 @@ function sseProcess(params: {
         userStore.resetUserInfo()
         throw new FatalError('无登录权限')
       } else {
+        console.log('response', response)
         throw new FatalError()
       }
     },
     onmessage(eventMessage) {
       if (eventMessage.event === 'error') {
-        console.log(`error:${eventMessage.data}`)
+        console.log(`error:${eventMessage}`)
         params.errorCallback(eventMessage.data)
         return
       }
@@ -283,6 +284,51 @@ function knowledgeBaseEmbedding<T = any>(kbItemUuid: string, currentPage: number
   })
 }
 
+function knowledgeBaseQaSseAsk(params: {
+  options: { kbUuid: string; question: string; modelName: string }
+  signal: AbortSignal
+  messageRecived: (chunk: string) => void
+  errorCallback: (error: string) => void
+}) {
+  fetchEventSource(`/api/knowledge-base/qa/process/${params.options.kbUuid}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    signal: params.signal,
+    body: JSON.stringify({
+      ...params.options,
+    }),
+    async onopen(response) {
+      if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
+        // everything's good
+      } else if (response.status === 401) {
+        console.log('无登录权限')
+        const authStore = useAuthStore()
+        authStore.removeToken()
+        const userStore = useUserStore()
+        userStore.resetUserInfo()
+        throw new FatalError('无登录权限')
+      } else {
+        throw new FatalError()
+      }
+    },
+    onmessage(eventMessage) {
+      if (eventMessage.event === 'error') {
+        console.log(`error:${eventMessage.data}`)
+        params.errorCallback(eventMessage.data)
+        return
+      }
+      // 会自动处理后端返回内容的首个空格，需在后端的返回内容前多加个空格，相关源码：https://github.com/Azure/fetch-event-source/blob/45ac3cfffd30b05b79fbf95c21e67d4ef59aa56a/src/parse.ts#L129-L133
+      params.messageRecived(eventMessage.data)
+    },
+    onerror(error) {
+      console.log(`sseProcess error:${error}`)
+      throw new FatalError(error)
+    },
+  })
+}
+
 function knowledgeBaseQaAsk<T = any>(kbUuid: string, question: string, modelName?: string) {
   return post<T>({
     url: `/knowledge-base/qa/ask/${kbUuid}`,
@@ -354,6 +400,7 @@ export default {
   knowledgeBaseItemDelete,
   knowledgeBaseItemEmbedding,
   knowledgeBaseEmbedding,
+  knowledgeBaseQaSseAsk,
   knowledgeBaseQaAsk,
   knowledgeBaseQaRecordSearch,
   knowledgeBaseQaRecordDel,
