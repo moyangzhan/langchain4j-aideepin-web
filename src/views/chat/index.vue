@@ -95,7 +95,6 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
         updateMessageSomeFields(curConvUuid, question.uuid, { ...metaData.question, loading: false })
         updateMessageSomeFields(curConvUuid, question.children[0].uuid, { ...metaData.answer, loading: false })
         selectedLatestAnswer(question.uuid)
-        scrollToBottomIfAtBottom()
         loading.value = false
       } else {
         if (!chunk)
@@ -120,6 +119,7 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
           console.error(error)
         }
       }
+      scrollToBottomIfAtBottom()
     },
     errorCallback: (error) => {
       ms.warning(error)

@@ -4,7 +4,8 @@ export const useKbStore = defineStore('kb-store', {
   state: (): KnowledgeBase.KbState => {
     return {
       activeKbUuid: 'default',
-      kbInfos: [],
+      myKbInfos: [],
+      publicKbInfos: [],
       kbUuidToQaRecords: new Map<string, KnowledgeBase.QaRecordInfo[]>(),
       loadingRecords: new Map<string, boolean>(),
       loaddingKbList: false,
@@ -33,8 +34,11 @@ export const useKbStore = defineStore('kb-store', {
     setLoadingRecords(currKbUuid: string, status: boolean) {
       this.loadingRecords.set(currKbUuid, status)
     },
-    setKbInfos(infos: KnowledgeBase.Info[]) {
-      this.kbInfos = infos
+    setMyKbInfos(infos: KnowledgeBase.Info[]) {
+      this.myKbInfos = infos
+    },
+    setPublicKbInfos(infos: KnowledgeBase.Info[]) {
+      this.publicKbInfos = infos
     },
     appendRecord(kbUuid: string, record: KnowledgeBase.QaRecordInfo) {
       let existRecords = this.kbUuidToQaRecords.get(kbUuid)

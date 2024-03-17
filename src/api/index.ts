@@ -223,10 +223,17 @@ function messageDel<T = any>(uuid: string) {
   })
 }
 
-function knowledgeBaseSearch<T>(keyword: string, includeOthersPublic: boolean, currentPage: number, pageSize: number) {
+function knowledgeBaseSearchMine<T>(keyword: string, currentPage: number, pageSize: number) {
   const search = keyword === undefined ? '' : `keyword=${keyword}&`
   return get<T>({
-    url: `/knowledge-base/search?${search}currentPage=${currentPage}&pageSize=${pageSize}&includeOthersPublic=${includeOthersPublic}`,
+    url: `/knowledge-base/searchMine?${search}currentPage=${currentPage}&pageSize=${pageSize}`,
+  })
+}
+
+function knowledgeBaseSearchPublic<T>(keyword: string, currentPage: number, pageSize: number) {
+  const search = keyword === undefined ? '' : `keyword=${keyword}&`
+  return get<T>({
+    url: `/knowledge-base/searchPublic?${search}currentPage=${currentPage}&pageSize=${pageSize}`,
   })
 }
 
@@ -392,7 +399,8 @@ export default {
   imageDel,
   messageDel,
   knowledgeBaseInfo,
-  knowledgeBaseSearch,
+  knowledgeBaseSearchMine,
+  knowledgeBaseSearchPublic,
   knowledgeBaseSaveOrUpdate,
   knowledgeBaseDelete,
   knowledgeBaseItemSaveOrUpdate,

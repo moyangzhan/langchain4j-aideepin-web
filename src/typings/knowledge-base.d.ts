@@ -50,7 +50,8 @@ declare namespace KnowledgeBase {
 
   interface KbState {
     activeKbUuid: string,
-    kbInfos: Info[],
+    myKbInfos: Info[],
+    publicKbInfos: Info[],
     kbUuidToQaRecords: Map<string, QaRecordInfo[]>,
     loadingRecords: Map<string, boolean>,
     loaddingKbList: boolean
