@@ -49,6 +49,7 @@ declare namespace KnowledgeBase {
   }
 
   interface KbState {
+    selectedKbType: string,
     activeKbUuid: string,
     myKbInfos: Info[],
     publicKbInfos: Info[],

@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import type { CSSProperties } from 'vue'
-import { computed, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { NButton, NLayoutSider } from 'naive-ui'
 import List from './List.vue'
 import { useAppStore } from '@/store'
@@ -45,6 +45,10 @@ watch(
     flush: 'post',
   },
 )
+
+onMounted(async () => {
+  console.info('kb index,onmounted')
+})
 </script>
 
 <template>
@@ -54,9 +58,7 @@ watch(
   >
     <div class="flex flex-col h-full" :style="mobileSafeArea">
       <main class="flex flex-col flex-1 min-h-0">
-        <div class="flex-1 min-h-0 pb-4 overflow-hidden">
-          <List />
-        </div>
+        <List class="flex-1 min-h-0 pb-4" />
         <div class="p-4">
           <NButton dashed block @click="$router.push({ name: 'KnowledgeBaseManage' })">
             管理我的知识库

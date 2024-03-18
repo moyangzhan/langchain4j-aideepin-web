@@ -2,7 +2,7 @@
 import { nextTick, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { NScrollbar, NTabPane, NTabs } from 'naive-ui'
+import { NTabPane, NTabs } from 'naive-ui'
 import SubList from './SubList.vue'
 import { useAuthStore, useKbStore } from '@/store'
 import api from '@/api'
@@ -11,7 +11,7 @@ const router = useRouter()
 const currentPage = ref<number>(1)
 const pageSize = 20
 const kbStore = useKbStore()
-const { activeKbUuid, myKbInfos, publicKbInfos } = storeToRefs<any>(kbStore)
+const { activeKbUuid, myKbInfos, publicKbInfos, selectedKbType } = storeToRefs<any>(kbStore)
 const authStore = useAuthStore()
 const authStoreRef = ref<AuthState>(authStore)
 
@@ -57,16 +57,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <NScrollbar class="px-4">
-    <div class="flex flex-col text-sm">
-      <NTabs type="line" justify-content="space-evenly" animated>
-        <NTabPane name="mine" tab="我的" size="small">
-          <SubList :list="myKbInfos" :active-kb-uuid="activeKbUuid" />
-        </NTabPane>
-        <NTabPane name="public" tab="公开">
-          <SubList :list="publicKbInfos" :active-kb-uuid="activeKbUuid" />
-        </NTabPane>
-      </NTabs>
-    </div>
-  </NScrollbar>
+  <NTabs v-model:value="selectedKbType" pane-class="h-full" type="line" justify-content="space-evenly" animated>
+    <NTabPane name="mine" tab="我的" size="small">
+      <SubList :list="myKbInfos" :active-kb-uuid="activeKbUuid" />
+    </NTabPane>
+    <NTabPane name="public" tab="公开">
+      <SubList :list="publicKbInfos" :active-kb-uuid="activeKbUuid" />
+    </NTabPane>
+  </NTabs>
 </template>

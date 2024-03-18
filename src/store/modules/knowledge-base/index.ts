@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 export const useKbStore = defineStore('kb-store', {
   state: (): KnowledgeBase.KbState => {
     return {
+      selectedKbType: 'mine',
       activeKbUuid: 'default',
       myKbInfos: [],
       publicKbInfos: [],
