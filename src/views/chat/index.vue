@@ -77,8 +77,35 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
       modelName: appStore.selectedLLM,
     },
     signal: controller.signal,
+    startCallBack(chunk) {
+
+    },
     messageRecived: (chunk) => {
       // Always process the final line
+      if (!chunk)
+        chunk = '\r\n'
+      let question = null
+      if (regenerateQuestionUuid) {
+        question = messages.value.find(q => q.uuid === regenerateQuestionUuid)
+        if (!question) {
+          ms.error('找不到提问')
+          return
+        }
+      } else {
+        question = messages.value[messages.value.length - 1]
+      }
+      try {
+        appendChunk(
+          curConvUuid,
+          question.children[0].uuid,
+          chunk,
+        )
+      } catch (error) {
+        console.error(error)
+      }
+      scrollToBottomIfAtBottom()
+    },
+    doneCallback: (chunk) => {
       if (chunk.includes('[META]')) {
         const meta = chunk.replace('[META]', '')
         const metaData: Chat.MetaData = JSON.parse(meta)
@@ -95,31 +122,8 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
         updateMessageSomeFields(curConvUuid, question.uuid, { ...metaData.question, loading: false })
         updateMessageSomeFields(curConvUuid, question.children[0].uuid, { ...metaData.answer, loading: false })
         selectedLatestAnswer(question.uuid)
-        loading.value = false
-      } else {
-        if (!chunk)
-          chunk = '\r\n'
-        let question = null
-        if (regenerateQuestionUuid) {
-          question = messages.value.find(q => q.uuid === regenerateQuestionUuid)
-          if (!question) {
-            ms.error('找不到提问')
-            return
-          }
-        } else {
-          question = messages.value[messages.value.length - 1]
-        }
-        try {
-          appendChunk(
-            curConvUuid,
-            question.children[0].uuid,
-            chunk,
-          )
-        } catch (error) {
-          console.error(error)
-        }
       }
-      scrollToBottomIfAtBottom()
+      loading.value = false
     },
     errorCallback: (error) => {
       ms.warning(error)

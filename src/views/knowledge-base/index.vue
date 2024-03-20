@@ -82,33 +82,43 @@ async function handleSubmit() {
         modelName: appStore.selectedLLM,
       },
       signal: controller.signal,
+      startCallback: (chunk) => {
+        tmpRecord.answer = ''
+        kbStore.updateRecord(currKbUuid, tmpUuid, tmpRecord)
+      },
       messageRecived: (chunk) => {
-        if (tmpRecord.answer === '生成中...')
-          tmpRecord.answer = ''
-
+        console.log(chunk)
         // Always process the final line
+        if (!chunk)
+          chunk = '\r\n'
+        try {
+          kbStore.appendChunk(
+            currKbUuid,
+            tmpUuid,
+            chunk,
+          )
+        } catch (error) {
+          console.error(error)
+        }
+        scrollToBottomIfAtBottom()
+      },
+      doneCallback: (chunk) => {
+        console.log(chunk)
         if (chunk.includes('[META]')) {
           const meta = chunk.replace('[META]', '')
           const metaData: Chat.MetaData = JSON.parse(meta)
           console.info('metaData', metaData)
-          tmpRecord.loading = false
-          tmpRecord.error = true
-          kbStore.updateRecord(currKbUuid, tmpUuid, tmpRecord)
-          loadingAnswer.value = false
         } else {
-          if (!chunk)
-            chunk = '\r\n'
-          try {
-            kbStore.appendChunk(
-              currKbUuid,
-              tmpUuid,
-              chunk,
-            )
-          } catch (error) {
-            console.error(error)
-          }
+          kbStore.appendChunk(
+            currKbUuid,
+            tmpUuid,
+            chunk,
+          )
         }
-        scrollToBottomIfAtBottom()
+        tmpRecord.loading = false
+        tmpRecord.error = true
+        kbStore.updateRecord(currKbUuid, tmpUuid, tmpRecord)
+        loadingAnswer.value = false
       },
       errorCallback: (error) => {
         loadingAnswer.value = false
@@ -277,8 +287,8 @@ onActivated(async () => {
           <template v-else>
             <div v-for="qaRecord of qaRecords" :key="qaRecord.uuid">
               <Message
-                :date-time="qaRecord.createTime" :text="qaRecord.question" :regenerate="false" type="text" :inversion="true"
-                :error="qaRecord.error" :loading="false" @delete="handleDelete(qaRecord.uuid)"
+                :date-time="qaRecord.createTime" :text="qaRecord.question" :regenerate="false" type="text"
+                :inversion="true" :error="qaRecord.error" :loading="false" @delete="handleDelete(qaRecord.uuid)"
               />
               <Message
                 :date-time="qaRecord.createTime" :text="!!qaRecord.answer ? qaRecord.answer : '[无答案]'"
@@ -306,8 +316,7 @@ onActivated(async () => {
           </div>
           <NInput
             ref="inputRef" v-model:value="prompt" type="textarea" :placeholder="placeholder"
-            :autosize="{ minRows: 1, maxRows: isMobile ? 4 : 8 }"
-            @keypress="handleEnter"
+            :autosize="{ minRows: 1, maxRows: isMobile ? 4 : 8 }" @keypress="handleEnter"
           />
           <NButton type="primary" :disabled="buttonDisabled" @click="handleSubmit">
             <template #icon>
