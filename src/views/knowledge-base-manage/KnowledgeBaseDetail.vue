@@ -50,7 +50,12 @@ const showEmbeddingList = (selected: KnowledgeBase.Item = knowledgeBaseEmptyItem
 }
 
 const changeItemShowModal = (selected: KnowledgeBase.Item = knowledgeBaseEmptyItem()) => {
-  Object.assign(tmpItem, selected)
+  if(selected.kbId !== '0'){
+    Object.assign(tmpItem, selected)
+  } else {
+    tmpItem.kbId = curKnowledgeBase.id
+    tmpItem.kbUuid = curKnowledgeBase.uuid
+  }
   showItemEditModal.value = !showItemEditModal.value
 }
 
@@ -146,6 +151,8 @@ function textEmbedding() {
     api.knowledgeBaseItemEmbedding(checkedItemRowKeys.value)
   } finally {
     loading.value = false
+
+    search(1)
   }
 }
 
@@ -216,6 +223,8 @@ async function saveOrUpdate() {
   } finally {
     submitting.value = false
     showItemEditModal.value = false
+
+    search(1)
   }
 }
 
