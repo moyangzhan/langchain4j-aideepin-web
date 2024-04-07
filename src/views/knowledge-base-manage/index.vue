@@ -182,7 +182,7 @@ watch(
         </div>
       </div>
       <NDataTable
-        remote :loading="loading" :max-height="400" :columns="columns" :data="infoList"
+        remote :loading="loading" :max-height="800" :columns="columns" :data="infoList"
         :pagination="paginationReactive" :single-line="false" :bordered="true" @update:page="onHandlePageChange"
       />
     </main>

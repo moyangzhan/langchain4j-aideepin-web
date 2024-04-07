@@ -42,6 +42,11 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/ai-search',
+    name: 'AiSearch',
+    component: () => import('@/views/ai-search/index.vue'),
+  },
+  {
     path: '/kb-manage',
     name: 'KnowledgeBaseManage',
     component: () => import('@/views/knowledge-base-manage/index.vue'),

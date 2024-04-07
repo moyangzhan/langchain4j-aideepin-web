@@ -11,7 +11,9 @@ export interface AppState {
   theme: Theme
   language: Language
 
+  selectedSearchEngine: string
   selectedLLM: string
+  searchEngines: SearchEngineInfo[]
   llms: AiModelInfo[]
   imageModels: AiModelInfo[]
 }
@@ -21,7 +23,9 @@ export function defaultSetting(): AppState {
     siderCollapsed: false,
     theme: 'light',
     language: 'zh-CN',
+    selectedSearchEngine: '',
     selectedLLM: '',
+    searchEngines: [],
     llms: [],
     imageModels: [],
   }

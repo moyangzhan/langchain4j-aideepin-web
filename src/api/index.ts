@@ -46,15 +46,18 @@ function fetchMessages<T = any>(conversationUuid: string, maxMsgUuid: string, pa
   })
 }
 
-function sseProcess(params: {
-  options: { prompt?: string; conversationUuid?: string; parentMessageId?: string; regenerateQuestionUuid?: string; modelName?: string }
-  signal?: AbortSignal
-  startCallBack: (chunk: string) => void
-  messageRecived: (chunk: string) => void
-  doneCallback: (chunk: string) => void
-  errorCallback: (error: string) => void
-}) {
-  fetchEventSource('/api/conversation/message/process', {
+function commonSseProcess(
+  url: string,
+  params: {
+    options: any
+    signal?: AbortSignal
+    startCallback: (chunk: string) => void
+    messageRecived: (chunk: string, eventName?: string) => void
+    doneCallback: (chunk: string) => void
+    errorCallback: (error: string) => void
+  },
+) {
+  fetchEventSource(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -79,7 +82,10 @@ function sseProcess(params: {
       }
     },
     onmessage(eventMessage) {
-      if (eventMessage.event === '[ERROR]') {
+      if (eventMessage.event === '[START]') {
+        params.startCallback(eventMessage.data)
+        return
+      } else if (eventMessage.event === '[ERROR]') {
         console.log(`error:${eventMessage}`)
         params.errorCallback(eventMessage.data)
         return
@@ -88,13 +94,25 @@ function sseProcess(params: {
         return
       }
       // 会自动处理后端返回内容的首个空格，需在后端的返回内容前多加个空格，相关源码：https://github.com/Azure/fetch-event-source/blob/45ac3cfffd30b05b79fbf95c21e67d4ef59aa56a/src/parse.ts#L129-L133
-      params.messageRecived(eventMessage.data)
+      params.messageRecived(eventMessage.data, eventMessage.event)
     },
     onerror(error) {
       console.log(`sse error:${error}`)
       params.errorCallback(error)
+      throw error
     },
   })
+}
+
+function sseProcess(params: {
+  options: { prompt?: string; conversationUuid?: string; parentMessageId?: string; regenerateQuestionUuid?: string; modelName?: string }
+  signal?: AbortSignal
+  startCallback: (chunk: string) => void
+  messageRecived: (chunk: string, eventName?: string) => void
+  doneCallback: (chunk: string) => void
+  errorCallback: (error: string) => void
+}) {
+  commonSseProcess('/api/conversation/message/process', params)
 }
 
 function login<T>(email: string, password: string, captchaId: string, captchaCode: string) {
@@ -133,6 +151,12 @@ function passwordReset<T>() {
 function passwordFind<T>(email: string) {
   return post<T>({
     url: `/auth/password/forgot?email=${email}`,
+  })
+}
+
+function loadSearchEngines<T>() {
+  return get<T>({
+    url: '/auth/search-engine/list',
   })
 }
 
@@ -298,55 +322,13 @@ function knowledgeBaseEmbedding<T = any>(kbItemUuid: string, currentPage: number
 
 function knowledgeBaseQaSseAsk(params: {
   options: { kbUuid: string; question: string; modelName: string }
-  signal: AbortSignal
+  signal?: AbortSignal
   startCallback: (chunk: string) => void
-  messageRecived: (chunk: string) => void
+  messageRecived: (chunk: string, eventName?: string) => void
   doneCallback: (chunk: string) => void
   errorCallback: (error: string) => void
 }) {
-  fetchEventSource(`/api/knowledge-base/qa/process/${params.options.kbUuid}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    signal: params.signal,
-    body: JSON.stringify({
-      ...params.options,
-    }),
-    async onopen(response) {
-      if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
-        // everything's good
-      } else if (response.status === 401) {
-        console.log('无登录权限')
-        const authStore = useAuthStore()
-        authStore.removeToken()
-        const userStore = useUserStore()
-        userStore.resetUserInfo()
-        throw new FatalError('无登录权限')
-      } else {
-        throw new FatalError()
-      }
-    },
-    onmessage(eventMessage) {
-      if (eventMessage.event === '[START]') {
-        params.startCallback(eventMessage.data)
-        return
-      } else if (eventMessage.event === '[DONE]') {
-        params.doneCallback(eventMessage.data)
-        return
-      } else if (eventMessage.event === '[ERROR]') {
-        console.log(`error:${eventMessage.data}`)
-        params.errorCallback(eventMessage.data)
-        return
-      }
-      // 会自动处理后端返回内容的首个空格，需在后端的返回内容前多加个空格，相关源码：https://github.com/Azure/fetch-event-source/blob/45ac3cfffd30b05b79fbf95c21e67d4ef59aa56a/src/parse.ts#L129-L133
-      params.messageRecived(eventMessage.data)
-    },
-    onerror(error) {
-      console.log(`sse error:${error}`)
-      params.errorCallback(error)
-    },
-  })
+  commonSseProcess(`/api/knowledge-base/qa/process/${params.options.kbUuid}`, params)
 }
 
 function knowledgeBaseQaAsk<T = any>(kbUuid: string, question: string, modelName?: string) {
@@ -380,6 +362,29 @@ function loadLLMs<T = any>() {
 function loadImageModels<T = any>() {
   return get<T>({
     url: '/model/imageModels',
+  })
+}
+
+function aiSearchProcess(params: {
+  options: { searchText: string; engineName: string; modelName: string; briefSearch: boolean }
+  signal: AbortSignal
+  startCallback: (chunk: string) => void
+  messageRecived: (chunk: string, eventName?: string) => void
+  doneCallback: (chunk: string) => void
+  errorCallback: (error: string) => void
+}) {
+  commonSseProcess('/api/ai-search/process', params)
+}
+
+function aiSearchRecords<T = any>(maxId: number, keyword: string) {
+  return get<T>({
+    url: `/ai-search-record/list?maxId=${maxId}&keyword=${keyword}`,
+  })
+}
+
+function aiSearchRecordDel<T = any>(uuid: string) {
+  return post<T>({
+    url: `/ai-search-record/del/${uuid}`,
   })
 }
 
@@ -425,6 +430,10 @@ export default {
   knowledgeBaseQaAsk,
   knowledgeBaseQaRecordSearch,
   knowledgeBaseQaRecordDel,
+  loadSearchEngines,
   loadLLMs,
   loadImageModels,
+  aiSearchProcess,
+  aiSearchRecords,
+  aiSearchRecordDel,
 }

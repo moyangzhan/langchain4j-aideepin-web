@@ -1,8 +1,8 @@
 <script setup lang='ts'>
 import type { Ref } from 'vue'
 import { computed, nextTick, onActivated, onMounted, onUnmounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { NButton, NIcon, NInput, NSelect, useDialog, useMessage } from 'naive-ui'
+import { storeToRefs } from 'pinia'
+import { NButton, NCollapse, NCollapseItem, NIcon, NInput, NSelect, useDialog, useMessage } from 'naive-ui'
 import type { MessageReactive } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { v4 as uuidv4 } from 'uuid'
@@ -10,43 +10,38 @@ import { Message } from '../chat/components'
 import { useScroll } from '../chat/hooks/useScroll'
 import { useCopyCode } from '../chat/hooks/useCopyCode'
 import HeaderComponent from '../chat/components/Header/index.vue'
-import { SvgIcon } from '@/components/common'
+import { HoverButton, SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useAppStore, useKbStore } from '@/store'
+import { useAiSearchStore, useAppStore } from '@/store'
 import api from '@/api'
 import { t } from '@/locales'
 import { debounce } from '@/utils/functions/debounce'
-import { knowledgeBaseEmptyRecord } from '@/utils/functions'
+import { aiSearchEmptyRecord } from '@/utils/functions'
 
 let controller = new AbortController()
+let loadingms: MessageReactive
 
-const route = useRoute()
-const router = useRouter()
 const ms = useMessage()
 const dialog = useDialog()
 const appStore = useAppStore()
-const kbStore = useKbStore()
+const aiSearchStore = useAiSearchStore()
+const { loadedAll, nextLoadingMaxId, loadingRecords, sseRequesting, records } = storeToRefs<any>(aiSearchStore)
 const { isMobile } = useBasicLayout()
 const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom, scrollTo } = useScroll()
-const { kbUuid: currKbUuid } = route.params as { kbUuid: string }
-console.log('currKbUUid', currKbUuid)
 const prompt = ref<string>('')
+const isBrief = ref<boolean>(false)
 const inputRef = ref<Ref | null>(null)
 
-const loadedAll = ref<boolean>(false)
-const sseRequesting = ref<boolean>(false)
-const pageSize = 20
-let currentPage = 1
 let prevScrollTop: number
-let loadingms: MessageReactive
 
 useCopyCode()
 
-if (currKbUuid === 'default' && !!kbStore.activeKbUuid)
-  router.replace({ name: 'QADetail', params: { kbUuid: kbStore.activeKbUuid } })
-
 function handleChangeModel(value: string) {
   appStore.setSelectedLLM(value)
+}
+
+function handleChangeEngine(value: string) {
+  appStore.setSelectedSearchEngine(value)
 }
 
 async function handleSubmit() {
@@ -55,50 +50,53 @@ async function handleSubmit() {
   if (!message || message.trim() === '')
     return
 
-  if (sseRequesting.value)
+  if (loadingRecords.value || sseRequesting.value)
     return
 
-  sseRequesting.value = true
+  aiSearchStore.setSseRequesting(true)
   controller = new AbortController()
 
   prompt.value = ''
   scrollToBottom()
 
   const tmpUuid = uuidv4().replace(/-/g, '')
-  const tmpRecord = knowledgeBaseEmptyRecord()
+  const tmpRecord = aiSearchEmptyRecord()
   tmpRecord.uuid = tmpUuid
   tmpRecord.question = message
-  tmpRecord.kbUuid = currKbUuid
   tmpRecord.answer = '生成中...'
   tmpRecord.loading = true
 
   try {
-    kbStore.appendRecord(currKbUuid, tmpRecord)
+    aiSearchStore.appendRecord(tmpRecord)
 
-    await api.knowledgeBaseQaSseAsk({
+    await api.aiSearchProcess({
       options: {
-        kbUuid: currKbUuid,
-        question: message,
+        searchText: message,
+        engineName: appStore.selectedSearchEngine,
         modelName: appStore.selectedLLM,
+        briefSearch: isBrief.value,
       },
       signal: controller.signal,
       startCallback: (chunk) => {
         tmpRecord.answer = ''
-        kbStore.updateRecord(currKbUuid, tmpUuid, tmpRecord)
+        aiSearchStore.updateRecord(tmpRecord)
       },
-      messageRecived: (chunk) => {
+      messageRecived: (chunk, eventName) => {
         console.log(chunk)
-        // Always process the final line
         if (!chunk)
           chunk = '\r\n'
-        try {
-          kbStore.appendChunk(
-            currKbUuid,
+
+        if (eventName === '[SOURCE_LINKS]') {
+          aiSearchStore.setSourceSites(
+            tmpUuid,
+            JSON.parse(chunk),
+          )
+        } else {
+          // Always process the final line
+          aiSearchStore.appendChunk(
             tmpUuid,
             chunk,
           )
-        } catch (error) {
-          console.error(error)
         }
         scrollToBottomIfAtBottom()
       },
@@ -109,24 +107,23 @@ async function handleSubmit() {
           const metaData: Chat.MetaData = JSON.parse(meta)
           console.info('metaData', metaData)
         } else {
-          kbStore.appendChunk(
-            currKbUuid,
+          aiSearchStore.appendChunk(
             tmpUuid,
             chunk,
           )
         }
         tmpRecord.loading = false
-        tmpRecord.error = true
-        kbStore.updateRecord(currKbUuid, tmpUuid, tmpRecord)
-        sseRequesting.value = false
+        tmpRecord.error = false
+        aiSearchStore.updateRecord(tmpRecord)
+        aiSearchStore.setSseRequesting(false)
       },
       errorCallback: (error) => {
-        sseRequesting.value = false
         ms.warning(`系统提示：${error}`)
         tmpRecord.answer = `系统提示：${error}`
         tmpRecord.loading = false
         tmpRecord.error = true
-        kbStore.updateRecord(currKbUuid, tmpUuid, tmpRecord)
+        aiSearchStore.updateRecord(tmpRecord)
+        aiSearchStore.setSseRequesting(false)
       },
     })
   } catch (error: any) {
@@ -134,12 +131,12 @@ async function handleSubmit() {
     ms.error(errorMessage)
     tmpRecord.answer = errorMessage
     tmpRecord.error = true
-    sseRequesting.value = false
+    aiSearchStore.setSseRequesting(false)
   }
 }
 
 async function loadMoreMessage(event: any) {
-  if (kbStore.loadingRecords.get(currKbUuid) || loadedAll.value)
+  if (loadedAll.value || loadingRecords.value)
     return
 
   loadingms = ms.loading(
@@ -147,18 +144,20 @@ async function loadMoreMessage(event: any) {
       duration: 3000,
     })
   try {
-    kbStore.setLoadingRecords(currKbUuid, true)
+    aiSearchStore.setLoadingRecords(true)
 
     const scrollPosition = event.target.scrollHeight - event.target.scrollTop
-    const { data } = await api.knowledgeBaseQaRecordSearch<KnowledgeBase.QaRecordListResp>(currKbUuid, '', currentPage, pageSize)
+    const { data } = await api.aiSearchRecords<AiSearch.AiSearchResp>(nextLoadingMaxId.value, '')
     console.log('kb record response:', data)
-    if (data.records)
-      kbStore.appendRecords(currKbUuid, data.records)
+    if (data.records) {
+      aiSearchStore.setMaxId(data.minId)
+      aiSearchStore.appendRecords(data.records)
+    }
 
     nextTick(() => scrollTo(event.target.scrollHeight - scrollPosition))
 
-    if (data.records.length < pageSize) {
-      loadedAll.value = true
+    if (data.records.length === 0) {
+      aiSearchStore.setLoadedAll()
       loadingms.destroy()
       loadingms = ms.warning('没有更多了', {
         duration: 1000,
@@ -167,8 +166,7 @@ async function loadMoreMessage(event: any) {
   } catch (error) {
     console.error(`loadMoreMessage${error}`)
   } finally {
-    currentPage++
-    kbStore.setLoadingRecords(currKbUuid, false)
+    aiSearchStore.setLoadingRecords(false)
     loadingms.destroy()
   }
 }
@@ -181,17 +179,15 @@ async function handleScroll(event: any) {
   prevScrollTop = scrollTop
 }
 
-function handleDelete(qaRecordUuid: string) {
-  if (kbStore.loadingRecords.get(currKbUuid))
-    return
+function handleDelete(recordUuid: string) {
   dialog.warning({
     title: t('chat.deleteMessage'),
     content: '提问及对应的答案会一起删除，继续执行？',
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: () => {
-      api.knowledgeBaseQaRecordDel(qaRecordUuid)
-      kbStore.deleteRecord(currKbUuid, qaRecordUuid)
+      api.aiSearchRecordDel(recordUuid)
+      aiSearchStore.deleteRecord(recordUuid)
     },
   })
 }
@@ -211,16 +207,15 @@ function handleEnter(event: KeyboardEvent) {
 }
 
 function handleStop() {
-  if (kbStore.loadingRecords.get(currKbUuid)) {
+  if (sseRequesting.value) {
     controller.abort()
-    sseRequesting.value = false
+    aiSearchStore.setSseRequesting(false)
   }
 }
 
-const qaRecords = computed(() => {
-  console.log('qaRecords computed')
-  return kbStore.getRecords(currKbUuid)
-})
+function toggleBrief() {
+  isBrief.value = !isBrief.value
+}
 
 const placeholder = computed(() => {
   if (isMobile.value)
@@ -229,7 +224,7 @@ const placeholder = computed(() => {
 })
 
 const buttonDisabled = computed(() => {
-  return sseRequesting.value || !prompt.value || prompt.value.trim() === ''
+  return loadingRecords.value || sseRequesting.value || !prompt.value || prompt.value.trim() === ''
 })
 
 const footerClass = computed(() => {
@@ -240,19 +235,16 @@ const footerClass = computed(() => {
 })
 
 onMounted(async () => {
-  console.log('knowledge-base onmounted', currKbUuid)
-  if (!!qaRecords.value && !kbStore.loadingRecords.get(currKbUuid) && !kbStore.kbUuidToQaRecords.get(currKbUuid)) {
+  if (!!records.value && !loadingRecords.value && !sseRequesting.value) {
     try {
-      kbStore.setLoadingRecords(currKbUuid, true)
-      const resp = await api.knowledgeBaseQaRecordSearch<KnowledgeBase.QaRecordListResp>(currKbUuid, '', currentPage, pageSize)
+      aiSearchStore.setLoadingRecords(true)
+      const resp = await api.aiSearchRecords<AiSearch.AiSearchResp>(nextLoadingMaxId.value, '')
       if (resp.data.records) {
-        kbStore.appendRecords(currKbUuid, resp.data.records)
-        if (resp.data.records.length < pageSize)
-          loadedAll.value = true
+        aiSearchStore.setMaxId(resp.data.minId)
+        aiSearchStore.appendRecords(resp.data.records)
       }
     } finally {
-      kbStore.setLoadingRecords(currKbUuid, false)
-      currentPage++
+      aiSearchStore.setLoadingRecords(false)
     }
     nextTick(() => {
       scrollToBottom()
@@ -263,7 +255,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  if (kbStore.loadingRecords.get(currKbUuid))
+  if (sseRequesting.value)
     controller.abort()
 })
 
@@ -281,7 +273,7 @@ onActivated(async () => {
           id="image-wrapper" class="w-full max-w-screen-xl m-auto dark:bg-[#101014]"
           :class="[isMobile ? 'p-2' : 'p-4']"
         >
-          <template v-if="!qaRecords.length">
+          <template v-if="!records.length">
             <div class="flex items-center justify-center mt-4 text-center text-neutral-400">
               <NIcon :component="Cat" size="32" />
               <span class="pl-1">Roar~</span>
@@ -289,16 +281,30 @@ onActivated(async () => {
           </template>
 
           <template v-else>
-            <div v-for="qaRecord of qaRecords" :key="qaRecord.uuid">
+            <div v-for="record of records" :key="record.uuid">
               <Message
-                :date-time="qaRecord.createTime" :text="qaRecord.question" :regenerate="false" type="text"
-                :inversion="true" :error="qaRecord.error" :loading="false" @delete="handleDelete(qaRecord.uuid)"
+                :date-time="record.createTime" :text="record.question" :regenerate="false" type="text"
+                :inversion="true" :error="record.error" :loading="false" @delete="handleDelete(record.uuid)"
               />
               <Message
-                :date-time="qaRecord.createTime" :text="!!qaRecord.answer ? qaRecord.answer : '[无答案]'"
-                :regenerate="false" type="text" :inversion="false" :error="qaRecord.error" :loading="qaRecord.loading"
-                @delete="handleDelete(qaRecord.uuid)"
-              />
+                :date-time="record.createTime" :text="!!record.answer ? record.answer : '[无答案]'"
+                :regenerate="false" type="text" :inversion="false" :error="record.error" :loading="record.loading"
+                @delete="handleDelete(record.uuid)"
+              >
+                <div v-if="record.searchEngineResp.items.length > 0" class="search-quota">
+                  <NCollapse>
+                    <NCollapseItem title="引用" name="quote">
+                      <ul>
+                        <li v-for="searchEngineItem of record.searchEngineResp.items" :key="searchEngineItem.link">
+                          <NButton size="tiny" text tag="a" :href="searchEngineItem.link" target="_blank" type="primary">
+                            {{ searchEngineItem.title }}
+                          </NButton>
+                        </li>
+                      </ul>
+                    </NCollapseItem>
+                  </NCollapse>
+                </div>
+              </Message>
             </div>
           </template>
         </div>
@@ -315,6 +321,24 @@ onActivated(async () => {
     <footer :class="footerClass">
       <div class="w-full max-w-screen-xl m-auto">
         <div class="flex items-center justify-between space-x-2">
+          <HoverButton
+            v-if="!isMobile"
+            :tooltip="isBrief ? '摘要模式' : '详细模式'"
+          >
+            <span
+              class="text-xl"
+              :class="{ 'text-[#4b9e5f]': isBrief, 'text-[#a8071a]': !isBrief }"
+              @click="toggleBrief"
+            >
+              <SvgIcon icon="carbon:folder-details-reference" />
+            </span>
+          </HoverButton>
+          <div class="w-32">
+            <NSelect
+              :value="appStore.selectedSearchEngine" :options="appStore.searchEngines"
+              @update:value="handleChangeEngine"
+            />
+          </div>
           <div class="w-48">
             <NSelect :value="appStore.selectedLLM" :options="appStore.llms" @update:value="handleChangeModel" />
           </div>
@@ -334,3 +358,9 @@ onActivated(async () => {
     </footer>
   </div>
 </template>
+
+<style>
+.search-quota .n-collapse-item__header-main{
+  font-size: 0.375rem;
+}
+</style>

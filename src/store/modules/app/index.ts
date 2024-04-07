@@ -25,9 +25,25 @@ export const useAppStore = defineStore('app-store', {
     recordState() {
       setLocalSetting(this.$state)
     },
+    setSelectedSearchEngine(selected: string) {
+      this.selectedSearchEngine = selected
+    },
     setSelectedLLM(selected: string) {
       this.selectedLLM = selected
       this.recordState()
+    },
+    setSearchEngines(engines: SearchEngineInfo[]) {
+      engines.forEach((item) => {
+        item.disabled = !item.enable
+        item.label = item.name
+        item.value = item.name
+      })
+      this.searchEngines = engines
+      if (!this.selectedSearchEngine) {
+        const name = this.searchEngines.find(item => item.enable)?.name
+        if (name)
+          this.selectedSearchEngine = name
+      }
     },
     setLLMs(llms: AiModelInfo[]) {
       llms.forEach((item) => {

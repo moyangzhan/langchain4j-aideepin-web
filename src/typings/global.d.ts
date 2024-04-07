@@ -31,3 +31,15 @@ interface AiModelInfo{
   label: string,
   disabled: boolean
 }
+
+interface SearchEngineInfo{
+
+  //from api
+  name: string,
+  enable: boolean,
+
+  //for NSelector
+  value: string,
+  label: string,
+  disabled: boolean
+}

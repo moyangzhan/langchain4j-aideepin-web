@@ -44,3 +44,17 @@ export function knowledgeBaseEmptyRecord() {
     error: false,
   }
 }
+
+export function aiSearchEmptyRecord() {
+  return {
+    uuid: '',
+    question: '',
+    searchEngineResp: {
+      items: [],
+    },
+    answer: '',
+    loading: false,
+    error: false,
+    createTime: new Date().toLocaleString(),
+  }
+}

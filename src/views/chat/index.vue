@@ -77,7 +77,7 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
       modelName: appStore.selectedLLM,
     },
     signal: controller.signal,
-    startCallBack(chunk) {
+    startCallback(chunk) {
 
     },
     messageRecived: (chunk) => {
@@ -244,10 +244,7 @@ function selectedLatestAnswer(questionUuid: string) {
 }
 
 async function loadMoreMessage(event: any) {
-  if (currConv.value.loadedAll)
-    return
-
-  if (loadingMsgs.value)
+  if (currConv.value.loadedAll || loadingMsgs.value)
     return
 
   loadingMsgs.value = true

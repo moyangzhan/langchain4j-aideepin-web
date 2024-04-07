@@ -4,7 +4,8 @@ import type { MenuOption } from 'naive-ui'
 import type { Component } from 'vue'
 import { defineAsyncComponent, h, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { ChatboxEllipsesOutline, ImagesOutline, LibraryOutline, SettingsOutline } from '@vicons/ionicons5'
+import { ChatboxEllipsesOutline, ImagesOutline, LibraryOutline, SearchOutline, SettingsOutline } from '@vicons/ionicons5'
+
 import { Prompt as PromptIcon } from '@vicons/tabler'
 import { NaiveProvider, PromptStore } from '@/components/common'
 import { useTheme } from '@/hooks/useTheme'
@@ -69,6 +70,20 @@ const menuOptions: MenuOption[] = [
         { default: () => '知识库' },
       ),
   },
+  {
+    key: 'ai-search',
+    icon: renderIcon(SearchOutline),
+    label: () =>
+      h(
+        RouterLink,
+        {
+          to: {
+            name: 'AiSearch',
+          },
+        },
+        { default: () => '搜索' },
+      ),
+  },
 ]
 function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) })
@@ -79,6 +94,8 @@ onMounted(async () => {
   appStore.setLLMs(llms.data)
   const imageModels = await api.loadImageModels<AiModelInfo[]>()
   appStore.setImageModels(imageModels.data)
+  const engines = await api.loadSearchEngines<SearchEngineInfo[]>()
+  appStore.setSearchEngines(engines.data)
 })
 </script>
 

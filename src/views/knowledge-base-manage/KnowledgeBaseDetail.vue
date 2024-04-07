@@ -50,7 +50,7 @@ const showEmbeddingList = (selected: KnowledgeBase.Item = knowledgeBaseEmptyItem
 }
 
 const changeItemShowModal = (selected: KnowledgeBase.Item = knowledgeBaseEmptyItem()) => {
-  if(selected.kbId !== '0'){
+  if (selected.kbId !== '0') {
     Object.assign(tmpItem, selected)
   } else {
     tmpItem.kbId = curKnowledgeBase.id
@@ -137,7 +137,7 @@ function rowKey(row: KnowledgeBase.Item) {
 
 const columns = createColumns()
 
-function textEmbedding() {
+async function textEmbedding() {
   if (checkedItemRowKeys.value.length === 0) {
     ms.warning('至少选中一行')
     return
@@ -148,7 +148,7 @@ function textEmbedding() {
   }
   loading.value = true
   try {
-    api.knowledgeBaseItemEmbedding(checkedItemRowKeys.value)
+    await api.knowledgeBaseItemEmbedding(checkedItemRowKeys.value)
   } finally {
     loading.value = false
 

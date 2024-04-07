@@ -148,6 +148,7 @@ function handleRegenerate() {
           </template>
         </template>
       </NSpace>
+      <slot />
     </div>
   </div>
 </template>
