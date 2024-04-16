@@ -17,7 +17,7 @@ interface CreateImageResult{
 }
 
 interface AuthState {
-  token: string | ''
+  token: string
 }
 
 interface AiModelInfo{

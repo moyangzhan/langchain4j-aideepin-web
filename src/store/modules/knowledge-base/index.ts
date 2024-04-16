@@ -8,6 +8,7 @@ export const useKbStore = defineStore('kb-store', {
       myKbInfos: [],
       publicKbInfos: [],
       kbUuidToQaRecords: new Map<string, KnowledgeBase.QaRecordInfo[]>(),
+      kbUuidToStarInfo: new Map<string, KnowledgeBase.KbStarInfo>(),
       loadingRecords: new Map<string, boolean>(),
       loaddingKbList: false,
     }
@@ -96,6 +97,24 @@ export const useKbStore = defineStore('kb-store', {
 
       const index = existRecords.findIndex(item => item.uuid === recordUuid)
       existRecords.splice(index, 1)
+    },
+
+    appStarInfos(starInfos: KnowledgeBase.KbStarInfo[]) {
+      starInfos.forEach((item) => {
+        // Default true(from remote server)
+        if (!item.star)
+          item.star = true
+
+        this.kbUuidToStarInfo.set(item.kbUuid, item)
+      })
+    },
+
+    insertOrUpdateStarInfo(starInfo: KnowledgeBase.KbStarInfo) {
+      const existData = this.kbUuidToStarInfo.get(starInfo.kbUuid)
+      if (!existData)
+        this.kbUuidToStarInfo.set(starInfo.kbUuid, starInfo)
+      else
+        existData.star = starInfo.star
     },
   },
 })

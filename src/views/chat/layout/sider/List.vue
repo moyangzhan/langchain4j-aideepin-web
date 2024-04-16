@@ -20,6 +20,7 @@ const tmpTitle = ref<string>('')
 const tmpSystemMessage = ref<string>('')
 
 async function handleSelect({ uuid }: Chat.Conversation) {
+  console.log('click chat', uuid)
   if (isActive(uuid))
     return
 
@@ -76,9 +77,11 @@ async function fetchHistory() {
     chatStore.clearDefault()
     chatStore.addConvs(convs)
 
-    const active = route.query.active as string
-    if (!active)
+    const active = route.params.uuid as string
+    console.log('active', active)
+    if (active === 'default'){
       await handleSelect(convs[0])
+    }
   }
 }
 
@@ -92,11 +95,12 @@ watch(
       fetchHistory()
     }
   },
-  { immediate: true },
 )
 
 onMounted(() => {
-  console.log('list onMounted')
+  console.log('chat list onMounted')
+  if (authStoreRef.value.token)
+    fetchHistory()
 })
 </script>
 

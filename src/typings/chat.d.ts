@@ -27,7 +27,7 @@ declare namespace Chat {
 	}
 
 	interface ChatState {
-		active: string | ''
+		active: string
 		usingContext: boolean
 		conversations: Conversation[]
 		chats: ConvWithMessages[]

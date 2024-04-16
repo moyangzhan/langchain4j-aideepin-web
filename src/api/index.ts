@@ -16,6 +16,15 @@ function fetchConvs<T = any>() {
   })
 }
 
+function convAdd<T = any>(params: { title: string; aiSystemMessage: string }) {
+  return post<T>({
+    url: '/conversation/add',
+    data: {
+      ...params,
+    },
+  })
+}
+
 function convEdit<T = any>(params: { uuid: string; title: string; aiSystemMessage: string }) {
   return post<T>({
     url: `/conversation/edit/${params.uuid}`,
@@ -279,6 +288,12 @@ function knowledgeBaseInfo<T = any>(uuid: string) {
   })
 }
 
+function knowledgeBaseStar<T = any>(uuid: string) {
+  return post<T>({
+    url: `/knowledge-base/star/toggle?kbUuid=${uuid}`,
+  })
+}
+
 function knowledgeBaseDelete<T = any>(uuid: string) {
   return post<T>({
     url: `/knowledge-base/del/${uuid}`,
@@ -353,6 +368,12 @@ function knowledgeBaseQaRecordDel<T = any>(uuid: string) {
   })
 }
 
+function knowledgeBaseStarListMine<T = any>(currentPage: number, pageSize: number) {
+  return get<T>({
+    url: `/knowledge-base/star/mine?currentPage=${currentPage}&pageSize=${pageSize}`,
+  })
+}
+
 function loadLLMs<T = any>() {
   return get<T>({
     url: '/model/llms',
@@ -398,6 +419,7 @@ export default {
   fetchUserConfig,
   userEdit,
   fetchConvs,
+  convAdd,
   convEdit,
   convToggleUsingContext,
   convDel,
@@ -417,6 +439,7 @@ export default {
   imageDel,
   messageDel,
   knowledgeBaseInfo,
+  knowledgeBaseStar,
   knowledgeBaseSearchMine,
   knowledgeBaseSearchPublic,
   knowledgeBaseSaveOrUpdate,
@@ -430,6 +453,7 @@ export default {
   knowledgeBaseQaAsk,
   knowledgeBaseQaRecordSearch,
   knowledgeBaseQaRecordDel,
+  knowledgeBaseStarListMine,
   loadSearchEngines,
   loadLLMs,
   loadImageModels,

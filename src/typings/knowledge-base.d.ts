@@ -5,6 +5,9 @@ declare namespace KnowledgeBase {
     title: string
     remark: string
     isPublic: boolean,
+    starCount: number,
+    ownerUuid: string,
+    ownerName: string,
     loadingRecords?: boolean
   }
   interface InfoListResp {
@@ -54,7 +57,19 @@ declare namespace KnowledgeBase {
     myKbInfos: Info[],
     publicKbInfos: Info[],
     kbUuidToQaRecords: Map<string, QaRecordInfo[]>,
+    kbUuidToStarInfo: Map<string, KbStarInfo>,
     loadingRecords: Map<string, boolean>,
     loaddingKbList: boolean
   }
+
+  interface KbStarInfo {
+    kbUuid: string,
+    kbTitle: string,
+    star: boolean
+  }
+
+  interface KbStarListResp {
+		total: number
+		records: KnowledgeBase.KbStarInfo[]
+	}
 }

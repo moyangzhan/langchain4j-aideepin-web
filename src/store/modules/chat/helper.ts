@@ -1,11 +1,8 @@
-import { v4 as uuidv4 } from 'uuid'
 import { ss } from '@/utils/storage'
 const LOCAL_NAME = 'chatStorage'
 
-const uuid = uuidv4().replace(/-/g, '')
-console.log(`init defaultConversation uuid:${uuid}`)
 const defaultConversation = {
-  uuid,
+  uuid: 'default',
   title: 'New Chat',
   aiSystemMessage: '',
   understandContextEnable: false,

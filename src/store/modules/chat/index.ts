@@ -55,26 +55,31 @@ export const useChatStore = defineStore('chat-store', {
     },
 
     clearDefault() {
-      this.conversations = []
-      this.chats = []
-      this.active = ''
+      const index = this.conversations.findIndex(item => item.uuid === 'default')
+      if(index != -1){
+        this.conversations.splice(index, 1)
+        this.chats.splice(index, 1)
+      }
     },
 
     addConvs(convs: Chat.Conversation[]) {
       convs.forEach((item) => {
+        if (this.conversations.findIndex(innerItem => innerItem.uuid === item.uuid) !== -1){
+          return
+        }
         this.conversations.push(item)
         this.chats.push({ uuid: item.uuid, data: [] })
       })
     },
 
-    addConv(history: Chat.Conversation, chatData: Chat.ChatMessage[] = []) {
-      if (this.conversations.findIndex(item => item.uuid === history.uuid) !== -1)
+    addConv(newConv: Chat.Conversation, chatData: Chat.ChatMessage[] = []) {
+      if (this.conversations.findIndex(item => item.uuid === newConv.uuid) !== -1)
         return
 
-      this.conversations.unshift(history)
-      this.chats.unshift({ uuid: history.uuid, data: chatData })
-      this.active = history.uuid
-      this.reloadRoute(history.uuid)
+      this.conversations.unshift(newConv)
+      this.chats.unshift({ uuid: newConv.uuid, data: chatData })
+      this.active = newConv.uuid
+      this.reloadRoute(newConv.uuid)
     },
 
     updateConv(convUuid: string, edit: Partial<Chat.Conversation>) {
@@ -244,7 +249,7 @@ export const useChatStore = defineStore('chat-store', {
 
     async reloadRoute(uuid?: string) {
       this.recordState()
-      await router.push({ name: 'Chat', params: { uuid } })
+      await router.push({ name: 'ChatDetail', params: { uuid } })
     },
 
     recordState() {

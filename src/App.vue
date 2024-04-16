@@ -11,12 +11,13 @@ import { NaiveProvider, PromptStore } from '@/components/common'
 import { useTheme } from '@/hooks/useTheme'
 import { useLanguage } from '@/hooks/useLanguage'
 import { t } from '@/locales'
-import { useAppStore, useKbStore } from '@/store'
+import { useAppStore, useChatStore, useKbStore } from '@/store'
 import api from '@/api'
 
 const Setting = defineAsyncComponent(() => import('@/components/common/Setting/index.vue'))
 
 const appStore = useAppStore()
+const chatStore = useChatStore()
 const kbStore = useKbStore()
 const { theme, themeOverrides } = useTheme()
 const { language } = useLanguage()
@@ -33,7 +34,10 @@ const menuOptions: MenuOption[] = [
         RouterLink,
         {
           to: {
-            name: 'Chat',
+            name: 'ChatDetail',
+            params: {
+              uuid: chatStore.active,
+            },
           },
         },
         { default: () => '聊天' },

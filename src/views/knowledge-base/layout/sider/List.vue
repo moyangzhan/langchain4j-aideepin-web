@@ -40,19 +40,28 @@ async function initList() {
   }
 }
 
+async function initStarredList() {
+  const starListResp = await api.knowledgeBaseStarListMine<KnowledgeBase.KbStarListResp>(1, 100)
+  kbStore.appStarInfos(starListResp.data.records)
+}
+
 watch(
   () => authStoreRef.value.token,
   (newVal) => {
     if (newVal) {
       console.log('token change, reaload')
       initList()
+      initStarredList()
     }
   },
-  { immediate: true },
 )
 
 onMounted(() => {
   console.log('list onMounted')
+  if (authStoreRef.value.token) {
+    initList()
+    initStarredList()
+  }
 })
 </script>
 
