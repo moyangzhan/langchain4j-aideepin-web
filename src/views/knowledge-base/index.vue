@@ -87,7 +87,6 @@ async function handleSubmit() {
         kbStore.updateRecord(currKbUuid, tmpUuid, tmpRecord)
       },
       messageRecived: (chunk) => {
-        console.log(chunk)
         // Always process the final line
         if (!chunk)
           chunk = '\r\n'
@@ -103,7 +102,6 @@ async function handleSubmit() {
         scrollToBottomIfAtBottom()
       },
       doneCallback: (chunk) => {
-        console.log(chunk)
         if (chunk.includes('[META]')) {
           const meta = chunk.replace('[META]', '')
           const metaData: Chat.MetaData = JSON.parse(meta)
@@ -116,7 +114,7 @@ async function handleSubmit() {
           )
         }
         tmpRecord.loading = false
-        tmpRecord.error = true
+        tmpRecord.error = false
         kbStore.updateRecord(currKbUuid, tmpUuid, tmpRecord)
         sseRequesting.value = false
       },

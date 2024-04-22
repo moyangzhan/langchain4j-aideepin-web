@@ -103,7 +103,7 @@ onUnmounted(() => {
             />
           </template>
         </NTag>
-        <NTag size="large" :bordered="false" :color="{ color: '#ff000000' }" class="cursor-pointer" @click="handleClickStar(tmpKb)">
+        <NTag size="large" :bordered="false" round :color="{ color: '#ff000000' }" checkable @click="handleClickStar(tmpKb)">
           {{ tmpKb.starCount }}
           <template #icon>
             <NIcon v-show="!kbStore.kbUuidToStarInfo.get(tmpKb.uuid)?.star" :component="Star24Regular" />

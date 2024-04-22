@@ -101,7 +101,6 @@ async function handleSubmit() {
         scrollToBottomIfAtBottom()
       },
       doneCallback: (chunk) => {
-        console.log(chunk)
         if (chunk.includes('[META]')) {
           const meta = chunk.replace('[META]', '')
           const metaData: Chat.MetaData = JSON.parse(meta)

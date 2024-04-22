@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import { computed, onMounted, ref, watch } from 'vue'
-import { NButton, NInput, NModal, NPopconfirm, NScrollbar, NSpace } from 'naive-ui'
+import { NButton, NFlex, NInput, NModal, NPopconfirm, NScrollbar, NSpace } from 'naive-ui'
 import { useRoute } from 'vue-router'
 import { SvgIcon } from '@/components/common'
 import { useAppStore, useAuthStore, useChatStore } from '@/store'
@@ -18,6 +18,7 @@ const showModal = ref<boolean>(false)
 const tmpUuid = ref<string>('')
 const tmpTitle = ref<string>('')
 const tmpSystemMessage = ref<string>('')
+const mouseEnterKbUuid = ref<string>('')
 
 async function handleSelect({ uuid }: Chat.Conversation) {
   console.log('click chat', uuid)
@@ -42,6 +43,12 @@ async function handleSelect({ uuid }: Chat.Conversation) {
     appStore.setSiderCollapsed(true)
 }
 
+function handleMouseEnter({ uuid }: Chat.Conversation) {
+  mouseEnterKbUuid.value = uuid
+}
+function handleMouseLeave() {
+  mouseEnterKbUuid.value = ''
+}
 function openEditView(item: Chat.Conversation, event?: KeyboardEvent) {
   showModal.value = true
   tmpUuid.value = item.uuid
@@ -63,6 +70,8 @@ function handleDelete(uuid: string, event?: MouseEvent | TouchEvent) {
   chatStore.deleteConv(uuid)
   if (isMobile.value)
     appStore.setSiderCollapsed(true)
+
+  showModal.value = false
 }
 
 const handleDeleteDebounce = debounce(handleDelete, 600)
@@ -79,9 +88,8 @@ async function fetchHistory() {
 
     const active = route.params.uuid as string
     console.log('active', active)
-    if (active === 'default'){
+    if (active === 'default')
       await handleSelect(convs[0])
-    }
   }
 }
 
@@ -109,9 +117,19 @@ onMounted(() => {
     <NSpace vertical justify="space-between">
       <NInput v-model:value="tmpTitle" type="text" size="large" :placeholder="$t('store.title')" />
       <NInput v-model:value="tmpSystemMessage" type="textarea" size="large" :placeholder="$t('setting.role')" />
-      <NButton block type="primary" @click="handleEdit()">
-        {{ $t('common.save') }}
-      </NButton>
+      <NFlex justify="space-between">
+        <NButton type="primary" @click="handleEdit()">
+          {{ $t('common.save') }}
+        </NButton>
+        <NPopconfirm placement="top" @positive-click.stop="handleDeleteDebounce(tmpUuid, $event)">
+          <template #trigger>
+            <NButton type="error" ghost>
+              {{ $t('common.delete') }}
+            </NButton>
+          </template>
+          {{ $t('chat.deleteConversationConfirm') }}
+        </NPopconfirm>
+      </NFlex>
     </NSpace>
   </NModal>
   <NScrollbar class="px-4">
@@ -126,8 +144,10 @@ onMounted(() => {
         <div v-for="(item, index) of convList" :key="index">
           <a
             class="relative flex items-center gap-3 px-3 py-3 break-all border rounded-md cursor-pointer hover:bg-neutral-100 group dark:border-neutral-800 dark:hover:bg-[#24272e]"
-            :class="isActive(item.uuid) && ['border-[#4b9e5f]', 'bg-neutral-100', 'text-[#4b9e5f]', 'dark:bg-[#24272e]', 'dark:border-[#4b9e5f]', 'pr-14']"
+            :class="isActive(item.uuid) && ['border-[#4b9e5f]', 'bg-neutral-100', 'text-[#4b9e5f]', 'dark:bg-[#24272e]', 'dark:border-[#4b9e5f]']"
             @click="handleSelect(item)"
+            @mouseenter="handleMouseEnter(item)"
+            @mouseleave="handleMouseLeave"
           >
             <span>
               <SvgIcon icon="ri:message-3-line" />
@@ -135,18 +155,10 @@ onMounted(() => {
             <div class="relative flex-1 overflow-hidden break-all text-ellipsis whitespace-nowrap">
               <span>{{ item.title }}</span>
             </div>
-            <div v-if="isActive(item.uuid)" class="absolute z-10 flex visible right-1">
+            <div v-if="mouseEnterKbUuid === item.uuid" class="absolute z-10 flex visible right-1 bg-neutral-100 pd-2">
               <button class="p-1">
-                <SvgIcon icon="ri:edit-line" @click="openEditView(item)" />
+                <SvgIcon icon="ri:edit-line" @click.stop="openEditView(item)" />
               </button>
-              <NPopconfirm placement="bottom" @positive-click="handleDeleteDebounce(item.uuid, $event)">
-                <template #trigger>
-                  <button class="p-1">
-                    <SvgIcon icon="ri:delete-bin-line" />
-                  </button>
-                </template>
-                {{ $t('chat.deleteConversationConfirm') }}
-              </NPopconfirm>
             </div>
           </a>
         </div>

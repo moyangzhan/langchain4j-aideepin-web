@@ -56,7 +56,7 @@ export const useChatStore = defineStore('chat-store', {
 
     clearDefault() {
       const index = this.conversations.findIndex(item => item.uuid === 'default')
-      if(index != -1){
+      if (index !== -1) {
         this.conversations.splice(index, 1)
         this.chats.splice(index, 1)
       }
@@ -64,9 +64,9 @@ export const useChatStore = defineStore('chat-store', {
 
     addConvs(convs: Chat.Conversation[]) {
       convs.forEach((item) => {
-        if (this.conversations.findIndex(innerItem => innerItem.uuid === item.uuid) !== -1){
+        if (this.conversations.findIndex(innerItem => innerItem.uuid === item.uuid) !== -1)
           return
-        }
+
         this.conversations.push(item)
         this.chats.push({ uuid: item.uuid, data: [] })
       })
