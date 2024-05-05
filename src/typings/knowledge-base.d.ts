@@ -45,10 +45,11 @@ declare namespace KnowledgeBase {
     kbId: string
     kbUuid: string
     question: string
-    answer: string,
-    createTime: string,
-    loading?: boolean,
+    answer: string
+    createTime: string
+    loading?: boolean
     error?: boolean
+    aiModelPlatform?: string
   }
 
   interface KbState {

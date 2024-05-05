@@ -450,7 +450,7 @@ onDeactivated(() => {
             <div v-for="(question, index) of messages" :key="index">
               <Message
                 :date-time="question.createTime" :text="question.remark" type="text"
-                :inversion="question.inversion" :error="question.error" :loading="false"
+                :inversion="true" :error="question.error" :loading="false"
                 @regenerate="onRegenerate(question.uuid)" @delete="handleDelete(question.uuid, '', true)"
               />
               <template v-if="question.children.length > 1">
@@ -465,7 +465,8 @@ onDeactivated(() => {
                   >
                     <Message
                       :show-avatar="false" :date-time="answer.createTime" :text="answer.remark" type="text"
-                      :inversion="answer.inversion" :regenerate="true" :error="answer.error" :loading="answer.loading"
+                      :inversion="false" :regenerate="true" :error="answer.error" :loading="answer.loading"
+                      :ai-model-platform="answer.aiModelPlatform"
                       @regenerate="onRegenerate(question.uuid)" @delete="handleDelete(question.uuid, answer.uuid)"
                     />
                   </NTabPane>
@@ -476,7 +477,8 @@ onDeactivated(() => {
                 <Message
                   :date-time="question.children[0].createTime" :text="question.children[0].remark" type="text"
                   :inversion="question.children[0].inversion" :regenerate="true" :error="question.children[0].error"
-                  :loading="question.children[0].loading" @regenerate="onRegenerate(question.uuid)"
+                  :loading="question.children[0].loading" :ai-model-platform="question.children[0].aiModelPlatform"
+                  @regenerate="onRegenerate(question.uuid)"
                   @delete="handleDelete(question.uuid, question.children[0].uuid)"
                 />
               </template>

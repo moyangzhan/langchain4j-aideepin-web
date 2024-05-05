@@ -9,6 +9,7 @@ declare namespace Chat {
 		inversion?: boolean
 		error?: boolean
 		loading?: boolean
+		aiModelPlatform?: string
 	}
 
 	interface Conversation {

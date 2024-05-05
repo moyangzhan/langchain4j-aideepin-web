@@ -295,6 +295,7 @@ onActivated(async () => {
               <Message
                 :date-time="qaRecord.createTime" :text="!!qaRecord.answer ? qaRecord.answer : '[无答案]'"
                 :regenerate="false" type="text" :inversion="false" :error="qaRecord.error" :loading="qaRecord.loading"
+                :ai-model-platform="qaRecord.aiModelPlatform"
                 @delete="handleDelete(qaRecord.uuid)"
               />
             </div>
