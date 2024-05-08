@@ -171,6 +171,8 @@ async function createChatTask() {
         loading: true,
         inversion: false,
         error: false,
+
+        aiModelPlatform: appStore.selectedModelPlatform,
       }],
       inversion: true,
       error: false,

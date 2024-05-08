@@ -23,12 +23,14 @@ interface AuthState {
 interface AiModelInfo{
 
   //from api
-  modelName: string,
-  enable: boolean,
+  modelId: string
+  modelName: string
+  modelPlatform: string
+  enable: boolean
 
   //for NSelector
-  value: string,
-  label: string,
+  value: string
+  label: string
   disabled: boolean
 }
 
