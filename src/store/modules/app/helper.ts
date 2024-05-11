@@ -1,4 +1,5 @@
 import { ss } from '@/utils/storage'
+import { emptyAiModel } from '@/utils/functions'
 
 const LOCAL_NAME = 'appSetting'
 
@@ -12,8 +13,7 @@ export interface AppState {
   language: Language
 
   selectedSearchEngine: string
-  selectedLLM: string
-  selectedModelPlatform: string
+  selectedLLM: AiModelInfo
   searchEngines: SearchEngineInfo[]
   llms: AiModelInfo[]
   imageModels: AiModelInfo[]
@@ -25,8 +25,7 @@ export function defaultSetting(): AppState {
     theme: 'light',
     language: 'zh-CN',
     selectedSearchEngine: '',
-    selectedLLM: '',
-    selectedModelPlatform: '',
+    selectedLLM: emptyAiModel(),
     searchEngines: [],
     llms: [],
     imageModels: [],

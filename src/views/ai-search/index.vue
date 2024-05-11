@@ -65,6 +65,7 @@ async function handleSubmit() {
   tmpRecord.question = message
   tmpRecord.answer = '生成中...'
   tmpRecord.loading = true
+  tmpRecord.aiModelPlatform = appStore.selectedLLM.modelPlatform
 
   try {
     aiSearchStore.appendRecord(tmpRecord)
@@ -73,7 +74,7 @@ async function handleSubmit() {
       options: {
         searchText: message,
         engineName: appStore.selectedSearchEngine,
-        modelName: appStore.selectedLLM,
+        modelName: appStore.selectedLLM.modelName,
         briefSearch: isBrief.value,
       },
       signal: controller.signal,
@@ -288,6 +289,7 @@ onActivated(async () => {
               <Message
                 :date-time="record.createTime" :text="!!record.answer ? record.answer : '[无答案]'"
                 :regenerate="false" type="text" :inversion="false" :error="record.error" :loading="record.loading"
+                :ai-model-platform="record.aiModelPlatform"
                 @delete="handleDelete(record.uuid)"
               >
                 <div v-if="record.searchEngineResp.items.length > 0" class="search-quota">
@@ -339,7 +341,7 @@ onActivated(async () => {
             />
           </div>
           <div class="w-48">
-            <NSelect :value="appStore.selectedLLM" :options="appStore.llms" @update:value="handleChangeModel" />
+            <NSelect :value="appStore.selectedLLM.modelId" :options="appStore.llms" @update:value="handleChangeModel" />
           </div>
           <NInput
             ref="inputRef" v-model:value="prompt" type="textarea" :placeholder="placeholder"

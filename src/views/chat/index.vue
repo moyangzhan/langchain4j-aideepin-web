@@ -74,7 +74,7 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
       prompt: message,
       conversationUuid: curConvUuid,
       regenerateQuestionUuid,
-      modelName: appStore.selectedLLM,
+      modelName: appStore.selectedLLM.modelName,
     },
     signal: controller.signal,
     startCallback(chunk) {
@@ -171,8 +171,7 @@ async function createChatTask() {
         loading: true,
         inversion: false,
         error: false,
-
-        aiModelPlatform: appStore.selectedModelPlatform,
+        aiModelPlatform: appStore.selectedLLM.modelPlatform,
       }],
       inversion: true,
       error: false,
@@ -513,7 +512,7 @@ onDeactivated(() => {
             </span>
           </HoverButton>
           <div class="w-48">
-            <NSelect :value="appStore.selectedLLM" :options="appStore.llms" @update:value="handleChangeModel" />
+            <NSelect :value="appStore.selectedLLM.modelId" :options="appStore.llms" @update:value="handleChangeModel" />
           </div>
           <NAutoComplete
             v-model:value="prompt" class="grow" :options="searchOptions" :get-show="getShow"

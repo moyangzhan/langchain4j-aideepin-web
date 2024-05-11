@@ -71,6 +71,7 @@ async function handleSubmit() {
   tmpRecord.kbUuid = currKbUuid
   tmpRecord.answer = '生成中...'
   tmpRecord.loading = true
+  tmpRecord.aiModelPlatform = appStore.selectedLLM.modelPlatform
 
   try {
     kbStore.appendRecord(currKbUuid, tmpRecord)
@@ -79,7 +80,7 @@ async function handleSubmit() {
       options: {
         kbUuid: currKbUuid,
         question: message,
-        modelName: appStore.selectedLLM,
+        modelName: appStore.selectedLLM.modelName,
       },
       signal: controller.signal,
       startCallback: (chunk) => {
@@ -315,7 +316,7 @@ onActivated(async () => {
       <div class="w-full max-w-screen-xl m-auto">
         <div class="flex items-center justify-between space-x-2">
           <div class="w-48">
-            <NSelect :value="appStore.selectedLLM" :options="appStore.llms" @update:value="handleChangeModel" />
+            <NSelect :value="appStore.selectedLLM.modelId" :options="appStore.llms" @update:value="handleChangeModel" />
           </div>
           <NInput
             ref="inputRef" v-model:value="prompt" type="textarea" :placeholder="placeholder"

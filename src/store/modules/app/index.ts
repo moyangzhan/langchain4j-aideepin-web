@@ -4,7 +4,12 @@ import { getLocalSetting, setLocalSetting } from './helper'
 import { store } from '@/store'
 
 export const useAppStore = defineStore('app-store', {
+
   state: (): AppState => getLocalSetting(),
+
+  getters: {
+  },
+
   actions: {
     setSiderCollapsed(collapsed: boolean) {
       this.siderCollapsed = collapsed
@@ -29,10 +34,9 @@ export const useAppStore = defineStore('app-store', {
       this.selectedSearchEngine = selected
     },
     setSelectedLLM(selected: string) {
-      this.selectedLLM = selected
       const selectedModel = this.llms.find(item => item.modelId === selected)
       if (selectedModel)
-        this.selectedModelPlatform = selectedModel.modelPlatform
+        this.selectedLLM = selectedModel
 
       this.recordState()
     },
@@ -56,12 +60,10 @@ export const useAppStore = defineStore('app-store', {
         item.value = item.modelId
       })
       this.llms = llms
-      if (!this.selectedLLM) {
+      if (this.selectedLLM.modelId === 'default') {
         const selectedModel = this.llms.find(item => item.enable)
-        if (selectedModel) {
-          this.selectedLLM = selectedModel.modelId
-          this.selectedModelPlatform = selectedModel.modelPlatform
-        }
+        if (selectedModel)
+          this.selectedLLM = selectedModel
       }
     },
     setImageModels(imageModels: AiModelInfo[]) {

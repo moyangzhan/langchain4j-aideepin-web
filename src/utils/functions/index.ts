@@ -43,6 +43,7 @@ export function knowledgeBaseEmptyRecord() {
     question: '',
     answer: '',
     createTime: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+    aiModelPlatform: '',
     loading: false,
     error: false,
   }
@@ -59,5 +60,21 @@ export function aiSearchEmptyRecord() {
     loading: false,
     error: false,
     createTime: new Date().toLocaleString(),
+    aiModelPlatform: '',
+  }
+}
+
+export function emptyAiModel() {
+  return {
+    // from api
+    modelId: 'default',
+    modelName: '',
+    modelPlatform: '',
+    enable: false,
+
+    // for NSelector
+    value: '',
+    label: '',
+    disabled: false,
   }
 }
