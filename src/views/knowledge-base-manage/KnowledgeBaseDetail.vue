@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import type { DataTableColumns, UploadFileInfo, UploadInst } from 'naive-ui'
 import { computed, h, onMounted, reactive, ref, watch } from 'vue'
-import { NButton, NCard, NDataTable, NFlex, NIcon, NInput, NModal, NP, NSpace, NSwitch, NText, NUpload, NUploadDragger, useDialog, useMessage } from 'naive-ui'
+import { NButton, NCard, NDataTable, NEllipsis, NFlex, NIcon, NInput, NModal, NP, NSpace, NSwitch, NText, NUpload, NUploadDragger, useDialog, useMessage } from 'naive-ui'
 import { ArchiveOutline } from '@vicons/ionicons5'
 import { Cloud32Regular, LockClosed32Regular } from '@vicons/fluent'
 import { useRoute } from 'vue-router'
@@ -44,6 +44,10 @@ const token = ref<string>(authStore.token)
 const checkedItemRowKeys = ref<string[]>([])
 const curKnowledgeBase: KnowledgeBase.Info = reactive<KnowledgeBase.Info>(knowledgeBaseEmptyInfo())
 
+const showFileContent = (selected: KnowledgeBase.Item = knowledgeBaseEmptyItem()) => {
+  window.open(`/api/file/${selected.sourceFileUuid}`, '_blank')
+}
+
 const showEmbeddingList = (selected: KnowledgeBase.Item = knowledgeBaseEmptyItem()) => {
   showEmbeddingListModal.value = true
   kbItemUuidForEmbeddingList.value = selected.uuid
@@ -83,6 +87,7 @@ const createColumns = (): DataTableColumns<KnowledgeBase.Item> => {
             default: () => [h(
               NButton,
               {
+                text: true,
                 tertiary: true,
                 size: 'small',
                 type: 'info',
@@ -94,6 +99,33 @@ const createColumns = (): DataTableColumns<KnowledgeBase.Item> => {
           })
         } else {
           return '×'
+        }
+      },
+    },
+    {
+      title: '附件',
+      key: 'sourceFileName',
+      width: 100,
+      render(row) {
+        const soureFile = !!row.sourceFileUuid
+        if (soureFile) {
+          return h('div', {
+            class: 'flex flex-col',
+            onClick: () => showFileContent(row),
+          },
+          {
+            default: () => [h(
+              NEllipsis,
+              {
+                lineClamp: 3,
+                style: 'color:#2080f0;cursor:pointer',
+              },
+              { default: () => row.sourceFileName || row.title },
+            ),
+            ],
+          })
+        } else {
+          return '无'
         }
       },
     },
@@ -263,7 +295,10 @@ watch(
 
 <template>
   <div class="p-4">
-    <NCard :title="`知识库: ${curKnowledgeBase.title}(${curKnowledgeBase.isPublic ? '公开' : '私有'})`" hoverable>
+    <NButton text size="large" type="primary" @click="$router.push({ name: 'KnowledgeBaseManage' })">
+      《 返回列表
+    </NButton>
+    <NCard style="margin-top: 12px" :title="`知识库: ${curKnowledgeBase.title}(${curKnowledgeBase.isPublic ? '公开' : '私有'})`" hoverable>
       <template #header-extra>
         <NIcon v-if="curKnowledgeBase.isPublic" :component="Cloud32Regular" />
         <NIcon v-if="!curKnowledgeBase.isPublic" :component="LockClosed32Regular" />
@@ -287,7 +322,8 @@ watch(
               点击或者拖动文件到该区域来上传
             </NText>
             <NP depth="3" style="margin: 8px 0 0 0">
-              支持的文件格式: TXT、PDF、DOC、DOCX、XLS、XLXS、PPT、PPTX
+              支持的文件格式: TXT、PDF、DOC、DOCX、XLS、XLXS、PPT、PPTX<br>
+              文件大小：不超过10M
             </NP>
           </NUploadDragger>
         </NUpload>

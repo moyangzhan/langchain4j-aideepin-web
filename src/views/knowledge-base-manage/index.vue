@@ -4,7 +4,7 @@ import { computed, h, reactive, ref, watch } from 'vue'
 import { NButton, NDataTable, NInput, NModal, NRadio, NRadioGroup, NSpace, useMessage } from 'naive-ui'
 import { RouterLink } from 'vue-router'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useAuthStore } from '@/store'
+import { useAuthStore, useKbStore } from '@/store'
 import { knowledgeBaseEmptyInfo } from '@/utils/functions'
 import { t } from '@/locales'
 import api from '@/api'
@@ -25,6 +25,7 @@ const tmpKb = reactive<KnowledgeBase.Info>(knowledgeBaseEmptyInfo())
 const inputStatus = computed(() => tmpKb.title.trim().length < 1 && !submitting.value)
 const { isMobile } = useBasicLayout()
 const authStore = useAuthStore()
+const kbStore = useKbStore()
 const token = ref<string>(authStore.token)
 
 const changeShowModal = (selected: KnowledgeBase.Info = knowledgeBaseEmptyInfo()) => {
@@ -137,6 +138,9 @@ async function saveOrUpdateKb() {
       infoList.value.push(res.data)
     }
     Object.assign(tmpKb, res.data)
+
+    kbStore.setReloadKbInfosSignal(true)
+    search(1)
   } finally {
     submitting.value = false
     showModal.value = false
@@ -166,26 +170,22 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-col w-full h-full p-4">
-    <main class="flex-1 overflow-hidden">
-      <div class="flex gap-3 mb-2" :class="[isMobile ? 'flex-col' : 'flex-row justify-between']">
-        <div class="flex items-center space-x-4">
-          <NButton type="primary" size="small" @click="changeShowModal()">
-            {{ $t('common.add') }}
-          </NButton>
-        </div>
-        <div class="flex justify-between">
-          <NInput v-model:value="searchValue" style="width: 100%" @keyup="onKeyUpSearch" />
-          <NButton type="primary" ghost @click="search(1)">
-            搜索
-          </NButton>
-        </div>
+  <div class="flex flex-col w-full p-4">
+    <div class="flex gap-3 mb-2" :class="[isMobile ? 'flex-col' : 'flex-row justify-between']">
+      <div class="flex items-center space-x-4">
+        <NButton type="primary" size="small" @click="changeShowModal()">
+          {{ $t('common.add') }}
+        </NButton>
       </div>
-      <NDataTable
-        remote :loading="loading" :max-height="800" :columns="columns" :data="infoList"
-        :pagination="paginationReactive" :single-line="false" :bordered="true" @update:page="onHandlePageChange"
-      />
-    </main>
+      <div class="flex justify-between">
+        <NInput v-model:value="searchValue" style="width: 100%" @keyup="onKeyUpSearch" />
+        <NButton type="primary" ghost @click="search(1)">
+          搜索
+        </NButton>
+      </div>
+    </div>
+    <NDataTable remote :loading="loading" :columns="columns" :data="infoList" :pagination="paginationReactive"
+      :single-line="false" :bordered="true" @update:page="onHandlePageChange" />
   </div>
 
   <NModal v-model:show="showModal" title="编辑" style="width: 90%; max-width: 600px;" preset="card">
@@ -202,10 +202,8 @@ watch(
         </NRadio>
       </NRadioGroup>
       {{ t('store.description') }}
-      <NInput
-        v-model:value="tmpKb.remark" type="textarea" maxlength="500" show-count
-        :autosize="{ minRows: 10, maxRows: 40 }"
-      />
+      <NInput v-model:value="tmpKb.remark" type="textarea" maxlength="500" show-count
+        :autosize="{ minRows: 10, maxRows: 40 }" />
       <NButton block type="primary" :disabled="inputStatus" @click="() => { saveOrUpdateKb() }">
         {{ t('common.confirm') }}
       </NButton>

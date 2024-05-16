@@ -31,6 +31,8 @@ export function knowledgeBaseEmptyItem() {
     brief: '',
     remark: '',
     isEmbedded: false,
+    sourceFileName: '',
+    sourceFileUuid: '',
   }
 }
 

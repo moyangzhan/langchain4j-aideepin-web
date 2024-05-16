@@ -11,14 +11,14 @@ const router = useRouter()
 const currentPage = ref<number>(1)
 const pageSize = 20
 const kbStore = useKbStore()
-const { activeKbUuid, myKbInfos, publicKbInfos, selectedKbType } = storeToRefs<any>(kbStore)
+const { activeKbUuid, myKbInfos, publicKbInfos, selectedKbType, reloadKbInfosSignal } = storeToRefs<any>(kbStore)
 const authStore = useAuthStore()
 const authStoreRef = ref<AuthState>(authStore)
 
 async function initList() {
-  if (kbStore.loaddingKbList || kbStore.myKbInfos.length > 0)
+  if (kbStore.loaddingKbList)
     return
-
+  console.log('My knowledge base init')
   kbStore.setLoadingKbList(true)
   try {
     const { data } = await api.knowledgeBaseSearchMine<KnowledgeBase.InfoListResp>('', currentPage.value, pageSize)
@@ -49,9 +49,22 @@ watch(
   () => authStoreRef.value.token,
   (newVal) => {
     if (newVal) {
-      console.log('token change, reaload')
       initList()
       initStarredList()
+    }
+  },
+)
+
+watch(
+  () => reloadKbInfosSignal.value,
+  (newVal) => {
+    if (newVal) {
+      try {
+        initList()
+        initStarredList()
+      } finally {
+        kbStore.setReloadKbInfosSignal(false)
+      }
     }
   },
 )

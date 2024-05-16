@@ -11,6 +11,7 @@ export const useKbStore = defineStore('kb-store', {
       kbUuidToStarInfo: new Map<string, KnowledgeBase.KbStarInfo>(),
       loadingRecords: new Map<string, boolean>(),
       loaddingKbList: false,
+      reloadKbInfosSignal: false,
     }
   },
 
@@ -35,6 +36,9 @@ export const useKbStore = defineStore('kb-store', {
     },
     setLoadingRecords(currKbUuid: string, status: boolean) {
       this.loadingRecords.set(currKbUuid, status)
+    },
+    setReloadKbInfosSignal(signal: boolean) {
+      this.reloadKbInfosSignal = signal
     },
     setMyKbInfos(infos: KnowledgeBase.Info[]) {
       this.myKbInfos = infos

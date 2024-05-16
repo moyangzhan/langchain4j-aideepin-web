@@ -69,7 +69,7 @@ onUnmounted(() => {
     <template v-else>
       <div class="flex flex-col gap-2 text-sm">
         <a
-          v-for="(item, index) of list" :key="index"
+          v-for="item of list" :key="item.uuid"
           class="relative flex items-center gap-3 px-3 py-3 break-all border rounded-md cursor-pointer hover:bg-neutral-100 group dark:border-neutral-800 dark:hover:bg-[#24272e]"
           :class="item.uuid === activeKbUuid && ['border-[#4b9e5f]', 'bg-neutral-100', 'text-[#4b9e5f]', 'dark:bg-[#24272e]', 'dark:border-[#4b9e5f]', 'pr-14']"
           @click="handleSelect(item)" @mouseenter="handleMouseEnter(item)" @mouseleave="handleMouseLeave"

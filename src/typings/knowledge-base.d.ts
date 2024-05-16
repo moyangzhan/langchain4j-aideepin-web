@@ -23,6 +23,8 @@ declare namespace KnowledgeBase {
     brief: string
     remark: string
     isEmbedded: boolean
+    sourceFileName: string
+    sourceFileUuid: string
   }
   interface KbItemEditReq {
     id?: string
@@ -53,19 +55,20 @@ declare namespace KnowledgeBase {
   }
 
   interface KbState {
-    selectedKbType: string,
-    activeKbUuid: string,
-    myKbInfos: Info[],
-    publicKbInfos: Info[],
-    kbUuidToQaRecords: Map<string, QaRecordInfo[]>,
-    kbUuidToStarInfo: Map<string, KbStarInfo>,
-    loadingRecords: Map<string, boolean>,
+    selectedKbType: string
+    activeKbUuid: string
+    myKbInfos: Info[]
+    publicKbInfos: Info[]
+    kbUuidToQaRecords: Map<string, QaRecordInfo[]>
+    kbUuidToStarInfo: Map<string, KbStarInfo>
+    loadingRecords: Map<string, boolean>
     loaddingKbList: boolean
+    reloadKbInfosSignal: boolean
   }
 
   interface KbStarInfo {
-    kbUuid: string,
-    kbTitle: string,
+    kbUuid: string
+    kbTitle: string
     star: boolean
   }
 
