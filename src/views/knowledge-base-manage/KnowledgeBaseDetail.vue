@@ -334,24 +334,24 @@ watch(
           <NFlex class="items-center">
             <NSwitch v-model:value="embeddingAfterUpload">
               <template #checked>
-                生成知识点后进行文本嵌入
+                生成知识点后自动向量化
               </template>
               <template #unchecked>
-                生成知识点后不进行文本嵌入
+                生成知识点后不向量化
               </template>
             </NSwitch>
           </NFlex>
         </NFlex>
       </NSpace>
     </NCard>
-    <NCard style="margin-top: 12px" title="知识点" hoverable>
+    <NCard style="margin-top: 12px" title="已生成的知识点" hoverable>
       <div class="flex gap-3 mb-4" :class="[isMobile ? 'flex-col' : 'flex-row justify-between']">
         <div class="flex items-left gap-2">
           <NButton type="primary" size="small" @click="changeItemShowModal()">
             {{ $t('common.add') }}
           </NButton>
           <NButton type="primary" size="small" @click="textEmbedding()">
-            文本嵌入
+            将选中内容向量化
           </NButton>
         </div>
         <div class="flex items-center">

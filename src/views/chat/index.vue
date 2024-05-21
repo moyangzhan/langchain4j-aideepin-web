@@ -43,6 +43,7 @@ const prompt = ref<string>('')
 const loading = ref<boolean>(false)
 const loadingMsgs = ref<boolean>(false)
 const inputRef = ref<Ref | null>(null)
+let arrowKeyIdx = -1
 
 // 添加PromptStore
 const promptStore = usePromptStore()
@@ -309,6 +310,46 @@ function handleDelete(questionUuid: string, answerUuid: string, isQuestion = fal
   })
 }
 
+function handleUp(event: KeyboardEvent) {
+  if (event.key === 'ArrowUp' && prompt.value.indexOf('/') !== 0) {
+    event.preventDefault()
+    const msgLength = messages.value.length
+    if (msgLength === 0)
+      return
+
+    if (arrowKeyIdx === -1)
+      arrowKeyIdx = msgLength - 1
+    else
+      arrowKeyIdx--
+
+    const nextMessage = messages.value[arrowKeyIdx]
+    if (nextMessage)
+      prompt.value = nextMessage.remark
+    else
+      arrowKeyIdx++
+  }
+}
+
+function handleDown(event: KeyboardEvent) {
+  if (event.key === 'ArrowDown' && prompt.value.indexOf('/') !== 0) {
+    event.preventDefault()
+    const msgLength = messages.value.length
+    if (msgLength === 0)
+      return
+
+    if (arrowKeyIdx === -1)
+      arrowKeyIdx = 0
+    else
+      arrowKeyIdx++
+
+    const preMessage = messages.value[arrowKeyIdx]
+    if (preMessage)
+      prompt.value = preMessage.remark
+    else
+      arrowKeyIdx--
+  }
+}
+
 function handleEnter(event: KeyboardEvent) {
   if (!isMobile.value) {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -321,6 +362,7 @@ function handleEnter(event: KeyboardEvent) {
       handleSubmit()
     }
   }
+  arrowKeyIdx = -1
 }
 
 function handleStop() {
@@ -450,9 +492,9 @@ onDeactivated(() => {
           <template v-else>
             <div v-for="(question, index) of messages" :key="index">
               <Message
-                :date-time="question.createTime" :text="question.remark" type="text"
-                :inversion="true" :error="question.error" :loading="false"
-                @regenerate="onRegenerate(question.uuid)" @delete="handleDelete(question.uuid, '', true)"
+                :date-time="question.createTime" :text="question.remark" type="text" :inversion="true"
+                :error="question.error" :loading="false" @regenerate="onRegenerate(question.uuid)"
+                @delete="handleDelete(question.uuid, '', true)"
               />
               <template v-if="question.children.length > 1">
                 <NTabs
@@ -467,8 +509,8 @@ onDeactivated(() => {
                     <Message
                       :show-avatar="false" :date-time="answer.createTime" :text="answer.remark" type="text"
                       :inversion="false" :regenerate="true" :error="answer.error" :loading="answer.loading"
-                      :ai-model-platform="answer.aiModelPlatform"
-                      @regenerate="onRegenerate(question.uuid)" @delete="handleDelete(question.uuid, answer.uuid)"
+                      :ai-model-platform="answer.aiModelPlatform" @regenerate="onRegenerate(question.uuid)"
+                      @delete="handleDelete(question.uuid, answer.uuid)"
                     />
                   </NTabPane>
                 </NTabs>
@@ -522,7 +564,7 @@ onDeactivated(() => {
               <NInput
                 ref="inputRef" v-model:value="prompt" type="textarea" :placeholder="placeholder"
                 :autosize="{ minRows: 1, maxRows: isMobile ? 4 : 8 }" @input="handleInput" @focus="handleFocus"
-                @blur="handleBlur" @keypress="handleEnter"
+                @blur="handleBlur" @keyup.up="handleUp" @keyup.down="handleDown" @keypress="handleEnter"
               />
             </template>
           </NAutoComplete>

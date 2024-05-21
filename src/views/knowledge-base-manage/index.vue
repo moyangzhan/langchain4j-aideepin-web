@@ -184,8 +184,10 @@ watch(
         </NButton>
       </div>
     </div>
-    <NDataTable remote :loading="loading" :columns="columns" :data="infoList" :pagination="paginationReactive"
-      :single-line="false" :bordered="true" @update:page="onHandlePageChange" />
+    <NDataTable
+      remote :loading="loading" :columns="columns" :data="infoList" :pagination="paginationReactive"
+      :single-line="false" :bordered="true" @update:page="onHandlePageChange"
+    />
   </div>
 
   <NModal v-model:show="showModal" title="编辑" style="width: 90%; max-width: 600px;" preset="card">
@@ -202,8 +204,10 @@ watch(
         </NRadio>
       </NRadioGroup>
       {{ t('store.description') }}
-      <NInput v-model:value="tmpKb.remark" type="textarea" maxlength="500" show-count
-        :autosize="{ minRows: 10, maxRows: 40 }" />
+      <NInput
+        v-model:value="tmpKb.remark" type="textarea" maxlength="500" show-count
+        :autosize="{ minRows: 10, maxRows: 40 }"
+      />
       <NButton block type="primary" :disabled="inputStatus" @click="() => { saveOrUpdateKb() }">
         {{ t('common.confirm') }}
       </NButton>

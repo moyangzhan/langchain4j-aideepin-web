@@ -18,6 +18,8 @@ export function knowledgeBaseEmptyInfo() {
     starCount: 0,
     ownerUuid: '',
     ownerName: '',
+    itemCount: 0,
+    embeddingCount: 0,
   }
 }
 

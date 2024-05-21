@@ -4,11 +4,13 @@ declare namespace KnowledgeBase {
     uuid: string
     title: string
     remark: string
-    isPublic: boolean,
-    starCount: number,
-    ownerUuid: string,
-    ownerName: string,
+    isPublic: boolean
+    starCount: number
+    ownerUuid: string
+    ownerName: string
     loadingRecords?: boolean
+    itemCount: number
+    embeddingCount: number
   }
   interface InfoListResp {
     total: number,

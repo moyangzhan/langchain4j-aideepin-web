@@ -1,8 +1,9 @@
 <script setup lang='ts'>
 import { onActivated, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { NAvatar, NButton, NDivider, NFlex, NIcon, NModal, NTag } from 'naive-ui'
+import { NAvatar, NButton, NDivider, NFlex, NIcon, NModal, NTag, NTooltip } from 'naive-ui'
 import { AppsListDetail24Regular, Cloud32Regular, LockClosed32Regular, Star24Filled, Star24Regular } from '@vicons/fluent'
+import { Bookmarks, VectorBeizer2 } from '@vicons/tabler'
 import defaultAvatar from '@/assets/avatar.jpg'
 import { useKbStore } from '@/store'
 import { SvgIcon } from '@/components/common'
@@ -103,13 +104,37 @@ onUnmounted(() => {
             />
           </template>
         </NTag>
-        <NTag size="large" :bordered="false" round :color="{ color: '#ff000000' }" checkable @click="handleClickStar(tmpKb)">
-          {{ tmpKb.starCount }}
-          <template #icon>
-            <NIcon v-show="!kbStore.kbUuidToStarInfo.get(tmpKb.uuid)?.star" :component="Star24Regular" />
-            <NIcon v-show="kbStore.kbUuidToStarInfo.get(tmpKb.uuid)?.star" :component="Star24Filled" color="#eac54f" />
-          </template>
-        </NTag>
+        <NFlex>
+          <NTooltip trigger="hover">
+            <template #trigger>
+              <NTag size="medium" :bordered="false" round :color="{ color: '#ff000000' }">
+                {{ tmpKb.itemCount }}
+                <template #icon>
+                  <NIcon :component="Bookmarks" depth="2" />
+                </template>
+              </NTag>
+            </template>
+            知识点
+          </NTooltip>
+          <NTooltip trigger="hover">
+            <template #trigger>
+              <NTag size="medium" :bordered="false" round :color="{ color: '#ff000000' }">
+                {{ tmpKb.embeddingCount }}
+                <template #icon>
+                  <NIcon :component="VectorBeizer2" depth="2" />
+                </template>
+              </NTag>
+            </template>
+            向量
+          </NTooltip>
+          <NTag size="medium" :bordered="false" round :color="{ color: '#ff000000' }" checkable @click="handleClickStar(tmpKb)">
+            {{ tmpKb.starCount }}
+            <template #icon>
+              <NIcon v-show="!kbStore.kbUuidToStarInfo.get(tmpKb.uuid)?.star" :component="Star24Regular" />
+              <NIcon v-show="kbStore.kbUuidToStarInfo.get(tmpKb.uuid)?.star" :component="Star24Filled" color="#eac54f" />
+            </template>
+          </NTag>
+        </NFlex>
       </NFlex>
       <NDivider />
       <div>{{ tmpKb.remark }}</div>
