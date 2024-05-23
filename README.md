@@ -11,6 +11,8 @@
 
 本仓库代码由chatgpt-web前端工程改造而来
 
+[github](https://github.com/moyangzhan/langchain4j-aideepin-web)   [gitee](https://gitee.com/moyangzhan/langchain4j-aideepin-web)
+
 ## 功能点
 
 * 注册&登录
@@ -145,6 +147,5 @@ AI绘图：
 ![1691583329105](image/README/kb03.png)
 
 token统计：
-
 
 ![1691583329105](image/README/1691583329105.png)
