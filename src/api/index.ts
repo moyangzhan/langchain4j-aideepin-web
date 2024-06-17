@@ -70,6 +70,7 @@ function commonSseProcess(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': useAuthStore().token,
     },
     signal: params.signal,
     body: JSON.stringify({
