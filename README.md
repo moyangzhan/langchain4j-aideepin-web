@@ -5,13 +5,14 @@
 
 > **该项目如对您有帮助，欢迎点赞**
 
+代码仓库地址： [github](https://github.com/moyangzhan/langchain4j-aideepin-web)   [gitee](https://gitee.com/moyangzhan/langchain4j-aideepin-web)
+
 ## 介绍
 
-此仓库为langchain4j-aideepin的前端项目，后端服务代码见[**langchain4j-aideepin**](https://github.com/moyangzhan/langchain4j-aideepin)
+本仓库为langchain4j-aideepin的前端项目
 
-本仓库代码由chatgpt-web前端工程改造而来
-
-[github](https://github.com/moyangzhan/langchain4j-aideepin-web)   [gitee](https://gitee.com/moyangzhan/langchain4j-aideepin-web)
+后端服务： [langchain4j-aideepin](https://github.com/moyangzhan/langchain4j-aideepin)
+管理端WEB：[langchain4j-aideepin-admin](https://github.com/moyangzhan/langchain4j-aideepin-admin)
 
 ## 功能点
 
@@ -51,7 +52,7 @@ node -v
 npm install pnpm -g
 ```
 
-## 安装依赖。
+## 安装依赖
 
 根目录下运行以下命令
 
@@ -59,25 +60,23 @@ npm install pnpm -g
 pnpm bootstrap
 ```
 
-## 环境变量
+## 本地环境开发
 
-全部参数变量请查看或[这里](#环境变量)
+1、修改根目录下 `.env` 文件中的 `VITE_GLOB_API_URL` 为你的实际后端口地址
 
-```
-/service/.env.example
-```
-
-## 测试环境运行
-
-根目录下运行以下命令
+2、根目录下运行以下命令
 
 ```shell
 pnpm dev
 ```
 
-## 打包
+3、如后端服务为远程地址，使用nginx解决跨域问题
 
-### 使用 Docker
+nginx配置参考 [./docker-compose/nginx/nginx.conf](docker-compose/nginx/nginx.conf)
+
+## 正式环境
+
+### 发布方式1 - 使用 Docker
 
 #### Docker build & Run
 
@@ -94,19 +93,48 @@ docker run --name aideepin-web -d -p 127.0.0.1:1002:1002 aideepin-web
 http://localhost:1002/
 ```
 
-### 手动打包
+### 发布方式2 - 手动打包
 
-#### 前端网页
+1、 nginx配置
 
-1、修改根目录下 `.env` 文件中的 `VITE_GLOB_API_URL` 为你的实际后端口地址
+服务器上nginx的配置可以参考 `./docker-compose/nginx/nginx.conf`，将 `proxy_pass http://localhost:9999/;` 中的 `localhost:9999`改成后端服务对应的ip及端口
 
-2、根目录下运行以下命令，然后将 `dist` 文件夹内的文件复制到你网站服务的根目录下
+**如果管理端WEB跟用户端WEB使用同一个nginx**，可参考以下配置：
 
-[参考信息](https://cn.vitejs.dev/guide/static-deploy.html#building-the-app)
+```shell
+# adi-web存放的是用户端构建后的代码
+# adi-admin-web存放的是管理端构建后的代码
+
+# 用户端WEB页面配置
+# 访问地址：http://你的ip:port/
+location / {
+  root /usr/share/nginx/adi-web;
+  try_files $uri /index.html;
+}
+
+# 管理端WEB页面配置
+# 访问地址：http://你的ip:port/admin
+  location /admin/ {
+    alias /usr/share/nginx/adi-admin-web/;
+   	index /index.html;
+  }
+
+# 后端服务
+location /api/ {
+  proxy_set_header X-Real-IP $remote_addr; #转发用户IP
+  proxy_pass http://localhost:9999/;
+}
+```
+
+2、根目录下运行以下命令，[参考信息](https://cn.vitejs.dev/guide/static-deploy.html#building-the-app)
 
 ```shell
 pnpm build
 ```
+
+3、将 `dist` 文件夹内的文件复制到网站服务的根目录下
+
+网站服务的根目录：`nginx.conf` 的 `location /` 设置的目录
 
 ## 常见问题
 
@@ -147,5 +175,4 @@ AI绘图：
 ![1691583329105](image/README/kb03.png)
 
 token统计：
-
 ![1691583329105](image/README/1691583329105.png)
