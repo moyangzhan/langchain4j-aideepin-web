@@ -1,14 +1,16 @@
 <script setup lang='ts'>
 import type { DataTableColumns } from 'naive-ui'
 import { computed, h, reactive, ref, watch } from 'vue'
-import { NButton, NDataTable, NInput, NModal, NRadio, NRadioGroup, NSpace, useMessage } from 'naive-ui'
-import { RouterLink } from 'vue-router'
+import { NBreadcrumb, NBreadcrumbItem, NButton, NDataTable, NInput, NModal, NRadio, NRadioGroup, NSpace, useDialog, useMessage } from 'naive-ui'
+import { RouterLink, useRouter } from 'vue-router'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAuthStore, useKbStore } from '@/store'
 import { knowledgeBaseEmptyInfo } from '@/utils/functions'
 import { t } from '@/locales'
 import api from '@/api'
 
+const router = useRouter()
+const dialog = useDialog()
 const ms = useMessage()
 const loading = ref(false)
 const submitting = ref(false)
@@ -70,30 +72,42 @@ const createColumns = (): DataTableColumns<KnowledgeBase.Info> => {
     {
       title: t('common.action'),
       key: 'actions',
-      width: 100,
+      width: 120,
       align: 'center',
       render(row) {
-        return h('div', { class: 'flex items-center flex-col gap-2' }, {
-          default: () => [h(
-            NButton,
-            {
-              tertiary: true,
-              size: 'small',
-              type: 'info',
-              onClick: () => changeShowModal(row),
-            },
-            { default: () => t('common.edit') },
-          ),
-          h(
-            NButton,
-            {
-              tertiary: true,
-              size: 'small',
-              type: 'error',
-              onClick: () => deleteKb(row),
-            },
-            { default: () => t('common.delete') },
-          ),
+        return h('div', { class: 'grid gap-1' }, {
+          default: () => [
+            h(
+              NButton,
+              {
+                tertiary: true,
+                size: 'tiny',
+                type: 'info',
+                class: 'col-span-2',
+                onClick: () => router.push({ name: 'KnowledgeBaseManageDetail', params: { kbUuid: row.uuid } }),
+              },
+              { default: () => '进入知识库' },
+            ),
+            h(
+              NButton,
+              {
+                tertiary: true,
+                size: 'tiny',
+                type: 'info',
+                onClick: () => changeShowModal(row),
+              },
+              { default: () => t('common.edit') },
+            ),
+            h(
+              NButton,
+              {
+                tertiary: true,
+                size: 'tiny',
+                type: 'error',
+                onClick: () => deleteKb(row),
+              },
+              { default: () => t('common.delete') },
+            ),
           ],
         })
       },
@@ -148,11 +162,19 @@ async function saveOrUpdateKb() {
 }
 
 function deleteKb(row: KnowledgeBase.Info) {
-  api.knowledgeBaseDelete(row.uuid)
-  const index = infoList.value.findIndex(item => item.uuid === row.uuid)
-  if (index !== -1)
-    infoList.value.splice(index, 1)
-  ms.success('删除成功')
+  dialog.warning({
+    title: '提示',
+    content: `删除后数据无法恢复，确定要删除知识库 ${row.title} 吗?`,
+    positiveText: '确定',
+    negativeText: '取消',
+    onPositiveClick: () => {
+      api.knowledgeBaseDelete(row.uuid)
+      const index = infoList.value.findIndex(item => item.uuid === row.uuid)
+      if (index !== -1)
+        infoList.value.splice(index, 1)
+      ms.success('删除成功')
+    },
+  })
 }
 
 async function initData() {
@@ -171,7 +193,15 @@ watch(
 
 <template>
   <div class="flex flex-col w-full p-4">
-    <div class="flex gap-3 mb-2" :class="[isMobile ? 'flex-col' : 'flex-row justify-between']">
+    <NBreadcrumb separator=">">
+      <NBreadcrumbItem href="/">
+        首页
+      </NBreadcrumbItem>
+      <NBreadcrumbItem :clickable="false">
+        我的知识库
+      </NBreadcrumbItem>
+    </NBreadcrumb>
+    <div class="flex gap-3 mb-2 mt-1" :class="[isMobile ? 'flex-col' : 'flex-row justify-between']">
       <div class="flex items-center space-x-4">
         <NButton type="primary" size="small" @click="changeShowModal()">
           {{ $t('common.add') }}
@@ -190,7 +220,7 @@ watch(
     />
   </div>
 
-  <NModal v-model:show="showModal" title="编辑" style="width: 90%; max-width: 600px;" preset="card">
+  <NModal v-model:show="showModal" :title="tmpKb.id === '0' ? '新建' : '编辑'" style="width: 90%; max-width: 600px;" preset="card">
     <NSpace vertical>
       {{ t('store.title') }}
       <NInput v-model:value="tmpKb.title" maxlength="100" show-count />

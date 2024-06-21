@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import type { DataTableColumns, UploadFileInfo, UploadInst } from 'naive-ui'
 import { computed, h, onMounted, reactive, ref, watch } from 'vue'
-import { NButton, NCard, NDataTable, NEllipsis, NFlex, NIcon, NInput, NModal, NP, NSpace, NSwitch, NText, NUpload, NUploadDragger, useDialog, useMessage } from 'naive-ui'
+import { NBreadcrumb, NBreadcrumbItem, NButton, NCard, NDataTable, NEllipsis, NFlex, NIcon, NInput, NModal, NP, NSpace, NSwitch, NText, NUpload, NUploadDragger, useDialog, useMessage } from 'naive-ui'
 import { ArchiveOutline } from '@vicons/ionicons5'
 import { Cloud32Regular, LockClosed32Regular } from '@vicons/fluent'
 import { useRoute } from 'vue-router'
@@ -298,9 +298,17 @@ watch(
 
 <template>
   <div class="p-4">
-    <NButton text size="large" type="primary" @click="$router.push({ name: 'KnowledgeBaseManage' })">
-      《 返回列表
-    </NButton>
+    <NBreadcrumb separator=">">
+      <NBreadcrumbItem href="/">
+        首页
+      </NBreadcrumbItem>
+      <NBreadcrumbItem href="/#/kb-manage">
+        我的知识库
+      </NBreadcrumbItem>
+      <NBreadcrumbItem :clickable="false">
+        {{ curKnowledgeBase.title }}
+      </NBreadcrumbItem>
+    </NBreadcrumb>
     <NCard
       style="margin-top: 12px"
       :title="`知识库: ${curKnowledgeBase.title}(${curKnowledgeBase.isPublic ? '公开' : '私有'})`" hoverable
