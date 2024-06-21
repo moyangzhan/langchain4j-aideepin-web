@@ -27,6 +27,7 @@ const showItemEditModal = ref(false)
 const itemList = ref<KnowledgeBase.Item[]>([])
 const embeddingAfterUpload = ref(true)
 const uploadRef = ref<UploadInst | null>(null)
+const headers = { Authorization: '' }
 const fileListLength = ref(0)
 const fileList = ref<UploadFileInfo[]>([])
 const paginationReactive = reactive({
@@ -255,7 +256,7 @@ async function saveOrUpdate() {
   } finally {
     submitting.value = false
     showItemEditModal.value = false
-
+    Object.assign(tmpItem, knowledgeBaseEmptyItem())
     search(1)
   }
 }
@@ -286,8 +287,10 @@ onMounted(async () => {
 watch(
   () => token,
   () => {
-    if (token.value)
+    if (token.value) {
       initData()
+      headers.Authorization = token.value
+    }
   },
   { immediate: true },
 )
@@ -298,7 +301,10 @@ watch(
     <NButton text size="large" type="primary" @click="$router.push({ name: 'KnowledgeBaseManage' })">
       《 返回列表
     </NButton>
-    <NCard style="margin-top: 12px" :title="`知识库: ${curKnowledgeBase.title}(${curKnowledgeBase.isPublic ? '公开' : '私有'})`" hoverable>
+    <NCard
+      style="margin-top: 12px"
+      :title="`知识库: ${curKnowledgeBase.title}(${curKnowledgeBase.isPublic ? '公开' : '私有'})`" hoverable
+    >
       <template #header-extra>
         <NIcon v-if="curKnowledgeBase.isPublic" :component="Cloud32Regular" />
         <NIcon v-if="!curKnowledgeBase.isPublic" :component="LockClosed32Regular" />
@@ -310,7 +316,8 @@ watch(
         <NUpload
           ref="uploadRef" multiple :default-file-list="fileList" directory-dnd
           :action="`/api/knowledge-base/upload/${curKbUuid}?embedding=${embeddingAfterUpload}`" :default-upload="false"
-          :max="20" @before-upload="onUploadBefore" @finish="onUploadFinish" @change="onUploadChange"
+          :max="20" :headers="headers" @before-upload="onUploadBefore" @finish="onUploadFinish"
+          @change="onUploadChange"
         >
           <NUploadDragger>
             <div style="margin-bottom: 12px">
