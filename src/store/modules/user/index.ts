@@ -7,7 +7,7 @@ export const useUserStore = defineStore('user-store', {
   actions: {
     updateUserInfo(userInfo: Partial<User.Profile>) {
       this.userInfo = { ...this.userInfo, ...userInfo }
-      this.userInfo.avatar = `${this.userInfo.avatar}?t=${new Date().getTime()}`
+      this.userInfo.avatar = `/api/user/avatar/${this.userInfo.uuid}?width=128&height=128`
       this.recordState()
     },
 

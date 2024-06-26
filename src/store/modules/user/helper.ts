@@ -9,9 +9,10 @@ export interface UserState {
 export function defaultSetting(): UserState {
   return {
     userInfo: {
-      avatar: '/api/user/myAvatar',
+      avatar: '/api/user/avatar/1',
       name: 'aideepin',
       description: '',
+      uuid: ''
     },
   }
 }

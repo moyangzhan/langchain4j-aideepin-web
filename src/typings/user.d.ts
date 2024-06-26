@@ -3,6 +3,7 @@ declare namespace User {
         avatar?: string
         name?: string
         description?: string
+        uuid: string
       }
 
     interface Config{

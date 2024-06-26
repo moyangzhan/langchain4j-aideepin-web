@@ -18,6 +18,7 @@ interface LoginResp {
   token: string
   name: string
   email: string
+  uuid: string
   captchaId?: string
 }
 const props = defineProps<Props>()
