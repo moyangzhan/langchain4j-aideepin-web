@@ -12,7 +12,7 @@ export function defaultSetting(): UserState {
       avatar: '/api/user/avatar/1',
       name: 'aideepin',
       description: '',
-      uuid: ''
+      uuid: '',
     },
   }
 }

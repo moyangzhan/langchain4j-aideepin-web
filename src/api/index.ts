@@ -347,16 +347,6 @@ function knowledgeBaseQaSseAsk(params: {
   commonSseProcess(`/api/knowledge-base/qa/process/${params.options.kbUuid}`, params)
 }
 
-function knowledgeBaseQaAsk<T = any>(kbUuid: string, question: string, modelName?: string) {
-  return post<T>({
-    url: `/knowledge-base/qa/ask/${kbUuid}`,
-    data: {
-      question,
-      modelName,
-    },
-  })
-}
-
 function knowledgeBaseQaRecordSearch<T = any>(kbUuid: string, keyword: string, currentPage: number, pageSize: number) {
   return get<T>({
     url: `/knowledge-base/qa/record/search?kbUuid=${kbUuid}&keyword=${keyword}&currentPage=${currentPage}&pageSize=${pageSize}`,
@@ -451,7 +441,6 @@ export default {
   knowledgeBaseItemEmbedding,
   knowledgeBaseEmbedding,
   knowledgeBaseQaSseAsk,
-  knowledgeBaseQaAsk,
   knowledgeBaseQaRecordSearch,
   knowledgeBaseQaRecordDel,
   knowledgeBaseStarListMine,
