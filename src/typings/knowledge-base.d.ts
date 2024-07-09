@@ -11,6 +11,9 @@ declare namespace KnowledgeBase {
     loadingRecords?: boolean
     itemCount: number
     embeddingCount: number
+    ragMaxOverlap: number
+    ragMaxResults: number
+    ragMinScore: number
   }
   interface InfoListResp {
     total: number,

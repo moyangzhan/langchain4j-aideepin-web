@@ -181,7 +181,7 @@ async function textEmbedding() {
   }
   loading.value = true
   try {
-    await api.knowledgeBaseItemEmbedding(checkedItemRowKeys.value)
+    await api.knowledgeBaseItemsEmbedding(checkedItemRowKeys.value)
   } finally {
     loading.value = false
 

@@ -20,6 +20,9 @@ export function knowledgeBaseEmptyInfo() {
     ownerName: '',
     itemCount: 0,
     embeddingCount: 0,
+    ragMaxOverlap: 0,
+    ragMaxResults: 0,
+    ragMinScore: 0,
   }
 }
 

@@ -301,6 +301,15 @@ function knowledgeBaseDelete<T = any>(uuid: string) {
   })
 }
 
+function knowledgeBaseItemsEmbedding<T = any>(uuids: string[]) {
+  return post<T>({
+    url: '/knowledge-base/item/embedding-list',
+    data: {
+      uuids,
+    },
+  })
+}
+
 function knowledgeBaseItemSearch<T>(currentPage: number, pageSize: number, kbUuid: string, keyword?: string) {
   const search = keyword === undefined ? '' : `keyword=${keyword}&`
   return get<T>({
@@ -318,15 +327,6 @@ function knowledgeBaseItemSaveOrUpdate<T = any>(obj: KnowledgeBase.Item) {
 function knowledgeBaseItemDelete<T = any>(uuid: string) {
   return post<T>({
     url: `/knowledge-base-item/del/${uuid}`,
-  })
-}
-
-function knowledgeBaseItemEmbedding<T = any>(uuids: string[]) {
-  return post<T>({
-    url: '/knowledge-base-item/embedding-list',
-    data: {
-      uuids,
-    },
   })
 }
 
@@ -438,7 +438,7 @@ export default {
   knowledgeBaseItemSaveOrUpdate,
   knowledgeBaseItemSearch,
   knowledgeBaseItemDelete,
-  knowledgeBaseItemEmbedding,
+  knowledgeBaseItemsEmbedding,
   knowledgeBaseEmbedding,
   knowledgeBaseQaSseAsk,
   knowledgeBaseQaRecordSearch,

@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import type { DataTableColumns } from 'naive-ui'
 import { computed, h, reactive, ref, watch } from 'vue'
-import { NBreadcrumb, NBreadcrumbItem, NButton, NDataTable, NInput, NModal, NRadio, NRadioGroup, NSpace, useDialog, useMessage } from 'naive-ui'
+import { NBreadcrumb, NBreadcrumbItem, NButton, NCollapse, NCollapseItem, NDataTable, NInput, NInputNumber, NModal, NRadio, NRadioGroup, NSpace, useDialog, useMessage } from 'naive-ui'
 import { RouterLink, useRouter } from 'vue-router'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAuthStore, useKbStore } from '@/store'
@@ -233,8 +233,18 @@ watch(
       {{ t('store.description') }}
       <NInput
         v-model:value="tmpKb.remark" type="textarea" maxlength="500" show-count
-        :autosize="{ minRows: 10, maxRows: 40 }"
+        :autosize="{ minRows: 5, maxRows: 30 }"
       />
+      <NCollapse>
+        <NCollapseItem title="RAG设置">
+          文档切割时重叠数量
+          <NInputNumber v-model:value="tmpKb.ragMaxOverlap" />
+          文档召回最大数量
+          <NInputNumber v-model:value="tmpKb.ragMaxResults" />
+          文档召回最小分数
+          <NInputNumber v-model:value="tmpKb.ragMinScore" :precision="1" :min="0" :max="1" />
+        </NCollapseItem>
+      </NCollapse>
       <NButton block type="primary" :disabled="inputStatus" @click="() => { saveOrUpdateKb() }">
         {{ t('common.confirm') }}
       </NButton>
