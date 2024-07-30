@@ -23,6 +23,7 @@ export function knowledgeBaseEmptyInfo() {
     ragMaxOverlap: 0,
     ragMaxResults: 0,
     ragMinScore: 0,
+    llmTemperature: 0,
   }
 }
 

@@ -245,6 +245,12 @@ watch(
           <NInputNumber v-model:value="tmpKb.ragMinScore" :precision="1" :min="0" :max="1" />
         </NCollapseItem>
       </NCollapse>
+      <NCollapse>
+        <NCollapseItem title="LLM设置">
+          响应时的创造性/随机性
+          <NInputNumber v-model:value="tmpKb.llmTemperature" :precision="1" :min="0" :max="1" />
+        </NCollapseItem>
+      </NCollapse>
       <NButton block type="primary" :disabled="inputStatus" @click="() => { saveOrUpdateKb() }">
         {{ t('common.confirm') }}
       </NButton>

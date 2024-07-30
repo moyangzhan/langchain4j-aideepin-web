@@ -14,6 +14,7 @@ declare namespace KnowledgeBase {
     ragMaxOverlap: number
     ragMaxResults: number
     ragMinScore: number
+    llmTemperature: number
   }
   interface InfoListResp {
     total: number,
