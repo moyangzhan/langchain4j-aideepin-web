@@ -1,14 +1,13 @@
 <script setup lang='ts'>
 import { computed, nextTick, onMounted, ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import { NIcon, NTab, NTabPane, NTabs, useDialog, useMessage } from 'naive-ui'
+import { NFlex, NRadio, NRadioGroup, NTab, NTabPane, NTabs, useDialog, useMessage } from 'naive-ui'
 import type { MessageReactive } from 'naive-ui'
-import { Cat } from '@vicons/fa'
-import { Message } from '../chat/components'
 import { useScroll } from '../chat/hooks/useScroll'
 import GenerateImage from './GenerateImage.vue'
 import EditImage from './EditImage.vue'
 import VariationImage from './VariationImage.vue'
+import DisplayStyleInChat from './components/DisplayStyleInChat.vue'
+import DisplayStyleInGallery from './components/DisplayStyleInGallery.vue'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useDrawStore } from '@/store'
 import api from '@/api'
@@ -25,7 +24,6 @@ const ms = useMessage()
 const { isMobile } = useBasicLayout()
 const { scrollRef, scrollTo, scrollToBottom } = useScroll()
 const drawStore = useDrawStore()
-const { aiImages } = storeToRefs<any>(drawStore)
 const tabObjs = ref<TabObj[]>([
   { name: 'tab_generate_image', defaultTab: '文生图', tab: '文生图 ↓' },
   { name: 'tab_edit_image', defaultTab: '修图', tab: '修图' },
@@ -36,6 +34,7 @@ const loading = ref<boolean>(false)
 const loadedAll = ref<boolean>(false)
 const nextPageMaxImageId = ref<number>(Number.MAX_SAFE_INTEGER)
 const interactingMethod = ref<string>(tabObjs.value[0].name)
+const displayStyle = ref<string>('chatStyle')
 let prevScrollTop: number
 let loadingms: MessageReactive
 let lastClickTab = tabObjs.value[0].name
@@ -140,7 +139,7 @@ function handleClick(tabOjb: TabObj) {
 }
 
 onMounted(() => {
-  console.log('draw onActivated')
+  console.log('draw onActivated', displayStyle.value)
   handleLoadMoreImages()
 })
 </script>
@@ -148,40 +147,20 @@ onMounted(() => {
 <template>
   <div class="flex flex-col w-full h-full">
     <main class="flex-1 overflow-hidden">
+      <NFlex justify="space-between" class="mx-5 my-1">
+        <NRadioGroup v-model:value="displayStyle" name="displayStyleRadioGroup" size="small">
+          <NRadio value="chatStyle">
+            聊天风格
+          </NRadio>
+          <NRadio value="galleryStyle">
+            画廊风格
+          </NRadio>
+        </NRadioGroup>
+      </NFlex>
       <div id="scrollRef" ref="scrollRef" class="h-full overflow-hidden overflow-y-auto" @scroll="handleScroll">
-        <div
-          id="image-wrapper" class="w-full max-w-screen-xl m-auto dark:bg-[#101014]"
-          :class="[isMobile ? 'p-2' : 'p-4']"
-        >
-          <template v-if="!aiImages.length">
-            <div class="flex items-center justify-center mt-4 text-center text-neutral-400">
-              <NIcon :component="Cat" size="32" />
-              <span class="pl-1">Roar~</span>
-            </div>
-          </template>
-          <template v-else>
-            <div>
-              <template v-for="(item) of aiImages" :key="item.uuid">
-                <Message
-                  v-if="item.interactingMethod === 1" :date-time="item.createTime" :text="item.prompt"
-                  :inversion="true" type="text" @delete="handleDelete(item.uuid)"
-                />
-                <Message
-                  v-if="item.interactingMethod === 2" :date-time="item.createTime" :text="item.prompt"
-                  :image-urls="[item.originalImageUrl, item.maskImageUrl]" :inversion="true" type="text-image"
-                  @delete="handleDelete(item.uuid)"
-                />
-                <Message
-                  v-if="item.interactingMethod === 3" :date-time="item.createTime"
-                  :image-urls="[item.originalImageUrl]" :inversion="true" type="image" @delete="handleDelete(item.uuid)"
-                />
-                <Message
-                  :date-time="item.createTime" :loading="item.uuid === drawStore.loadingUuid"
-                  :image-urls="item.imageUrlList" :inversion="false" type="image" @delete="handleDelete(item.uuid)"
-                />
-              </template>
-            </div>
-          </template>
+        <div>
+          <DisplayStyleInChat v-show="displayStyle === 'chatStyle'" @del="handleDelete" />
+          <DisplayStyleInGallery v-show="displayStyle === 'galleryStyle'" @del="handleDelete" />
         </div>
       </div>
     </main>

@@ -8,7 +8,14 @@ import { copyText } from '@/utils/format'
 import { useIconRender } from '@/hooks/useIconRender'
 import { t } from '@/locales'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
+import { useAuthStore } from '@/store'
 import NoPic from '@/assets/no_pic.png'
+const props = withDefaults(defineProps<Props>(), {
+  showAvatar: true,
+})
+const emit = defineEmits<Emit>()
+const authStore = useAuthStore()
+const token = ref<string>(authStore.token)
 
 interface Props {
   dateTime?: string
@@ -28,12 +35,6 @@ interface Emit {
   (ev: 'regenerate'): void
   (ev: 'delete'): void
 }
-
-const props = withDefaults(defineProps<Props>(), {
-  showAvatar: true,
-})
-
-const emit = defineEmits<Emit>()
 
 const { isMobile } = useBasicLayout()
 
@@ -142,7 +143,7 @@ function handleRegenerate() {
               <NImageGroup>
                 <NSpace>
                   <template v-for="imageUrl in imageUrls" :key="imageUrl">
-                    <NImage v-if="imageUrl" width="100" :src="`/api${imageUrl}`" :fallback-src="NoPic" />
+                    <NImage v-if="imageUrl" width="100" :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic" />
                   </template>
                 </NSpace>
               </NImageGroup>

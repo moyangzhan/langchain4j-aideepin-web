@@ -46,7 +46,7 @@ const checkedItemRowKeys = ref<string[]>([])
 const curKnowledgeBase: KnowledgeBase.Info = reactive<KnowledgeBase.Info>(knowledgeBaseEmptyInfo())
 
 const showFileContent = (selected: KnowledgeBase.Item = knowledgeBaseEmptyItem()) => {
-  window.open(`/api/file/${selected.sourceFileUuid}`, '_blank')
+  window.open(`/api/file/${selected.sourceFileUuid}?token=${token.value}`, '_blank')
 }
 
 const showEmbeddingList = (selected: KnowledgeBase.Item = knowledgeBaseEmptyItem()) => {
