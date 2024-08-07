@@ -155,7 +155,7 @@ onMounted(() => {
             <div class="relative flex-1 overflow-hidden break-all text-ellipsis whitespace-nowrap">
               <span>{{ item.title }}</span>
             </div>
-            <div v-if="mouseEnterKbUuid === item.uuid" class="absolute z-10 flex visible right-1 bg-neutral-100 pd-2">
+            <div v-if="mouseEnterKbUuid === item.uuid || isMobile" class="absolute z-10 flex visible right-1 pd-2">
               <button class="p-1">
                 <SvgIcon icon="ri:edit-line" @click.stop="openEditView(item)" />
               </button>

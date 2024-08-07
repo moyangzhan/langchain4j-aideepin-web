@@ -1,43 +1,28 @@
 <script setup lang='ts'>
 import { computed, nextTick, onMounted, ref } from 'vue'
-import { NFlex, NRadio, NRadioGroup, NTab, NTabPane, NTabs, useDialog, useMessage } from 'naive-ui'
+import { NFlex, NRadio, NRadioGroup, useMessage } from 'naive-ui'
 import type { MessageReactive } from 'naive-ui'
 import { useScroll } from '../chat/hooks/useScroll'
-import GenerateImage from './GenerateImage.vue'
-import EditImage from './EditImage.vue'
-import VariationImage from './VariationImage.vue'
 import DisplayStyleInChat from './components/DisplayStyleInChat.vue'
 import DisplayStyleInGallery from './components/DisplayStyleInGallery.vue'
+import Dalle2Editor from './components/dalle2/Dalle2Editor.vue'
+import Dalle3Editor from './components/dalle3/Dalle3Editor.vue'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useDrawStore } from '@/store'
+import { useAppStore, useDrawStore } from '@/store'
 import api from '@/api'
-import { t } from '@/locales'
 import { debounce } from '@/utils/functions/debounce'
 
-interface TabObj {
-  name: string
-  tab: string
-  defaultTab: string
-}
-const dialog = useDialog()
+const appStore = useAppStore()
 const ms = useMessage()
 const { isMobile } = useBasicLayout()
 const { scrollRef, scrollTo, scrollToBottom } = useScroll()
 const drawStore = useDrawStore()
-const tabObjs = ref<TabObj[]>([
-  { name: 'tab_generate_image', defaultTab: '文生图', tab: '文生图 ↓' },
-  { name: 'tab_edit_image', defaultTab: '修图', tab: '修图' },
-  { name: 'tab_variation_image', defaultTab: '图生图', tab: '图生图' },
-])
-const tabPanelShow = ref<boolean>(true)
 const loading = ref<boolean>(false)
 const loadedAll = ref<boolean>(false)
 const nextPageMaxImageId = ref<number>(Number.MAX_SAFE_INTEGER)
-const interactingMethod = ref<string>(tabObjs.value[0].name)
-const displayStyle = ref<string>('chatStyle')
+const selectedDisplayStyle = ref<string>('chatStyle')
 let prevScrollTop: number
 let loadingms: MessageReactive
-let lastClickTab = tabObjs.value[0].name
 
 async function loadNextPage(event?: any) {
   if (loading.value)
@@ -95,24 +80,31 @@ async function handleScroll(event: any) {
   prevScrollTop = scrollTop
 }
 
-function handleDelete(uuid: string) {
+/**
+ * 删除一个作图任务（包括提示词及生成的图片）
+ */
+async function handleDelete(uuid: string) {
   console.log(`delete image,uuid:${uuid}`)
   if (loading.value)
     return
 
-  dialog.warning({
-    title: t('chat.deletePromptAndImage'),
-    content: t('chat.deletePromptAndImageConfirm'),
-    positiveText: t('common.yes'),
-    negativeText: t('common.no'),
-    onPositiveClick: async () => {
-      // delete image
-      const ret = await api.imageDel<boolean>(uuid)
-      if (ret)
-        drawStore.deleteAiImage(uuid)
-    },
-  })
+  const ret = await api.imageDel<boolean>(uuid)
+  if (ret)
+    drawStore.deleteAiImage(uuid)
 }
+
+/**
+ * 删除作图任务中的一张图片
+ */
+async function handleDelOneImage(uuid: string, fileUrl: string) {
+  if (loading.value)
+    return
+  const fileUuid = fileUrl.replace('/image/', '')
+  const ret = await api.aiImageFileDel<boolean>(uuid, fileUuid)
+  if (ret)
+    drawStore.deleteOneFile(uuid, fileUuid)
+}
+
 const footerClass = computed(() => {
   let classes = ['p-4']
   if (isMobile.value)
@@ -124,22 +116,17 @@ function handleScrollToBottom() {
   scrollToBottom()
 }
 
-function handleClick(tabOjb: TabObj) {
-  console.log(`${interactingMethod.value},${tabOjb.name}`)
-  if (lastClickTab === tabOjb.name)
-    tabPanelShow.value = !tabPanelShow.value
+function handleChangeModel(value: string) {
+  appStore.setSelectedImageModel(value)
+}
 
-  tabObjs.value.forEach((element) => {
-    if (element.name === tabOjb.name)
-      tabOjb.tab = tabPanelShow.value ? `${tabOjb.defaultTab} ↓` : `${tabOjb.defaultTab} ↑`
-    else
-      element.tab = element.defaultTab
-  })
-  lastClickTab = tabOjb.name
+function handleDisplayChange(value: string) {
+  selectedDisplayStyle.value = value
+  if (value === 'chatStyle')
+    scrollToBottom()
 }
 
 onMounted(() => {
-  console.log('draw onActivated', displayStyle.value)
   handleLoadMoreImages()
 })
 </script>
@@ -147,8 +134,16 @@ onMounted(() => {
 <template>
   <div class="flex flex-col w-full h-full">
     <main class="flex-1 overflow-hidden">
-      <NFlex justify="space-between" class="mx-5 my-1">
-        <NRadioGroup v-model:value="displayStyle" name="displayStyleRadioGroup" size="small">
+      <NFlex justify="space-between" class="w-full max-w-screen-xl m-auto" :class="[isMobile ? 'p-2' : 'p-4']">
+        <NRadioGroup
+          :value="appStore.selectedImageModel.modelId" name="imageModelRadioGroup" size="small"
+          @update:value="handleChangeModel"
+        >
+          <NRadio v-for="imageModel in appStore.imageModels" :key="imageModel.modelId" :value="imageModel.modelId">
+            {{ imageModel.modelName }}
+          </NRadio>
+        </NRadioGroup>
+        <NRadioGroup :value="selectedDisplayStyle" name="displayStyleRadioGroup" size="small" @update:value="handleDisplayChange">
           <NRadio value="chatStyle">
             聊天风格
           </NRadio>
@@ -159,44 +154,15 @@ onMounted(() => {
       </NFlex>
       <div id="scrollRef" ref="scrollRef" class="h-full overflow-hidden overflow-y-auto" @scroll="handleScroll">
         <div>
-          <DisplayStyleInChat v-show="displayStyle === 'chatStyle'" @del="handleDelete" />
-          <DisplayStyleInGallery v-show="displayStyle === 'galleryStyle'" @del="handleDelete" />
+          <DisplayStyleInChat v-show="selectedDisplayStyle === 'chatStyle'" @del="handleDelete" @del-one-image="handleDelOneImage" />
+          <DisplayStyleInGallery v-show="selectedDisplayStyle === 'galleryStyle'" @del="handleDelete" @del-one-image="handleDelOneImage" />
         </div>
       </div>
     </main>
     <footer :class="footerClass">
       <div class="w-full max-w-screen-xl m-auto">
-        <NTabs v-model:value="interactingMethod" type="line" animated default-value="tab_generate_image">
-          <NTab v-for="tab in tabObjs" :key="tab.name" :name="tab.name" @click="handleClick(tab)">
-            {{ tab.tab }}
-          </NTab>
-        </NTabs>
-        <NTabs v-model:value="interactingMethod" type="line" animated default-value="tab_generate_image">
-          <NTabPane
-            :key="tabObjs[0].name" :name="tabObjs[0].name" display-directive="show"
-            :tab-props="{ style: 'display:none' }"
-          >
-            <transition name="collapse">
-              <GenerateImage v-show="tabPanelShow" @scroll-to-bottom="handleScrollToBottom" />
-            </transition>
-          </NTabPane>
-          <NTabPane
-            :key="tabObjs[1].name" :name="tabObjs[1].name" display-directive="show"
-            :tab-props="{ style: 'display:none' }"
-          >
-            <transition name="collapse">
-              <EditImage v-show="tabPanelShow" />
-            </transition>
-          </NTabPane>
-          <NTabPane
-            :key="tabObjs[2].name" :name="tabObjs[2].name" display-directive="show"
-            :tab-props="{ style: 'display:none' }"
-          >
-            <transition name="collapse">
-              <VariationImage v-show="tabPanelShow" />
-            </transition>
-          </NTabPane>
-        </NTabs>
+        <Dalle2Editor v-show="appStore.selectedImageModel.modelName === 'dall-e-2'" @scroll-to-bottom="handleScrollToBottom" />
+        <Dalle3Editor v-show="appStore.selectedImageModel.modelName === 'dall-e-3'" @scroll-to-bottom="handleScrollToBottom" />
       </div>
     </footer>
   </div>

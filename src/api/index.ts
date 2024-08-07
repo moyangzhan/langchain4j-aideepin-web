@@ -229,30 +229,47 @@ function fileDel<T = any>(uuid: string) {
   })
 }
 
-function imageGenerate<T = any>(prompt: string, size: string, number: number) {
+function imageGenerate<T = any>(modelName: string, prompt: string, size: string, number: number, quality?: string) {
   return post<T>({
     url: '/ai-image/generation',
-    data: { prompt, size, number },
+    data: { modelName, prompt, size, number, quality },
   })
 }
 
 function imageEdit<T = any>(originalImage: string, maskImage: string, prompt: string, size: string, number: number) {
   return post<T>({
     url: '/ai-image/edit',
-    data: { originalImage, maskImage, prompt, size, number },
-  })
-}
-
-function imageDel<T = any>(uuid: string) {
-  return post<T>({
-    url: `/ai-image/del/${uuid}`,
+    data: { modelName: 'dall-e-2', originalImage, maskImage, prompt, size, number },
   })
 }
 
 function imageVariation<T = any>(originalImage: string, size: string, number: number) {
   return post<T>({
     url: '/ai-image/variation',
-    data: { originalImage, size, number },
+    data: { modelName: 'dall-e-2', originalImage, size, number },
+  })
+}
+
+/**
+ * 删除作图任务
+ * @param uuid 作图任务uuid
+ * @returns
+ */
+function imageDel<T = any>(uuid: string) {
+  return post<T>({
+    url: `/ai-image/del/${uuid}`,
+  })
+}
+
+/**
+ * 删除作图任务中的一张图片
+ * @param uuid 作图任务uuid
+ * @param fileUuid 图片文件uuid
+ * @returns
+ */
+function aiImageFileDel<T = any>(uuid: string, fileUuid: string) {
+  return post<T>({
+    url: `/ai-image/file/del/${fileUuid}?uuid=${uuid}`,
   })
 }
 
@@ -424,6 +441,7 @@ export default {
   fileDel,
   fetchAiImage,
   fetchAiImages,
+  aiImageFileDel,
   imageGenerate,
   imageEdit,
   imageVariation,

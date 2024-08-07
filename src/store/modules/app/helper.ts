@@ -14,6 +14,7 @@ export interface AppState {
 
   selectedSearchEngine: string
   selectedLLM: AiModelInfo
+  selectedImageModel: AiModelInfo
   searchEngines: SearchEngineInfo[]
   llms: AiModelInfo[]
   imageModels: AiModelInfo[]
@@ -26,6 +27,7 @@ export function defaultSetting(): AppState {
     language: 'zh-CN',
     selectedSearchEngine: '',
     selectedLLM: emptyAiModel(),
+    selectedImageModel: emptyAiModel(),
     searchEngines: [],
     llms: [],
     imageModels: [],

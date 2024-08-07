@@ -4,9 +4,9 @@ import { NCard, NCol, NCollapseTransition, NIcon, NImage, NRow, NSpace, NSwitch,
 import type { UploadFileInfo } from 'naive-ui'
 import { QuestionCircle16Regular } from '@vicons/fluent'
 import format from 'date-fns/format'
-import CommonSetting from './components/CommonSetting.vue'
-import SearchInput from './components/SearchInput.vue'
-import { checkProcess } from './helper'
+import CommonProperty from './CommonProperty.vue'
+import SearchInput from '@/views/draw/components/SearchInput.vue'
+import { checkProcess } from '@/views/draw/helper'
 import { useDrawStore } from '@/store'
 import OriginalImage from '@/assets/image_edit_original.webp'
 import MaskImage from '@/assets/image_edit_mask.webp'
@@ -199,7 +199,7 @@ async function handleSubmit(prompt: string) {
         </NCard>
       </NCollapseTransition>
     </NSpace>
-    <CommonSetting @valChange="commonSettingChange" />
+    <CommonProperty @valChange="commonSettingChange" />
     <NRow>
       <NCol :span="2" class="min-w-fit">
         原&nbsp;&nbsp;&nbsp;&nbsp;图

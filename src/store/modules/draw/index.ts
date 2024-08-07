@@ -48,5 +48,13 @@ export const useDrawStore = defineStore('draw-store', {
       this.aiImages.splice(index, 1)
     },
 
+    async deleteOneFile(uuid: string, fileUuid: string) {
+      const aiImage = this.aiImages.find(item => item.uuid === uuid)
+      if (aiImage) {
+        const idx = aiImage.imageUrlList?.findIndex(url => url.indexOf(fileUuid) > 0)
+        aiImage.imageUrlList?.splice(idx, 1)
+      }
+    },
+
   },
 })

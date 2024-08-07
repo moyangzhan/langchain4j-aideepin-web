@@ -9,11 +9,13 @@ import { useKbStore } from '@/store'
 import { SvgIcon } from '@/components/common'
 import { useScroll } from '@/views/chat/hooks/useScroll'
 import { knowledgeBaseEmptyInfo } from '@/utils/functions'
+import { useBasicLayout } from '@/hooks/useBasicLayout'
 import api from '@/api'
 const props = defineProps<Props>()
 const router = useRouter()
 const kbStore = useKbStore()
 const { scrollRef, scrollTo } = useScroll()
+const { isMobile } = useBasicLayout()
 const mouseEnterKbUuid = ref<string>('')
 const showModal = ref<boolean>(false)
 const tmpKb = ref<KnowledgeBase.Info>(knowledgeBaseEmptyInfo())
@@ -83,7 +85,7 @@ onUnmounted(() => {
             <span>{{ item.title }}</span>
           </div>
           <div class="absolute z-10 flex visible right-1">
-            <NButton v-show="mouseEnterKbUuid === item.uuid" secondary size="tiny" @click.stop="showKb(item)">
+            <NButton v-show="mouseEnterKbUuid === item.uuid || isMobile" secondary size="tiny" @click.stop="showKb(item)">
               <NIcon :component="AppsListDetail24Regular" />
             </NButton>
           </div>

@@ -2,9 +2,9 @@
 import { ref } from 'vue'
 import format from 'date-fns/format'
 import { useMessage } from 'naive-ui'
-import CommonSetting from './components/CommonSetting.vue'
-import SearchInput from './components/SearchInput.vue'
-import { checkProcess } from './helper'
+import CommonProperty from './CommonProperty.vue'
+import SearchInput from '@/views/draw/components/SearchInput.vue'
+import { checkProcess } from '@/views/draw/helper'
 import { useDrawStore } from '@/store'
 import api from '@/api'
 
@@ -24,7 +24,7 @@ function commonSettingChange(imageSize: string, imageNumber: number) {
 async function handleSubmit(prompt: string) {
   console.log(`GenerateImage submit:${prompt}`)
   try {
-    const resp = await api.imageGenerate<CreateImageResult>(prompt, selectedImageSize.value, generateImageNumber.value)
+    const resp = await api.imageGenerate<CreateImageResult>('dall-e-2', prompt, selectedImageSize.value, generateImageNumber.value)
     const uuid = resp.data.uuid
     drawStore.setLoadingUuid(uuid)
     const curDate = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
@@ -56,7 +56,7 @@ async function handleSubmit(prompt: string) {
 
 <template>
   <div>
-    <CommonSetting @valChange="commonSettingChange" />
+    <CommonProperty @valChange="commonSettingChange" />
     <SearchInput @submit="handleSubmit" />
   </div>
 </template>

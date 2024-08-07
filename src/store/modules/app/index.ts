@@ -40,6 +40,12 @@ export const useAppStore = defineStore('app-store', {
 
       this.recordState()
     },
+    setSelectedImageModel(selected: string) {
+      const selectedModel = this.imageModels.find(item => item.modelId === selected)
+      if (selectedModel)
+        this.selectedImageModel = selectedModel
+      this.recordState()
+    },
     setSearchEngines(engines: SearchEngineInfo[]) {
       engines.forEach((item) => {
         item.disabled = !item.enable
@@ -73,6 +79,11 @@ export const useAppStore = defineStore('app-store', {
         item.value = item.modelName
       })
       this.imageModels = imageModels
+      if (this.selectedImageModel.modelId === 'default') {
+        const selectedModel = this.imageModels.find(item => item.enable)
+        if (selectedModel)
+          this.selectedImageModel = selectedModel
+      }
     },
   },
 })

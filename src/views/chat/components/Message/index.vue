@@ -1,6 +1,8 @@
 <script setup lang='ts'>
-import { computed, ref } from 'vue'
-import { NDropdown, NEmpty, NImage, NImageGroup, NSpace, NSpin } from 'naive-ui'
+import { computed, h, ref } from 'vue'
+import { NButton, NDropdown, NEmpty, NImage, NSpace, NSpin, useDialog } from 'naive-ui'
+import type { ImageRenderToolbarProps } from 'naive-ui'
+import { Delete24Regular } from '@vicons/fluent'
 import AvatarComponent from './Avatar.vue'
 import TextComponent from './Text.vue'
 import { SvgIcon } from '@/components/common'
@@ -10,10 +12,12 @@ import { t } from '@/locales'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAuthStore } from '@/store'
 import NoPic from '@/assets/no_pic.png'
+
 const props = withDefaults(defineProps<Props>(), {
   showAvatar: true,
 })
 const emit = defineEmits<Emit>()
+const dialog = useDialog()
 const authStore = useAuthStore()
 const token = ref<string>(authStore.token)
 
@@ -34,6 +38,7 @@ interface Props {
 interface Emit {
   (ev: 'regenerate'): void
   (ev: 'delete'): void
+  (ev: 'delOneImage', fileUrl: string): void
 }
 
 const { isMobile } = useBasicLayout()
@@ -88,6 +93,39 @@ function handleRegenerate() {
   messageRef.value?.scrollIntoView()
   emit('regenerate')
 }
+
+function handleDelImage(imageUrl: string) {
+  dialog.warning({
+    title: '删除确认',
+    content: '删除该图片',
+    positiveText: t('common.yes'),
+    negativeText: t('common.no'),
+    onPositiveClick: async () => {
+      emit('delOneImage', imageUrl)
+    },
+  })
+}
+function renderToolbarOut2(imageUrl: string) {
+  return ({ nodes }: ImageRenderToolbarProps) => {
+    return [
+      ...Object.values(nodes),
+      h(
+        NButton,
+        {
+          quaternary: true,
+          circle: true,
+          color: 'white',
+          onClick: () => {
+            handleDelImage(imageUrl)
+          },
+        },
+        {
+          icon: () => h(Delete24Regular),
+        },
+      ),
+    ]
+  }
+}
 </script>
 
 <template>
@@ -140,13 +178,13 @@ function handleRegenerate() {
               <NEmpty description="找不到图片" />
             </template>
             <template v-if="imageUrls && imageUrls.length > 0">
-              <NImageGroup>
-                <NSpace>
-                  <template v-for="imageUrl in imageUrls" :key="imageUrl">
-                    <NImage v-if="imageUrl" width="100" :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic" />
-                  </template>
-                </NSpace>
-              </NImageGroup>
+              <!-- <NImageGroup :render-toolbar="renderToolbar"> -->
+              <NSpace>
+                <template v-for="imageUrl in imageUrls" :key="imageUrl">
+                  <NImage v-if="imageUrl" width="100" :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic" :render-toolbar="renderToolbarOut2(imageUrl)" />
+                </template>
+              </NSpace>
+              <!-- </NImageGroup> -->
             </template>
           </template>
         </template>

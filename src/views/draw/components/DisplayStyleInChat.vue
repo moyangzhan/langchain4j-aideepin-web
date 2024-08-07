@@ -12,9 +12,13 @@ const { aiImages } = storeToRefs<any>(drawStore)
 
 interface Emit {
   (e: 'del', uuid: string): void
+  (e: 'delOneImage', uuid: string, fileUrl: string): void
 }
 function handleDelete(uuid: string) {
   emit('del', uuid)
+}
+function handleDelOneImage(uuid: string, fileUrl: string) {
+  emit('delOneImage', uuid, fileUrl)
 }
 </script>
 
@@ -44,7 +48,7 @@ function handleDelete(uuid: string) {
           />
           <Message
             :date-time="item.createTime" :loading="item.uuid === drawStore.loadingUuid"
-            :image-urls="item.imageUrlList" :inversion="false" type="image" @delete="handleDelete(item.uuid)"
+            :image-urls="item.imageUrlList" :inversion="false" type="image" @del-one-image="(fileUrl:string) => handleDelOneImage(item.uuid, fileUrl)"
           />
         </template>
       </div>

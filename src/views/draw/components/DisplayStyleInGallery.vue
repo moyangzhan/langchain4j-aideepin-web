@@ -1,13 +1,15 @@
 <script setup lang='ts'>
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { NEmpty, NFlex, NIcon, NImage, NImageGroup, NModal } from 'naive-ui'
+import { NButton, NEmpty, NFlex, NIcon, NImage, NImageGroup, NModal, useDialog } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { useAuthStore, useDrawStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-
+import { t } from '@/locales'
 import NoPic from '@/assets/no_pic.png'
+
 const emit = defineEmits<Emit>()
+const dialog = useDialog()
 const authStore = useAuthStore()
 const token = ref<string>(authStore.token)
 const { isMobile } = useBasicLayout()
@@ -23,11 +25,25 @@ interface ModalData {
 }
 
 interface Emit {
-  (e: 'del', uuid: string): void
+  // (e: 'del', uuid: string): void
+  (e: 'delOneImage', uuid: string, imageUrl: string): void
 }
 
-function handleDelete(uuid: string) {
-  emit('del', uuid)
+// function handleDelete(uuid: string) {
+//   emit('del', uuid)
+// }
+
+function handleDeleteOneImage(uuid: string, imageUrl: string) {
+  dialog.warning({
+    title: '是否要删除该图片',
+    content: '删除图片后不可恢复',
+    positiveText: t('common.yes'),
+    negativeText: t('common.no'),
+    onPositiveClick: async () => {
+      showDetailModal.value = false
+      emit('delOneImage', uuid, imageUrl)
+    },
+  })
 }
 
 function openImage(imageUrl: string, item: Chat.AiImageItem) {
@@ -60,7 +76,6 @@ function openImage(imageUrl: string, item: Chat.AiImageItem) {
                   <NImage
                     v-if="imageUrl" width="200" :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic"
                     object-fit="scale-down" preview-disabled @click="openImage(imageUrl, item)"
-                    @delete="handleDelete(item.uuid)"
                   />
                 </template>
               </template>
@@ -73,11 +88,18 @@ function openImage(imageUrl: string, item: Chat.AiImageItem) {
       <NFlex justify="center">
         <NImage
           v-if="modalData.url" :src="`/api${modalData.url}?token=${token}`" :fallback-src="NoPic"
-          object-fit="scale-down" preview-disabled
+          object-fit="scale-down"
         />
       </NFlex>
       <template #footer>
-        提示词：{{ modalData.prompt }}
+        <NFlex vertical>
+          <NFlex>提示词：{{ modalData.prompt }}</NFlex>
+          <NFlex justify="end">
+            <NButton quaternary type="error" @click="handleDeleteOneImage(modalData.uuid, modalData.url)">
+              删除
+            </NButton>
+          </NFlex>
+        </NFlex>
       </template>
     </NModal>
   </div>
