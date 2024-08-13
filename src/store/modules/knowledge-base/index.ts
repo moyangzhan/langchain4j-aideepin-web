@@ -9,6 +9,7 @@ export const useKbStore = defineStore('kb-store', {
       publicKbInfos: [],
       kbUuidToQaRecords: new Map<string, KnowledgeBase.QaRecordInfo[]>(),
       kbUuidToStarInfo: new Map<string, KnowledgeBase.KbStarInfo>(),
+      qaRecordToReferences: new Map<string, KnowledgeBase.QaRecordReference[]>(),
       loadingRecords: new Map<string, boolean>(),
       loaddingKbList: false,
       reloadKbInfosSignal: false,
@@ -22,6 +23,14 @@ export const useKbStore = defineStore('kb-store', {
         if (records)
           return records
 
+        return []
+      }
+    },
+    getReferences(state: KnowledgeBase.KbState) {
+      return (qaRecordUuid: string) => {
+        const references = state.qaRecordToReferences.get(qaRecordUuid)
+        if (references)
+          return references
         return []
       }
     },
@@ -119,6 +128,10 @@ export const useKbStore = defineStore('kb-store', {
         this.kbUuidToStarInfo.set(starInfo.kbUuid, starInfo)
       else
         existData.star = starInfo.star
+    },
+
+    setQaRecordReferences(qaRecordUuid: string, references: KnowledgeBase.QaRecordReference[]) {
+      this.qaRecordToReferences.set(qaRecordUuid, !references ? [] : references)
     },
   },
 })

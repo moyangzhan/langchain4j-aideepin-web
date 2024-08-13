@@ -376,6 +376,12 @@ function knowledgeBaseQaRecordDel<T = any>(uuid: string) {
   })
 }
 
+function knowledgeBaseRecordReference<T = any>(recordUuid: string) {
+  return get<T>({
+    url: `/knowledge-base/qa/record/reference/${recordUuid}`,
+  })
+}
+
 function knowledgeBaseStarListMine<T = any>(currentPage: number, pageSize: number) {
   return get<T>({
     url: `/knowledge-base/star/mine?currentPage=${currentPage}&pageSize=${pageSize}`,
@@ -461,6 +467,7 @@ export default {
   knowledgeBaseQaSseAsk,
   knowledgeBaseQaRecordSearch,
   knowledgeBaseQaRecordDel,
+  knowledgeBaseRecordReference,
   knowledgeBaseStarListMine,
   loadSearchEngines,
   loadLLMs,

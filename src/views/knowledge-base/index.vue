@@ -2,7 +2,7 @@
 import type { Ref } from 'vue'
 import { computed, nextTick, onActivated, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NIcon, NInput, NSelect, useDialog, useMessage } from 'naive-ui'
+import { NButton, NCollapse, NCollapseItem, NIcon, NInput, NModal, NSelect, useDialog, useMessage } from 'naive-ui'
 import type { MessageReactive } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { v4 as uuidv4 } from 'uuid'
@@ -30,6 +30,9 @@ const { isMobile } = useBasicLayout()
 const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom, scrollTo } = useScroll()
 const { kbUuid: currKbUuid } = route.params as { kbUuid: string }
 console.log('currKbUUid', currKbUuid)
+const showReferenceModal = ref<boolean>(false)
+const showReferenceRecordUuid = ref<string>('')
+const references = ref<KnowledgeBase.QaRecordReference[]>([])
 const prompt = ref<string>('')
 const inputRef = ref<Ref | null>(null)
 
@@ -210,9 +213,24 @@ function handleEnter(event: KeyboardEvent) {
 }
 
 function handleStop() {
-  if (kbStore.loadingRecords.get(currKbUuid)) {
+  if (kbStore.loadingRecords.get(currKbUuid))
     controller.abort()
-    sseRequesting.value = false
+
+  sseRequesting.value = false
+}
+
+// 打开引用
+async function handleReferenceClick(qaRecordUuid: string) {
+  showReferenceModal.value = true
+  showReferenceRecordUuid.value = qaRecordUuid
+  references.value = []
+  references.value = kbStore.getReferences(qaRecordUuid)
+  if (references.value.length === 0) {
+    const { data } = await api.knowledgeBaseRecordReference(qaRecordUuid)
+    kbStore.setQaRecordReferences(qaRecordUuid, data)
+
+    // 显示最后一次点击的引用
+    references.value = kbStore.getReferences(showReferenceRecordUuid.value)
   }
 }
 
@@ -296,9 +314,12 @@ onActivated(async () => {
               <Message
                 :date-time="qaRecord.createTime" :text="!!qaRecord.answer ? qaRecord.answer : '[无答案]'"
                 :regenerate="false" type="text" :inversion="false" :error="qaRecord.error" :loading="qaRecord.loading"
-                :ai-model-platform="qaRecord.aiModelPlatform"
-                @delete="handleDelete(qaRecord.uuid)"
-              />
+                :ai-model-platform="qaRecord.aiModelPlatform" @delete="handleDelete(qaRecord.uuid)"
+              >
+                <NButton v-if="!!qaRecord.answer" size="tiny" text type="primary" @click="handleReferenceClick(qaRecord.uuid)">
+                  引用
+                </NButton>
+              </Message>
             </div>
           </template>
         </div>
@@ -332,5 +353,16 @@ onActivated(async () => {
         </div>
       </div>
     </footer>
+
+    <NModal v-model:show="showReferenceModal" style="max-width: 80%;" preset="card" title="引用资料">
+      <div v-show="references.length === 0">
+        无
+      </div>
+      <NCollapse v-show="references.length > 0" :default-expanded-names="['refer_0']">
+        <NCollapseItem v-for="(reference, idx) of references" :key="reference.id" :title="`引用${idx + 1}`" :name="`refer_${idx}`">
+          {{ reference.text }}
+        </NCollapseItem>
+      </NCollapse>
+    </NModal>
   </div>
 </template>

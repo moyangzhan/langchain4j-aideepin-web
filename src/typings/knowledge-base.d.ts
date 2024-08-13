@@ -60,6 +60,11 @@ declare namespace KnowledgeBase {
     aiModelPlatform?: string
   }
 
+  interface QaRecordReference {
+    id: string
+    text: string
+  }
+
   interface KbState {
     selectedKbType: string
     activeKbUuid: string
@@ -67,6 +72,7 @@ declare namespace KnowledgeBase {
     publicKbInfos: Info[]
     kbUuidToQaRecords: Map<string, QaRecordInfo[]>
     kbUuidToStarInfo: Map<string, KbStarInfo>
+    qaRecordToReferences: Map<string, KnowledgeBase.QaRecordReference[]>
     loadingRecords: Map<string, boolean>
     loaddingKbList: boolean
     reloadKbInfosSignal: boolean
