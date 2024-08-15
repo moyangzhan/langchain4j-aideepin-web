@@ -354,19 +354,26 @@ function knowledgeBaseEmbedding<T = any>(kbItemUuid: string, currentPage: number
 }
 
 function knowledgeBaseQaSseAsk(params: {
-  options: { kbUuid: string; question: string; modelName: string }
+  options: { qaRecordUuid: string }
   signal?: AbortSignal
   startCallback: (chunk: string) => void
   messageRecived: (chunk: string, eventName?: string) => void
   doneCallback: (chunk: string) => void
   errorCallback: (error: string) => void
 }) {
-  commonSseProcess(`/api/knowledge-base/qa/process/${params.options.kbUuid}`, params)
+  commonSseProcess(`/api/knowledge-base/qa/process/${params.options.qaRecordUuid}`, params)
 }
 
 function knowledgeBaseQaRecordSearch<T = any>(kbUuid: string, keyword: string, currentPage: number, pageSize: number) {
   return get<T>({
     url: `/knowledge-base/qa/record/search?kbUuid=${kbUuid}&keyword=${keyword}&currentPage=${currentPage}&pageSize=${pageSize}`,
+  })
+}
+
+function knowledgeBaseQaRecordAdd<T = any>(uuid: string, QaContent: { question: string; modelName: string }) {
+  return post<T>({
+    url: `/knowledge-base/qa/record/add/${uuid}`,
+    data: QaContent,
   })
 }
 
@@ -466,6 +473,7 @@ export default {
   knowledgeBaseEmbedding,
   knowledgeBaseQaSseAsk,
   knowledgeBaseQaRecordSearch,
+  knowledgeBaseQaRecordAdd,
   knowledgeBaseQaRecordDel,
   knowledgeBaseRecordReference,
   knowledgeBaseStarListMine,

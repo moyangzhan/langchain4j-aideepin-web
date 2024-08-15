@@ -5,7 +5,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { NButton, NCollapse, NCollapseItem, NIcon, NInput, NModal, NSelect, useDialog, useMessage } from 'naive-ui'
 import type { MessageReactive } from 'naive-ui'
 import { Cat } from '@vicons/fa'
-import { v4 as uuidv4 } from 'uuid'
 import { Message } from '../chat/components'
 import { useScroll } from '../chat/hooks/useScroll'
 import { useCopyCode } from '../chat/hooks/useCopyCode'
@@ -16,7 +15,6 @@ import { useAppStore, useKbStore } from '@/store'
 import api from '@/api'
 import { t } from '@/locales'
 import { debounce } from '@/utils/functions/debounce'
-import { knowledgeBaseEmptyRecord } from '@/utils/functions'
 
 let controller = new AbortController()
 
@@ -67,28 +65,22 @@ async function handleSubmit() {
   prompt.value = ''
   scrollToBottom()
 
-  const tmpUuid = uuidv4().replace(/-/g, '')
-  const tmpRecord = knowledgeBaseEmptyRecord()
-  tmpRecord.uuid = tmpUuid
-  tmpRecord.question = message
-  tmpRecord.kbUuid = currKbUuid
-  tmpRecord.answer = '生成中...'
-  tmpRecord.loading = true
-  tmpRecord.aiModelPlatform = appStore.selectedLLM.modelPlatform
+  const { data: qaRecord } = await api.knowledgeBaseQaRecordAdd<KnowledgeBase.QaRecordInfo>(currKbUuid, { question: message, modelName: appStore.selectedLLM.modelName })
+  qaRecord.answer = '生成中...'
+  qaRecord.loading = true
+  qaRecord.aiModelPlatform = appStore.selectedLLM.modelPlatform
 
   try {
-    kbStore.appendRecord(currKbUuid, tmpRecord)
+    kbStore.appendRecord(currKbUuid, qaRecord)
 
     await api.knowledgeBaseQaSseAsk({
       options: {
-        kbUuid: currKbUuid,
-        question: message,
-        modelName: appStore.selectedLLM.modelName,
+        qaRecordUuid: qaRecord.uuid,
       },
       signal: controller.signal,
       startCallback: (chunk) => {
-        tmpRecord.answer = ''
-        kbStore.updateRecord(currKbUuid, tmpUuid, tmpRecord)
+        qaRecord.answer = ''
+        kbStore.updateRecord(currKbUuid, qaRecord.uuid, qaRecord)
       },
       messageRecived: (chunk) => {
         // Always process the final line
@@ -97,7 +89,7 @@ async function handleSubmit() {
         try {
           kbStore.appendChunk(
             currKbUuid,
-            tmpUuid,
+            qaRecord.uuid,
             chunk,
           )
         } catch (error) {
@@ -113,29 +105,29 @@ async function handleSubmit() {
         } else {
           kbStore.appendChunk(
             currKbUuid,
-            tmpUuid,
+            qaRecord.uuid,
             chunk,
           )
         }
-        tmpRecord.loading = false
-        tmpRecord.error = false
-        kbStore.updateRecord(currKbUuid, tmpUuid, tmpRecord)
+        qaRecord.loading = false
+        qaRecord.error = false
+        kbStore.updateRecord(currKbUuid, qaRecord.uuid, qaRecord)
         sseRequesting.value = false
       },
       errorCallback: (error) => {
         sseRequesting.value = false
         ms.warning(`系统提示：${error}`)
-        tmpRecord.answer = `系统提示：${error}`
-        tmpRecord.loading = false
-        tmpRecord.error = true
-        kbStore.updateRecord(currKbUuid, tmpUuid, tmpRecord)
+        qaRecord.answer = `系统提示：${error}`
+        qaRecord.loading = false
+        qaRecord.error = true
+        kbStore.updateRecord(currKbUuid, qaRecord.uuid, qaRecord)
       },
     })
   } catch (error: any) {
     const errorMessage = error?.message ?? t('common.wrong')
     ms.error(errorMessage)
-    tmpRecord.answer = errorMessage
-    tmpRecord.error = true
+    qaRecord.answer = errorMessage
+    qaRecord.error = true
     sseRequesting.value = false
   }
 }
@@ -316,7 +308,10 @@ onActivated(async () => {
                 :regenerate="false" type="text" :inversion="false" :error="qaRecord.error" :loading="qaRecord.loading"
                 :ai-model-platform="qaRecord.aiModelPlatform" @delete="handleDelete(qaRecord.uuid)"
               >
-                <NButton v-if="!!qaRecord.answer" size="tiny" text type="primary" @click="handleReferenceClick(qaRecord.uuid)">
+                <NButton
+                  v-if="!!qaRecord.answer && !qaRecord.loading" size="tiny" text type="primary"
+                  @click="handleReferenceClick(qaRecord.uuid)"
+                >
                   引用
                 </NButton>
               </Message>
@@ -359,7 +354,10 @@ onActivated(async () => {
         无
       </div>
       <NCollapse v-show="references.length > 0" :default-expanded-names="['refer_0']">
-        <NCollapseItem v-for="(reference, idx) of references" :key="reference.id" :title="`引用${idx + 1}`" :name="`refer_${idx}`">
+        <NCollapseItem
+          v-for="(reference, idx) of references" :key="reference.id" :title="`引用${idx + 1}`"
+          :name="`refer_${idx}`"
+        >
           {{ reference.text }}
         </NCollapseItem>
       </NCollapse>
