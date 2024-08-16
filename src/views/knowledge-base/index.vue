@@ -63,12 +63,15 @@ async function handleSubmit() {
   controller = new AbortController()
 
   prompt.value = ''
-  scrollToBottom()
 
   const { data: qaRecord } = await api.knowledgeBaseQaRecordAdd<KnowledgeBase.QaRecordInfo>(currKbUuid, { question: message, modelName: appStore.selectedLLM.modelName })
   qaRecord.answer = '生成中...'
   qaRecord.loading = true
   qaRecord.aiModelPlatform = appStore.selectedLLM.modelPlatform
+
+  nextTick(() => {
+    scrollToBottom()
+  })
 
   try {
     kbStore.appendRecord(currKbUuid, qaRecord)
