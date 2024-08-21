@@ -1,8 +1,9 @@
 <script setup lang='ts'>
 import type { DataTableColumns } from 'naive-ui'
 import { computed, h, reactive, ref, watch } from 'vue'
-import { NBreadcrumb, NBreadcrumbItem, NButton, NCollapse, NCollapseItem, NDataTable, NInput, NInputNumber, NModal, NRadio, NRadioGroup, NSpace, useDialog, useMessage } from 'naive-ui'
+import { NBreadcrumb, NBreadcrumbItem, NButton, NCollapse, NCollapseItem, NDataTable, NIcon, NInput, NInputNumber, NModal, NRadio, NRadioGroup, NSpace, NTooltip, useDialog, useMessage } from 'naive-ui'
 import { RouterLink, useRouter } from 'vue-router'
+import { QuestionCircle16Regular } from '@vicons/fluent'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAuthStore, useKbStore } from '@/store'
 import { knowledgeBaseEmptyInfo } from '@/utils/functions'
@@ -67,6 +68,14 @@ const createColumns = (): DataTableColumns<KnowledgeBase.Info> => {
       width: 100,
       render(row) {
         return row.isPublic ? '是' : '否'
+      },
+    },
+    {
+      title: '严格模式',
+      key: 'isStrict',
+      width: 100,
+      render(row) {
+        return row.isStrict ? '是' : '否'
       },
     },
     {
@@ -217,10 +226,16 @@ watch(
     />
   </div>
 
-  <NModal v-model:show="showModal" :title="tmpKb.id === '0' ? '新建' : '编辑'" style="width: 90%; max-width: 600px;" preset="card">
+  <NModal
+    v-model:show="showModal" :title="tmpKb.id === '0' ? '新建' : '编辑'" style="width: 90%; max-width: 600px;"
+    preset="card"
+  >
     <NSpace vertical>
-      {{ t('store.title') }}
-      <NInput v-model:value="tmpKb.title" maxlength="100" show-count />
+      <NInput v-model:value="tmpKb.title" maxlength="100" :placeholder="t('store.title')" show-count />
+      <NInput
+        v-model:value="tmpKb.remark" type="textarea" :placeholder="t('store.description')" maxlength="500"
+        show-count :autosize="{ minRows: 5, maxRows: 30 }"
+      />
       是否公开
       <NRadioGroup v-model:value="tmpKb.isPublic" name="radiogroup">
         <NRadio key="public_yes" :value="true">
@@ -230,11 +245,26 @@ watch(
           私有
         </NRadio>
       </NRadioGroup>
-      {{ t('store.description') }}
-      <NInput
-        v-model:value="tmpKb.remark" type="textarea" maxlength="500" show-count
-        :autosize="{ minRows: 5, maxRows: 30 }"
-      />
+      <div>
+        严格模型
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <NIcon style="padding-top: 0.1rem">
+              <QuestionCircle16Regular />
+            </NIcon>
+          </template>
+          <div> 严格模式：严格匹配知识库，知识库中如无搜索结果，直接返回无答案</div>
+          <div> 非严格模式：知识库中如无搜索结果，将用户提问传给LLM继续请求答案</div>
+        </NTooltip>
+      </div>
+      <NRadioGroup v-model:value="tmpKb.isStrict" name="radiogroup">
+        <NRadio key="strict_yes" :value="true">
+          是
+        </NRadio>
+        <NRadio key="strict_no" :value="false">
+          否
+        </NRadio>
+      </NRadioGroup>
       <NCollapse>
         <NCollapseItem title="RAG设置">
           文档切割时重叠数量

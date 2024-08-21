@@ -5,6 +5,7 @@ declare namespace KnowledgeBase {
     title: string
     remark: string
     isPublic: boolean
+    isStrict: boolean
     starCount: number
     ownerUuid: string
     ownerName: string

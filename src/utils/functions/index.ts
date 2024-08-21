@@ -15,6 +15,7 @@ export function knowledgeBaseEmptyInfo() {
     title: '',
     remark: '',
     isPublic: false,
+    isStrict: true,
     starCount: 0,
     ownerUuid: '',
     ownerName: '',
