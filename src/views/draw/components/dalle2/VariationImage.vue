@@ -5,7 +5,7 @@ import type { UploadFileInfo } from 'naive-ui'
 import format from 'date-fns/format'
 import CommonProperty from './CommonProperty.vue'
 import { checkProcess } from '@/views/draw/helper'
-import { useDrawStore } from '@/store'
+import { useAuthStore, useDrawStore } from '@/store'
 import api from '@/api'
 
 interface Emit {
@@ -14,6 +14,8 @@ interface Emit {
 const emit = defineEmits<Emit>()
 const drawStore = useDrawStore()
 const ms = useMessage()
+const authStore = useAuthStore()
+const token = ref<string>(authStore.token)
 const originalImage = ref<string>('')
 const selectedImageSize = ref<string>('')
 const generateImageNumber = ref<number>(0)
@@ -99,7 +101,7 @@ async function handleSubmit() {
       </NCol>
       <NCol :span="12">
         <NUpload
-          action="/api/file/upload" :max="1" response-type="text" list-type="image-card"
+          :action="`/api/file/upload?token=${token}`" :max="1" response-type="text" list-type="image-card"
           @before-upload="beforeUpload" @finish="handleOriginalFinish" @remove="removeOriginalImage"
         >
           上传小于4MB的PNG图片

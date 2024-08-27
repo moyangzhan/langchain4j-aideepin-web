@@ -7,7 +7,7 @@ import format from 'date-fns/format'
 import CommonProperty from './CommonProperty.vue'
 import SearchInput from '@/views/draw/components/SearchInput.vue'
 import { checkProcess } from '@/views/draw/helper'
-import { useDrawStore } from '@/store'
+import { useAuthStore, useDrawStore } from '@/store'
 import OriginalImage from '@/assets/image_edit_original.webp'
 import MaskImage from '@/assets/image_edit_mask.webp'
 import OutPutImage from '@/assets/image_edit_output.webp'
@@ -19,6 +19,8 @@ interface Emit {
 const emit = defineEmits<Emit>()
 const ms = useMessage()
 const drawStore = useDrawStore()
+const authStore = useAuthStore()
+const token = ref<string>(authStore.token)
 const showTip = ref<boolean>(false)
 const selectedImageSize = ref<string>('')
 const generateImageNumber = ref<number>(0)
@@ -214,7 +216,7 @@ async function handleSubmit(prompt: string) {
       </NCol>
       <NCol :span="12">
         <NUpload
-          action="/api/file/upload" :max="1" response-type="text" list-type="image-card"
+          :action="`/api/file/upload?token=${token}`" :max="1" response-type="text" list-type="image-card"
           :default-file-list="originalImageList" @before-upload="beforeUpload" @finish="handleOriginalFinish"
           @remove="removeOriginalImage"
         >
@@ -236,7 +238,7 @@ async function handleSubmit(prompt: string) {
       </NCol>
       <NCol :span="12">
         <NUpload
-          action="/api/file/upload" :max="1" response-type="text" list-type="image-card"
+          :action="`/api/file/upload?token=${token}`" :max="1" response-type="text" list-type="image-card"
           :default-file-list="maskImageList" @before-upload="beforeUpload" @finish="handleMaskFinish"
           @remove="removeMaskImage"
         >
