@@ -112,6 +112,10 @@ export const useKbStore = defineStore('kb-store', {
       existRecords.splice(index, 1)
     },
 
+    clearRecords(kbUuid: string) {
+      this.kbUuidToQaRecords.set(kbUuid, [])
+    },
+
     appStarInfos(starInfos: KnowledgeBase.KbStarInfo[]) {
       starInfos.forEach((item) => {
         // Default true(from remote server)

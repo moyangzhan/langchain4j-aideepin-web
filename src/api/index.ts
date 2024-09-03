@@ -383,6 +383,12 @@ function knowledgeBaseQaRecordDel<T = any>(uuid: string) {
   })
 }
 
+function knowledgeBaseQaRecordClear<T = any>() {
+  return post<T>({
+    url: '/knowledge-base/qa/record/clear',
+  })
+}
+
 function knowledgeBaseRecordReference<T = any>(recordUuid: string) {
   return get<T>({
     url: `/knowledge-base/qa/record/reference/${recordUuid}`,
@@ -475,6 +481,7 @@ export default {
   knowledgeBaseQaRecordSearch,
   knowledgeBaseQaRecordAdd,
   knowledgeBaseQaRecordDel,
+  knowledgeBaseQaRecordClear,
   knowledgeBaseRecordReference,
   knowledgeBaseStarListMine,
   loadSearchEngines,

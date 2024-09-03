@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import { onActivated, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { NAvatar, NButton, NDivider, NFlex, NIcon, NModal, NTag, NTooltip } from 'naive-ui'
+import { NAvatar, NButton, NDivider, NFlex, NIcon, NModal, NPopconfirm, NTag, NTooltip } from 'naive-ui'
 import { AppsListDetail24Regular, Cloud32Regular, LockClosed32Regular, Star24Filled, Star24Regular } from '@vicons/fluent'
 import { Bookmarks, VectorBeizer2 } from '@vicons/tabler'
 import defaultAvatar from '@/assets/avatar.jpg'
@@ -44,6 +44,10 @@ function showKb(item: KnowledgeBase.Info) {
   showModal.value = true
   tmpKb.value = item
 }
+async function clearHistory(kbInfo: KnowledgeBase.Info) {
+  await api.knowledgeBaseQaRecordClear<boolean>()
+  kbStore.clearRecords(kbInfo.uuid)
+}
 async function handleClickStar(kbInfo: KnowledgeBase.Info) {
   const starOrUnstarResp = await api.knowledgeBaseStar<boolean>(kbInfo.uuid)
   const starOrUnstar = starOrUnstarResp.data
@@ -85,7 +89,10 @@ onUnmounted(() => {
             <span>{{ item.title }}</span>
           </div>
           <div class="absolute z-10 flex visible right-1">
-            <NButton v-show="mouseEnterKbUuid === item.uuid || isMobile" secondary size="tiny" @click.stop="showKb(item)">
+            <NButton
+              v-show="mouseEnterKbUuid === item.uuid || isMobile" secondary size="tiny"
+              @click.stop="showKb(item)"
+            >
               <NIcon :component="AppsListDetail24Regular" />
             </NButton>
           </div>
@@ -129,11 +136,17 @@ onUnmounted(() => {
             </template>
             向量
           </NTooltip>
-          <NTag size="medium" :bordered="false" round :color="{ color: '#ff000000' }" checkable @click="handleClickStar(tmpKb)">
+          <NTag
+            size="medium" :bordered="false" round :color="{ color: '#ff000000' }" checkable
+            @click="handleClickStar(tmpKb)"
+          >
             {{ tmpKb.starCount }}
             <template #icon>
               <NIcon v-show="!kbStore.kbUuidToStarInfo.get(tmpKb.uuid)?.star" :component="Star24Regular" />
-              <NIcon v-show="kbStore.kbUuidToStarInfo.get(tmpKb.uuid)?.star" :component="Star24Filled" color="#eac54f" />
+              <NIcon
+                v-show="kbStore.kbUuidToStarInfo.get(tmpKb.uuid)?.star" :component="Star24Filled"
+                color="#eac54f"
+              />
             </template>
           </NTag>
         </NFlex>
@@ -141,5 +154,15 @@ onUnmounted(() => {
       <NDivider />
       <div>{{ tmpKb.remark }}</div>
     </NFlex>
+    <template #footer>
+      <NPopconfirm placement="top" @positive-click="clearHistory(tmpKb)">
+        <template #trigger>
+          <NButton size="small" text>
+            清除历史记录
+          </NButton>
+        </template>
+        删除后不可恢复，请谨慎操作
+      </NPopconfirm>
+    </template>
   </NModal>
 </template>

@@ -37,7 +37,7 @@ export default {
     captcha: '验证码',
   },
   chat: {
-    newChatButton: '新建聊天',
+    newChatButton: '新建角色',
     placeholder: '来说点什么吧...（Shift + Enter = 换行）',
     placeholderMobile: '来说点什么...',
     copy: '复制',
