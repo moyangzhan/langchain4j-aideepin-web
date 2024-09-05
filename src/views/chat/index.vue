@@ -82,9 +82,9 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
 
     },
     messageRecived: (chunk) => {
-      // Always process the final line
-      if (!chunk)
-        chunk = '\r\n'
+      if (chunk)
+        chunk = chunk.replace('-_-_wrap_-_-', '\r\n')
+
       let question = null
       if (regenerateQuestionUuid) {
         question = messages.value.find(q => q.uuid === regenerateQuestionUuid)
@@ -96,11 +96,14 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
         question = messages.value[messages.value.length - 1]
       }
       try {
-        appendChunk(
-          curConvUuid,
-          question.children[0].uuid,
-          chunk,
-        )
+        console.log('====:', chunk)
+        for (let i = 0; i < chunk.length; i++) {
+          appendChunk(
+            curConvUuid,
+            question.children[0].uuid,
+            chunk[i],
+          )
+        }
       } catch (error) {
         console.error(error)
       }

@@ -157,7 +157,7 @@ onUnmounted(() => {
     <template #footer>
       <NPopconfirm placement="top" @positive-click="clearHistory(tmpKb)">
         <template #trigger>
-          <NButton size="small" text>
+          <NButton size="small" text type="primary">
             清除历史记录
           </NButton>
         </template>
