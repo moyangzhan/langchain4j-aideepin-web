@@ -172,6 +172,16 @@ export const useChatStore = defineStore('chat-store', {
       this.recordState()
     },
 
+    unshiftMessages(uuid: string, messages: Chat.ChatMessage[]) {
+      const chatIndex = this.chats.findIndex(item => item.uuid === uuid)
+      if (chatIndex === -1)
+        return
+      const cachedMsgs = this.chats[chatIndex].data
+      messages.forEach((item) => {
+        cachedMsgs.unshift(item)
+      })
+    },
+
     updateMessage(uuid: string, index: number, chat: Chat.ChatMessage) {
       if (!uuid && this.chats.length) {
         this.chats[0].data[index] = chat
@@ -250,6 +260,14 @@ export const useChatStore = defineStore('chat-store', {
     async reloadRoute(uuid?: string) {
       this.recordState()
       await router.push({ name: 'ChatDetail', params: { uuid } })
+    },
+
+    addLoadingMsg(convUuid: string) {
+      this.loadingMsgs.add(convUuid)
+    },
+
+    deleteLoadingMsg(convUuid: string) {
+      this.loadingMsgs.delete(convUuid)
     },
 
     recordState() {

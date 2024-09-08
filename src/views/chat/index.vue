@@ -261,13 +261,17 @@ async function loadMoreMessage(event: any) {
     const scrollPosition = event.target.scrollHeight - event.target.scrollTop
     const minMsgUuid = chatStore.getCurConv?.minMsgUuid || ''
     const { data } = await api.fetchMessages<Chat.ConvMsgListResp>(curConvUuid, minMsgUuid, pageSize)
-    loadingms.destroy()
+
     nextTick(() => scrollTo(event.target.scrollHeight - scrollPosition))
     if (data.msgList.length < pageSize) {
       chatStore.updateConv(curConvUuid, { minMsgUuid: data.minMsgUuid, loadedAll: true })
+      loadingms.destroy()
       loadingms = ms.warning('没有更多了', {
         duration: 1000,
       })
+    } else {
+      chatStore.updateConv(curConvUuid, { minMsgUuid: data.minMsgUuid })
+      chatStore.unshiftMessages(curConvUuid, data.msgList)
     }
   } catch (error) {
     console.error(`loadMoreMessage${error}`)

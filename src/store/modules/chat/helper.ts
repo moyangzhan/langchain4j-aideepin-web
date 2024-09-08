@@ -16,6 +16,7 @@ export function defaultState(): Chat.ChatState {
     usingContext: true,
     conversations: [defaultConversation],
     chats: [{ uuid: defaultConversation.uuid, data: [] }],
+    loadingMsgs: new Set<string>(),
   }
 }
 

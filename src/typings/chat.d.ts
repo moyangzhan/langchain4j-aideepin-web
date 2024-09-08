@@ -32,6 +32,7 @@ declare namespace Chat {
 		usingContext: boolean
 		conversations: Conversation[]
 		chats: ConvWithMessages[]
+		loadingMsgs: Set<string>
 	}
 
 	interface ConversationRequest {

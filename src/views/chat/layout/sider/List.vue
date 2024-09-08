@@ -29,15 +29,7 @@ async function handleSelect({ uuid }: Chat.Conversation) {
     chatStore.updateConv(chatStore.active, {})
   await chatStore.setActive(uuid)
 
-  const minMsgUuid = chatStore.getCurConv?.minMsgUuid || ''
-  const cacheMessages = chatStore.getMsgsByConv(uuid)
-  if (cacheMessages.length === 0) {
-    const { data } = await api.fetchMessages<Chat.ConvMsgListResp>(uuid, minMsgUuid, 20)
-    data.msgList.forEach((messageRecord) => {
-      chatStore.addMessage(uuid, messageRecord, false)
-    })
-    chatStore.updateConv(uuid, { minMsgUuid: data.minMsgUuid, loadedFirstPageMsg: true })
-  }
+  await checkAndLoadFirstPageMsgsByConv(uuid)
 
   if (isMobile.value)
     appStore.setSiderCollapsed(true)
@@ -87,9 +79,36 @@ async function fetchHistory() {
     chatStore.addConvs(convs)
 
     const active = route.params.uuid as string
-    console.log('active', active)
-    if (active === 'default')
+    console.log('List.vue active', active)
+    if (active === 'default') {
       await handleSelect(convs[0])
+    } else {
+      // F5刷新页面时
+      await checkAndLoadFirstPageMsgsByConv(active)
+    }
+  }
+}
+
+/**
+ * 如果会话{uuid}的消息不存在，向服务端请求第一页
+ */
+async function checkAndLoadFirstPageMsgsByConv(uuid: string) {
+  if (chatStore.loadingMsgs.has(uuid))
+    return
+
+  chatStore.addLoadingMsg(uuid)
+  try {
+    const minMsgUuid = chatStore.getCurConv?.minMsgUuid || ''
+    const cacheMessages = chatStore.getMsgsByConv(uuid)
+    if (cacheMessages.length === 0) {
+      const { data } = await api.fetchMessages<Chat.ConvMsgListResp>(uuid, minMsgUuid, 20)
+      data.msgList.forEach((messageRecord) => {
+        chatStore.addMessage(uuid, messageRecord, false)
+      })
+      chatStore.updateConv(uuid, { minMsgUuid: data.minMsgUuid, loadedFirstPageMsg: true })
+    }
+  } finally {
+    chatStore.deleteLoadingMsg(uuid)
   }
 }
 
@@ -145,9 +164,7 @@ onMounted(() => {
           <a
             class="relative flex items-center gap-3 px-3 py-3 break-all border rounded-md cursor-pointer hover:bg-neutral-100 group dark:border-neutral-800 dark:hover:bg-[#24272e]"
             :class="isActive(item.uuid) && ['border-[#4b9e5f]', 'bg-neutral-100', 'text-[#4b9e5f]', 'dark:bg-[#24272e]', 'dark:border-[#4b9e5f]']"
-            @click="handleSelect(item)"
-            @mouseenter="handleMouseEnter(item)"
-            @mouseleave="handleMouseLeave"
+            @click="handleSelect(item)" @mouseenter="handleMouseEnter(item)" @mouseleave="handleMouseLeave"
           >
             <span>
               <SvgIcon icon="ri:message-3-line" />
