@@ -87,8 +87,8 @@ async function handleSubmit() {
       },
       messageRecived: (chunk) => {
         // Always process the final line
-        if (!chunk)
-          chunk = '\r\n'
+        if (chunk)
+          chunk = chunk.replace('-_-_wrap_-_-', '\r\n')
         try {
           kbStore.appendChunk(
             currKbUuid,
