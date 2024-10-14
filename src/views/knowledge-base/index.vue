@@ -2,13 +2,14 @@
 import type { Ref } from 'vue'
 import { computed, nextTick, onActivated, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NCollapse, NCollapseItem, NIcon, NInput, NModal, NSelect, useDialog, useMessage } from 'naive-ui'
+import { NButton, NCollapse, NCollapseItem, NFlex, NIcon, NInput, NModal, NSelect, useDialog, useMessage } from 'naive-ui'
 import type { MessageReactive } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { Message } from '../chat/components'
 import { useScroll } from '../chat/hooks/useScroll'
 import { useCopyCode } from '../chat/hooks/useCopyCode'
 import HeaderComponent from '../chat/components/Header/index.vue'
+import RefGraph from './RefGraph.vue'
 import { SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAppStore, useKbStore } from '@/store'
@@ -31,6 +32,8 @@ console.log('currKbUUid', currKbUuid)
 const showReferenceModal = ref<boolean>(false)
 const showReferenceRecordUuid = ref<string>('')
 const references = ref<KnowledgeBase.QaRecordReference[]>([])
+const showRefGraphModal = ref<boolean>(false)
+const showRefGraphRecordUuid = ref<string>('')
 const prompt = ref<string>('')
 const inputRef = ref<Ref | null>(null)
 
@@ -89,6 +92,7 @@ async function handleSubmit() {
         // Always process the final line
         if (chunk)
           chunk = chunk.replace('-_-_wrap_-_-', '\r\n')
+
         try {
           kbStore.appendChunk(
             currKbUuid,
@@ -229,6 +233,11 @@ async function handleReferenceClick(qaRecordUuid: string) {
   }
 }
 
+async function handleGraphClick(qaRecordUuid: string) {
+  showRefGraphModal.value = true
+  showRefGraphRecordUuid.value = qaRecordUuid
+}
+
 const qaRecords = computed(() => {
   console.log('qaRecords computed')
   return kbStore.getRecords(currKbUuid)
@@ -311,12 +320,21 @@ onActivated(async () => {
                 :regenerate="false" type="text" :inversion="false" :error="qaRecord.error" :loading="qaRecord.loading"
                 :ai-model-platform="qaRecord.aiModelPlatform" @delete="handleDelete(qaRecord.uuid)"
               >
-                <NButton
-                  v-if="!!qaRecord.answer && !qaRecord.loading" size="tiny" text type="primary"
-                  @click="handleReferenceClick(qaRecord.uuid)"
-                >
-                  引用
-                </NButton>
+                <NFlex>
+                  <NButton
+                    v-if="!!qaRecord.answer && !qaRecord.loading" size="tiny" text type="primary"
+                    @click="handleReferenceClick(qaRecord.uuid)"
+                  >
+                    引用
+                  </NButton>
+
+                  <NButton
+                    v-if="!!qaRecord.answer && !qaRecord.loading" size="tiny" text type="primary"
+                    @click="handleGraphClick(qaRecord.uuid)"
+                  >
+                    图谱
+                  </NButton>
+                </NFlex>
               </Message>
             </div>
           </template>
@@ -364,6 +382,10 @@ onActivated(async () => {
           {{ reference.text }}
         </NCollapseItem>
       </NCollapse>
+    </NModal>
+
+    <NModal v-model:show="showRefGraphModal" style="max-width: 80%;" preset="card" title="引用图谱">
+      <RefGraph :qa-record-uuid="showRefGraphRecordUuid" />
     </NModal>
   </div>
 </template>

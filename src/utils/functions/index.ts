@@ -21,10 +21,11 @@ export function knowledgeBaseEmptyInfo() {
     ownerName: '',
     itemCount: 0,
     embeddingCount: 0,
-    ragMaxOverlap: 0,
-    ragMaxResults: 0,
-    ragMinScore: 0,
-    llmTemperature: 0,
+    ingestMaxOverlap: 0,
+    ingestModelName: '',
+    retrieveMaxResults: 0,
+    retrieveMinScore: 0,
+    queryLlmTemperature: 0,
   }
 }
 
@@ -37,7 +38,10 @@ export function knowledgeBaseEmptyItem() {
     title: '',
     brief: '',
     remark: '',
-    isEmbedded: false,
+    embeddingStatus: 'NONE',
+    graphicalStatus: 'NONE',
+    embeddingStatusChangeTime: '',
+    graphicalStatusChangeTime: '',
     sourceFileName: '',
     sourceFileUuid: '',
   }

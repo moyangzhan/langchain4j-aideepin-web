@@ -12,10 +12,11 @@ declare namespace KnowledgeBase {
     loadingRecords?: boolean
     itemCount: number
     embeddingCount: number
-    ragMaxOverlap: number
-    ragMaxResults: number
-    ragMinScore: number
-    llmTemperature: number
+    ingestMaxOverlap: number
+    ingestModelName: string
+    retrieveMaxResults: number
+    retrieveMinScore: number
+    queryLlmTemperature: number
   }
   interface InfoListResp {
     total: number,
@@ -29,7 +30,10 @@ declare namespace KnowledgeBase {
     title: string
     brief: string
     remark: string
-    isEmbedded: boolean
+    embeddingStatus: string
+    graphicalStatus: string
+    embeddingStatusChangeTime: string
+    graphicalStatusChangeTime: string
     sourceFileName: string
     sourceFileUuid: string
   }
@@ -43,6 +47,22 @@ declare namespace KnowledgeBase {
     embeddingId: string
     embedding: number[]
     text: string
+  }
+  interface KbEdge {
+    id: number
+    label: string
+    startId: number
+    endId: number
+    description: string
+  }
+  interface KbVertex {
+    id: number
+    name: string
+    description: string
+  }
+  interface KbItemGraphResp {
+    vertices: KbVertex[]
+    edges: KbEdge[]
   }
   interface QaRecordListResp {
     total: number,
@@ -66,6 +86,11 @@ declare namespace KnowledgeBase {
     text: string
   }
 
+  interface QaRecordGraphRef {
+    vertices: KbVertex[]
+    edges: KbEdge[]
+  }
+
   interface KbState {
     selectedKbType: string
     activeKbUuid: string
@@ -74,6 +99,8 @@ declare namespace KnowledgeBase {
     kbUuidToQaRecords: Map<string, QaRecordInfo[]>
     kbUuidToStarInfo: Map<string, KbStarInfo>
     qaRecordToReferences: Map<string, KnowledgeBase.QaRecordReference[]>
+    qaRecordToGraphRef: Map<string, KnowledgeBase.QaRecordGraphRef>
+    loadingGraphRef: Map<string, boolean>
     loadingRecords: Map<string, boolean>
     loaddingKbList: boolean
     reloadKbInfosSignal: boolean
@@ -86,7 +113,7 @@ declare namespace KnowledgeBase {
   }
 
   interface KbStarListResp {
-		total: number
-		records: KnowledgeBase.KbStarInfo[]
-	}
+    total: number
+    records: KnowledgeBase.KbStarInfo[]
+  }
 }

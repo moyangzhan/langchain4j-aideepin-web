@@ -24,7 +24,7 @@ if (active === 'success') {
 const intervalId = setInterval(() => {
   if (countdown.value < 1) {
     clearInterval(intervalId)
-    router.push('/chat')
+    router.push('/')
   } else {
     countdown.value--
   }

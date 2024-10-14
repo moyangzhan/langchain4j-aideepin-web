@@ -10,6 +10,8 @@ export const useKbStore = defineStore('kb-store', {
       kbUuidToQaRecords: new Map<string, KnowledgeBase.QaRecordInfo[]>(),
       kbUuidToStarInfo: new Map<string, KnowledgeBase.KbStarInfo>(),
       qaRecordToReferences: new Map<string, KnowledgeBase.QaRecordReference[]>(),
+      qaRecordToGraphRef: new Map<string, KnowledgeBase.QaRecordGraphRef>(),
+      loadingGraphRef: new Map<string, boolean>(),
       loadingRecords: new Map<string, boolean>(),
       loaddingKbList: false,
       reloadKbInfosSignal: false,
@@ -32,6 +34,22 @@ export const useKbStore = defineStore('kb-store', {
         if (references)
           return references
         return []
+      }
+    },
+    getGraphRef(state: KnowledgeBase.KbState) {
+      return (qaRecordUuid: string) => {
+        const graphRef = state.qaRecordToGraphRef.get(qaRecordUuid)
+        if (graphRef)
+          return graphRef
+        return null
+      }
+    },
+    isLoadingGraphRef(state: KnowledgeBase.KbState) {
+      return (qaRecordUuid: string) => {
+        const loading = state.loadingGraphRef.get(qaRecordUuid)
+        if (loading)
+          return loading
+        return false
       }
     },
   },
@@ -136,6 +154,14 @@ export const useKbStore = defineStore('kb-store', {
 
     setQaRecordReferences(qaRecordUuid: string, references: KnowledgeBase.QaRecordReference[]) {
       this.qaRecordToReferences.set(qaRecordUuid, !references ? [] : references)
+    },
+
+    setQaRecordGraphRef(qaRecordUuid: string, graphRef: KnowledgeBase.QaRecordGraphRef) {
+      this.qaRecordToGraphRef.set(qaRecordUuid, graphRef)
+    },
+
+    setLoadingGraphRef(qaRecordUuid: string, loading: boolean) {
+      this.loadingGraphRef.set(qaRecordUuid, loading)
     },
   },
 })

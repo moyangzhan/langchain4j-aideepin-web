@@ -318,12 +318,18 @@ function knowledgeBaseDelete<T = any>(uuid: string) {
   })
 }
 
-function knowledgeBaseItemsEmbedding<T = any>(uuids: string[]) {
+function knowledgeBaseItemsIndexing<T = any>(uuids: string[]) {
   return post<T>({
-    url: '/knowledge-base/item/embedding-list',
+    url: '/knowledge-base/item/indexing-list',
     data: {
       uuids,
     },
+  })
+}
+
+function knowledgeBaseIndexingCheck<T = any>() {
+  return get<T>({
+    url: '/knowledge-base/indexing/check',
   })
 }
 
@@ -350,6 +356,18 @@ function knowledgeBaseItemDelete<T = any>(uuid: string) {
 function knowledgeBaseEmbedding<T = any>(kbItemUuid: string, currentPage: number, pageSize: number) {
   return get<T>({
     url: `/knowledge-base-embedding/list/${kbItemUuid}?currentPage=${currentPage}&pageSize=${pageSize}`,
+  })
+}
+
+function knowledgeBaseGraph<T = any>(kbItemUuid: string, maxVertextId: number, maxEdgeId: number, limit: number) {
+  return get<T>({
+    url: `/knowledge-base-graph/list/${kbItemUuid}?limit=${limit}&maxEdgeId=${maxEdgeId}&maxVertexId=${maxVertextId}`,
+  })
+}
+
+function knowledgeBaseGraphRef<T = any>(recordUuid: string) {
+  return get<T>({
+    url: `/knowledge-base/qa/record/graph-ref/${recordUuid}`,
   })
 }
 
@@ -475,14 +493,17 @@ export default {
   knowledgeBaseItemSaveOrUpdate,
   knowledgeBaseItemSearch,
   knowledgeBaseItemDelete,
-  knowledgeBaseItemsEmbedding,
+  knowledgeBaseItemsIndexing,
+  knowledgeBaseIndexingCheck,
   knowledgeBaseEmbedding,
+  knowledgeBaseGraph,
   knowledgeBaseQaSseAsk,
   knowledgeBaseQaRecordSearch,
   knowledgeBaseQaRecordAdd,
   knowledgeBaseQaRecordDel,
   knowledgeBaseQaRecordClear,
   knowledgeBaseRecordReference,
+  knowledgeBaseGraphRef,
   knowledgeBaseStarListMine,
   loadSearchEngines,
   loadLLMs,

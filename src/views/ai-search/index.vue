@@ -83,9 +83,8 @@ async function handleSubmit() {
         aiSearchStore.updateRecord(tmpRecord)
       },
       messageRecived: (chunk, eventName) => {
-        console.log(chunk)
-        if (!chunk)
-          chunk = '\r\n'
+        if (chunk)
+          chunk = chunk.replace('-_-_wrap_-_-', '\r\n')
 
         if (eventName === '[SOURCE_LINKS]') {
           aiSearchStore.setSourceSites(

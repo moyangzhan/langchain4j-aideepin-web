@@ -246,7 +246,7 @@ watch(
         </NRadio>
       </NRadioGroup>
       <div>
-        严格模型
+        严格模式
         <NTooltip trigger="hover">
           <template #trigger>
             <NIcon style="padding-top: 0.1rem">
@@ -266,19 +266,25 @@ watch(
         </NRadio>
       </NRadioGroup>
       <NCollapse>
-        <NCollapseItem title="RAG设置">
-          文档切割时重叠数量
-          <NInputNumber v-model:value="tmpKb.ragMaxOverlap" />
-          文档召回最大数量
-          <NInputNumber v-model:value="tmpKb.ragMaxResults" />
-          文档召回最小分数
-          <NInputNumber v-model:value="tmpKb.ragMinScore" :precision="1" :min="0" :max="1" />
+        <NCollapseItem title="文档索引设置">
+          文档切割时重叠数量（改动后对新索引生效）
+          <NInputNumber v-model:value="tmpKb.ingestMaxOverlap" />
+          模型名称（抽取图数据时使用的模型，为空则使用第一个可用的模型）
+          <NInput v-model:value="tmpKb.ingestModelName" />
         </NCollapseItem>
       </NCollapse>
       <NCollapse>
-        <NCollapseItem title="LLM设置">
+        <NCollapseItem title="文档召回设置">
+          文档召回最大数量
+          <NInputNumber v-model:value="tmpKb.retrieveMaxResults" />
+          文档召回最小分数
+          <NInputNumber v-model:value="tmpKb.retrieveMinScore" :precision="1" :min="0" :max="1" />
+        </NCollapseItem>
+      </NCollapse>
+      <NCollapse>
+        <NCollapseItem title="用户请求设置">
           响应时的创造性/随机性
-          <NInputNumber v-model:value="tmpKb.llmTemperature" :precision="1" :min="0" :max="1" />
+          <NInputNumber v-model:value="tmpKb.queryLlmTemperature" :precision="1" :min="0" :max="1" />
         </NCollapseItem>
       </NCollapse>
       <NButton block type="primary" :disabled="inputStatus" @click="() => { saveOrUpdateKb() }">

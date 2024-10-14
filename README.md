@@ -1,15 +1,25 @@
 # AIDeepIn Web
 
-
-
 ## 介绍
 
-本仓库为langchain4j-aideepin的前端项目，langchain4j-aideepin是基于 ChatGPT 等大语言模型与 Langchain4j 等应用框架实现，开源、可离线部署的检索增强生成(RAG)项目。
+本仓库是langchain4j-aideepin的前端项目
 
-> **该项目如对您有帮助，欢迎点赞**
+**LangChain4j-AIDeepin 是基于AI的企业内部提效工具。**
+
+ *可用于辅助技术研发、产品设计、规章制度咨询、系统或商品咨询、客服话术支撑等工作*
+
+> **🌟该项目如对您有帮助，欢迎点赞🌟**
+
+## 系统组成及文档
+
+AIDEEPIN
+  |__ 服务端(langchain4j-aideepin)
+  |__ 用户端WEB(langchain4j-aideepin-web)
+  |__ 管理端WEB(langchain4j-aideepin-admin)
+
+👉[详细文档](https://github.com/moyangzhan/langchain4j-aideepin/wiki)
 
 代码仓库地址： [github](https://github.com/moyangzhan/langchain4j-aideepin-web)   [gitee](https://gitee.com/moyangzhan/langchain4j-aideepin-web)
-
 
 关联项目
 
@@ -19,7 +29,6 @@
 * 用户端WEB langchain4j-aideepin-admin:
   * [github](https://github.com/moyangzhan/langchain4j-aideepin-admin)
   * [gitee](https://gitee.com/moyangzhan/langchain4j-aideepin-admin)
-
 
 ## 功能点
 
@@ -173,13 +182,17 @@ AI聊天：
 ![1691583184761](image/README/1691583184761.png)
 
 AI绘图：
-![1691583124744](image/README/1691583124744.png)
+![draw_001](image/README/draw_001.png)
+
+![draw_002](image/README/draw_002.png)
 
 知识库：
 ![1691583329105](image/README/kbidx.png)
 ![1691583329105](image/README/kb01.png)
 ![1691583329105](image/README/kb02.png)
 ![1691583329105](image/README/kb03.png)
+![kb_graph_01](image/README/kb_graph_01.png)
+![kb_graph_02](image/README/kb_graph_02.png)
 
 token统计：
 ![1691583329105](image/README/1691583329105.png)

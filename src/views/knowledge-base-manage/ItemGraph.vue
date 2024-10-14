@@ -1,0 +1,182 @@
+<script setup lang='ts'>
+import { nextTick, onMounted, ref, watch } from 'vue'
+import { NButton, NDivider, NFlex } from 'naive-ui'
+import cytoscape from 'cytoscape'
+import api from '@/api'
+
+interface Props {
+  kbItemUuid: string
+}
+const props = withDefaults(defineProps<Props>(), {
+  kbItemUuid: '',
+})
+const limit = 100
+const loading = ref(false)
+const selectedVertex = ref<KnowledgeBase.KbVertex | null>()
+const selectedEdge = ref<KnowledgeBase.KbEdge | null>()
+let cy: any = null
+
+async function loadGraph(maxVertexId: number, maxEdgeId: number) {
+  if (loading.value)
+    return
+
+  loading.value = true
+  try {
+    if (cy) {
+      console.log(cy.$('node'))
+      cy.$('node').remove()
+      cy.$('edge').remove()
+    }
+    const resp = await api.knowledgeBaseGraph<KnowledgeBase.KbItemGraphResp>(props.kbItemUuid, maxVertexId, maxEdgeId, limit)
+    const nodes = resp.data.vertices.map((item) => {
+      return { group: 'nodes', data: item }
+    })
+    const edges = resp.data.edges.map((item) => {
+      return { group: 'edges', data: { source: `${item.startId}`, target: `${item.endId}`, ...item } }
+    })
+    nextTick(() => {
+      if (!cy)
+        initCy()
+
+      renderGraph(nodes, edges)
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  if (!cy) {
+    nextTick(() => {
+      console.log('onMounted nextTick')
+      // initCy()
+    })
+  }
+})
+
+function initCy() {
+  cy = cytoscape({
+    container: document.getElementById('cy'),
+    elements: [],
+    style: [
+      {
+        selector: 'node',
+        style: {
+          content: 'data(name)',
+          width: 30,
+          height: 30,
+        },
+      },
+    ],
+  })
+}
+
+function renderGraph(nodes: any, edges: any) {
+  console.log('renderGraph')
+  if (nodes.length > 0) {
+    cy.add(nodes)
+    cy.nodes().on('click', (e: any) => {
+      const clickedNode = e.target
+      selectedVertex.value = clickedNode.data()
+      selectedEdge.value = null
+    })
+  }
+  if (edges.length > 0) {
+    cy.add(edges)
+    cy.edges().on('click', (e: any) => {
+      const clickedNode = e.target
+      selectedVertex.value = null
+      selectedEdge.value = clickedNode.data()
+    })
+  }
+  relayout()
+}
+
+function relayout() {
+  const options = {
+    name: 'cose',
+    // Called on `layoutready`
+    ready() { },
+    // Called on `layoutstop`
+    stop() { },
+    // Whether to animate while running the layout
+    // true : Animate continuously as the layout is running
+    // false : Just show the end result
+    // 'end' : Animate with the end result, from the initial positions to the end positions
+    animate: true,
+    // Easing of the animation for animate:'end'
+    animationEasing: undefined,
+    // The duration of the animation for animate:'end'
+    animationDuration: undefined,
+    animateFilter(node: any, i: any) { return true },
+    // The layout animates only after this many milliseconds for animate:true
+    // (prevents flashing on fast runs)
+    animationThreshold: 250,
+    refresh: 20,
+    // Whether to fit the network view after when done
+    fit: true,
+    padding: 30,
+    boundingBox: undefined,
+    nodeDimensionsIncludeLabels: false,
+    randomize: false,
+    componentSpacing: 40,
+    nodeRepulsion(node: any) { return 2048 },
+    nodeOverlap: 4,
+    idealEdgeLength(edge: any) { return 32 },
+    edgeElasticity(edge: any) { return 32 },
+    nestingFactor: 1.2,
+    gravity: 1,
+    numIter: 1000,
+    initialTemp: 1000,
+    coolingFactor: 0.99,
+    minTemp: 1.0,
+  }
+  const layout = cy.layout(options)
+  layout.run()
+}
+
+watch(
+  () => props.kbItemUuid,
+  (newVal, oldVal) => {
+    console.log(`newVal:${props.kbItemUuid},oldVal:${oldVal}`)
+    if (newVal !== oldVal)
+      loadGraph(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+  },
+  { immediate: true },
+)
+</script>
+
+<template>
+  <NFlex>
+    <div id="cy" style="width:80%; height: 400px;" class="border border-gray-300" />
+    <div class="w-1/6 h-[400px] overflow-y-auto">
+      <NButton size="small" :loading="loading" type="info" ghost @click="relayout">
+        重新布局
+      </NButton>
+      <NFlex v-if="selectedVertex" vertical>
+        <NDivider title-placement="left">
+          实体
+        </NDivider>
+        <div>{{ selectedVertex.id }}</div>
+        <NDivider title-placement="left">
+          名称
+        </NDivider>
+        <div>{{ selectedVertex.name }}</div>
+        <NDivider title-placement="left">
+          描述
+        </NDivider>
+        <div>{{ selectedVertex.description }}</div>
+      </NFlex>
+      <NFlex v-if="selectedEdge" vertical>
+        <NDivider title-placement="left">
+          关系
+        </NDivider>
+        <div>{{ selectedEdge.id }}</div>
+        <NDivider title-placement="left">
+          描述
+        </NDivider>
+        <div>{{ selectedEdge.description }}</div>
+      </NFlex>
+    </div>
+  </NFlex>
+</template>
