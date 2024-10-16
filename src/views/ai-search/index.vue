@@ -83,6 +83,7 @@ async function handleSubmit() {
         aiSearchStore.updateRecord(tmpRecord)
       },
       messageRecived: (chunk, eventName) => {
+        console.log(chunk)
         if (chunk)
           chunk = chunk.replace('-_-_wrap_-_-', '\r\n')
 

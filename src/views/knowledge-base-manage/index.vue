@@ -1,11 +1,11 @@
 <script setup lang='ts'>
 import type { DataTableColumns } from 'naive-ui'
 import { computed, h, reactive, ref, watch } from 'vue'
-import { NBreadcrumb, NBreadcrumbItem, NButton, NCollapse, NCollapseItem, NDataTable, NIcon, NInput, NInputNumber, NModal, NRadio, NRadioGroup, NSpace, NTooltip, useDialog, useMessage } from 'naive-ui'
+import { NBreadcrumb, NBreadcrumbItem, NButton, NCollapse, NCollapseItem, NDataTable, NIcon, NInput, NInputNumber, NModal, NRadio, NRadioGroup, NSelect, NSpace, NTooltip, useDialog, useMessage } from 'naive-ui'
 import { RouterLink, useRouter } from 'vue-router'
 import { QuestionCircle16Regular } from '@vicons/fluent'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useAuthStore, useKbStore } from '@/store'
+import { useAppStore, useAuthStore, useKbStore } from '@/store'
 import { knowledgeBaseEmptyInfo } from '@/utils/functions'
 import { t } from '@/locales'
 import api from '@/api'
@@ -13,6 +13,7 @@ import api from '@/api'
 const router = useRouter()
 const dialog = useDialog()
 const ms = useMessage()
+const appStore = useAppStore()
 const loading = ref(false)
 const submitting = ref(false)
 const showModal = ref(false)
@@ -270,7 +271,7 @@ watch(
           文档切割时重叠数量（改动后对新索引生效）
           <NInputNumber v-model:value="tmpKb.ingestMaxOverlap" />
           模型名称（抽取图数据时使用的模型，为空则使用第一个可用的模型）
-          <NInput v-model:value="tmpKb.ingestModelName" />
+          <NSelect v-model:value="tmpKb.ingestModelId" :options="appStore.llms" />
         </NCollapseItem>
       </NCollapse>
       <NCollapse>

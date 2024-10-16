@@ -22,7 +22,7 @@ export function knowledgeBaseEmptyInfo() {
     itemCount: 0,
     embeddingCount: 0,
     ingestMaxOverlap: 0,
-    ingestModelName: '',
+    ingestModelId: 0,
     retrieveMaxResults: 0,
     retrieveMinScore: 0,
     queryLlmTemperature: 0,
