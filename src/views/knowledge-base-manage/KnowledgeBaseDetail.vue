@@ -316,7 +316,7 @@ watch(
   </div>
 
   <NModal
-    v-model:show="showItemEditModal" style="width: 90%; max-width: 600px;max-height: 700px;" preset="card"
+    v-model:show="showItemEditModal" style="width: 90%; max-height: 700px;" preset="card"
     title="知识点-新增|编辑"
   >
     <NSpace vertical>

@@ -8,12 +8,14 @@ const defaultConversation = {
   understandContextEnable: false,
   loadedAll: false,
   loadedFirstPageMsg: false,
+  usedPreset: false,
 }
 
 export function defaultState(): Chat.ChatState {
   return {
     active: defaultConversation.uuid,
     usingContext: true,
+    presetConvs: [],
     conversations: [defaultConversation],
     chats: [{ uuid: defaultConversation.uuid, data: [] }],
     loadingMsgs: new Set<string>(),

@@ -270,6 +270,24 @@ export const useChatStore = defineStore('chat-store', {
       this.loadingMsgs.delete(convUuid)
     },
 
+    setPresetConvs(convs: Chat.ConversationPreset[]) {
+      this.presetConvs.splice(0, this.presetConvs.length)
+      convs.forEach((item) => {
+        if (this.presetConvs.findIndex(innerItem => innerItem.uuid === item.uuid) !== -1)
+          return
+        if (!item.used)
+          item.used = false
+
+        this.presetConvs.push(item)
+      })
+    },
+
+    setUsedPresetConv(rels: Chat.ConvToPresetRel[]) {
+      this.presetConvs.forEach((item) => {
+        const hit = rels.some(rel => rel.presetConvId === item.id)
+        item.used = hit
+      })
+    },
     recordState() {
 
     },

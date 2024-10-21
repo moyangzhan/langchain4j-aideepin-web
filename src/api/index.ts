@@ -49,6 +49,28 @@ function convDel<T = any>(uuid: string) {
   })
 }
 
+function searchPresetConvs<T = any>(keyword = '') {
+  return post<T>({
+    url: '/conversation-preset/search?currentPage=1&pageSize=100',
+    data: {
+      keyword,
+    },
+  })
+}
+
+// 搜索会话与预设会话关联关系
+function listConvPresetRels<T = any>() {
+  return get<T>({
+    url: '/conversation-preset-rel/mine?limit=100',
+  })
+}
+
+function convAddByPreset<T = any>(params: { presetConvUuid: string }) {
+  return post<T>({
+    url: `/conversation/addByPreset?presetUuid=${params.presetConvUuid}`,
+  })
+}
+
 function fetchMessages<T = any>(conversationUuid: string, maxMsgUuid: string, pageSize: number) {
   return get<T>({
     url: `/conversation/${conversationUuid}?maxMsgUuid=${maxMsgUuid}&pageSize=${pageSize}`,
@@ -465,9 +487,12 @@ export default {
   userEdit,
   fetchConvs,
   convAdd,
+  convAddByPreset,
   convEdit,
   convToggleUsingContext,
   convDel,
+  searchPresetConvs,
+  listConvPresetRels,
   fetchMessages,
   sseProcess,
   searchPrompts,

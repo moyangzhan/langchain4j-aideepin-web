@@ -12,6 +12,23 @@ declare namespace Chat {
 		aiModelPlatform?: string
 	}
 
+	interface ConversationPreset {
+		id: string
+		uuid: string
+		title: string
+		remark: string
+		aiSystemMessage: string
+
+		used: boolean
+	}
+
+	interface ConvToPresetRel {
+		id: string
+		uuid: string
+		userConvId: string
+		presetConvId: string
+	}
+
 	interface Conversation {
 		title: string
 		uuid: string
@@ -22,7 +39,7 @@ declare namespace Chat {
 		minMsgUuid?: string | ''
 	}
 
-	interface ConvWithMessages{
+	interface ConvWithMessages {
 		uuid: string
 		data: ChatMessage[]
 	}
@@ -33,6 +50,7 @@ declare namespace Chat {
 		conversations: Conversation[]
 		chats: ConvWithMessages[]
 		loadingMsgs: Set<string>
+		presetConvs: ConversationPreset[]
 	}
 
 	interface ConversationRequest {
