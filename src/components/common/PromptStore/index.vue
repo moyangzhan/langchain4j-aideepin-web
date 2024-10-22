@@ -158,8 +158,8 @@ const importPromptTemplate = async (from = 'online') => {
 const exportPromptTemplate = async () => {
   exportLoading.value = true
   try {
-    const allPrompts = await api.searchPrompts<Chat.Prompt>(1, 10000)
-    const jsonDataStr = JSON.stringify(allPrompts.data)
+    const resp = await api.searchPrompts<PageResponse>(1, 10000)
+    const jsonDataStr = JSON.stringify(resp.data)
     const blob = new Blob([jsonDataStr], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')

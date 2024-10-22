@@ -48,7 +48,7 @@ let arrowKeyIdx = -1
 // 添加PromptStore
 const promptStore = usePromptStore()
 // 使用storeToRefs，保证store修改后，联想部分能够重新渲染
-const { promptList: promptTemplate } = storeToRefs<any>(promptStore)
+const { promptList: promptTemplateList } = storeToRefs<any>(promptStore)
 let prevScrollTop: number
 let loadingms: MessageReactive
 
@@ -386,21 +386,24 @@ const searchOptions = computed(() => {
   if (prompt.value.indexOf('/') === 0)
     searchRemote()
 
-  return promptTemplate.value
+  return promptTemplateList.value
 })
 
 async function searchRemote() {
-  const resp = await api.searchPrompts<Chat.Prompt[]>(1, 10, prompt.value)
-  promptTemplate.value = resp.data.map((item) => {
-    return {
-      label: item.act,
-      value: item.prompt,
-    }
-  })
+  const resp = await api.searchPrompts<PageResponse>(1, 10, prompt.value.substring(1))
+  promptTemplateList.value.splice(0, promptTemplateList.value.length)
+  if (resp.success && resp.data.records) {
+    resp.data.records.forEach((item: Chat.Prompt) => {
+      promptTemplateList.value.push({
+        label: item.act,
+        value: item.prompt,
+      })
+    })
+  }
 }
 
 function getShow(value: string) {
-  if (value === '/')
+  if (value.indexOf('/') === 0)
     return true
 
   return false
@@ -408,7 +411,7 @@ function getShow(value: string) {
 
 // value反渲染key
 const renderOption = (option: { label: string }) => {
-  for (const i of promptTemplate.value) {
+  for (const i of promptTemplateList.value) {
     if (i.value === option.label)
       return [i.key]
   }
@@ -418,7 +421,7 @@ const renderOption = (option: { label: string }) => {
 const placeholder = computed(() => {
   if (isMobile.value)
     return t('chat.placeholderMobile')
-  return t('chat.placeholder')
+  return 'Shift + Enter = 换行 ；/ 开头显示提示词'
 })
 
 const buttonDisabled = computed(() => {
@@ -563,10 +566,7 @@ onDeactivated(() => {
           <div class="w-48">
             <NSelect :value="appStore.selectedLLM.modelId" :options="appStore.llms" @update:value="handleChangeModel" />
           </div>
-          <NAutoComplete
-            v-model:value="prompt" class="grow" :options="searchOptions" :get-show="getShow"
-            :render-label="renderOption"
-          >
+          <NAutoComplete v-model:value="prompt" class="grow" :options="searchOptions" :get-show="getShow">
             <template #default="{ handleInput, handleBlur, handleFocus }">
               <NInput
                 ref="inputRef" v-model:value="prompt" type="textarea" :placeholder="placeholder"
