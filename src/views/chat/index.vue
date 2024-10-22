@@ -379,9 +379,6 @@ function handleStop() {
   }
 }
 
-// 可优化部分
-// 搜索选项计算，这里使用value作为索引项，所以当出现重复value时渲染异常(多项同时出现选中效果)
-// 理想状态下其实应该是key作为索引项,但官方的renderOption会出现问题，所以就需要value反renderLabel实现
 const searchOptions = computed(() => {
   if (prompt.value.indexOf('/') === 0)
     searchRemote()
@@ -407,15 +404,6 @@ function getShow(value: string) {
     return true
 
   return false
-}
-
-// value反渲染key
-const renderOption = (option: { label: string }) => {
-  for (const i of promptTemplateList.value) {
-    if (i.value === option.label)
-      return [i.key]
-  }
-  return []
 }
 
 const placeholder = computed(() => {
