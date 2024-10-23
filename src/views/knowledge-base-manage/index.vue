@@ -35,6 +35,11 @@ const token = ref<string>(authStore.token)
 const changeShowModal = (selected: KnowledgeBase.Info = knowledgeBaseEmptyInfo()) => {
   Object.assign(tmpKb, selected)
   showModal.value = !showModal.value
+  if (tmpKb.ingestModelId === '0') {
+    const firstEnableModel = appStore.llms.find(item => item.enable)
+    if (firstEnableModel)
+      tmpKb.ingestModelId = firstEnableModel.modelId
+  }
 }
 // table相关
 const createColumns = (): DataTableColumns<KnowledgeBase.Info> => {

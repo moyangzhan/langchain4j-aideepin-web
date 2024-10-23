@@ -13,7 +13,7 @@ declare namespace KnowledgeBase {
     itemCount: number
     embeddingCount: number
     ingestMaxOverlap: number
-    ingestModelId: number
+    ingestModelId: string
     retrieveMaxResults: number
     retrieveMinScore: number
     queryLlmTemperature: number
