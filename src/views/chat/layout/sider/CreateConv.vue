@@ -1,9 +1,11 @@
 <script setup lang='ts'>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { NButton, NFlex, NInput, NList, NListItem, NModal, NScrollbar, NTabPane, NTabs, NThing, useMessage } from 'naive-ui'
-import { useChatStore } from '@/store'
+import { useAuthStore, useChatStore } from '@/store'
 import api from '@/api'
 
+const authStore = useAuthStore()
+const authStoreRef = ref<AuthState>(authStore)
 const convSaving = ref<boolean>(false)
 const loadingPresetConvs = ref<boolean>(false)
 const loadingRels = ref<boolean>(false)
@@ -97,9 +99,21 @@ async function handleUsePresetConv(presetConvUuid: string) {
   await searchPresetConvRel()
 }
 
+watch(
+  () => authStoreRef.value.token,
+  (newVal) => {
+    if (newVal) {
+      searchPresetConvs()
+      searchPresetConvRel()
+    }
+  },
+)
+
 onMounted(async () => {
-  await searchPresetConvs()
-  await searchPresetConvRel()
+  if (authStoreRef.value.token) {
+    searchPresetConvs()
+    searchPresetConvRel()
+  }
 })
 
 function toggleModal() {
