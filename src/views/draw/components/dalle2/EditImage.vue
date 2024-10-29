@@ -216,7 +216,7 @@ async function handleSubmit(prompt: string) {
       </NCol>
       <NCol :span="12">
         <NUpload
-          :action="`/api/file/upload?token=${token}`" :max="1" response-type="text" list-type="image-card"
+          :action="`/api/image/upload?token=${token}`" :max="1" response-type="text" list-type="image-card"
           :default-file-list="originalImageList" @before-upload="beforeUpload" @finish="handleOriginalFinish"
           @remove="removeOriginalImage"
         >
@@ -238,7 +238,7 @@ async function handleSubmit(prompt: string) {
       </NCol>
       <NCol :span="12">
         <NUpload
-          :action="`/api/file/upload?token=${token}`" :max="1" response-type="text" list-type="image-card"
+          :action="`/api/image/upload?token=${token}`" :max="1" response-type="text" list-type="image-card"
           :default-file-list="maskImageList" @before-upload="beforeUpload" @finish="handleMaskFinish"
           @remove="removeMaskImage"
         >

@@ -99,7 +99,7 @@ async function handleSubmit() {
       </NCol>
       <NCol :span="12">
         <NUpload
-          action="/api/file/upload" :max="1" response-type="text" list-type="image-card"
+          action="/api/image/upload" :max="1" response-type="text" list-type="image-card"
           @before-upload="beforeUpload" @finish="handleOriginalFinish" @remove="removeOriginalImage"
         >
           上传小于4MB的PNG图片
