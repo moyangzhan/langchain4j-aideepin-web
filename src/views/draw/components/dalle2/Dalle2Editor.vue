@@ -6,7 +6,7 @@ import EditImage from './EditImage.vue'
 import VariationImage from './VariationImage.vue'
 
 interface Emit {
-  (e: 'scrollToBottom'): void
+  (e: 'submitted'): void
 }
 interface TabObj {
   name: string
@@ -38,7 +38,7 @@ function handleClick(tabOjb: TabObj) {
 }
 
 function handleScrollToBottom() {
-  emit('scrollToBottom')
+  emit('submitted')
 }
 </script>
 
@@ -55,7 +55,7 @@ function handleScrollToBottom() {
         :tab-props="{ style: 'display:none' }"
       >
         <transition name="collapse">
-          <GenerateImage v-show="tabPanelShow" @scroll-to-bottom="handleScrollToBottom" />
+          <GenerateImage v-show="tabPanelShow" @submitted="handleScrollToBottom" />
         </transition>
       </NTabPane>
       <NTabPane

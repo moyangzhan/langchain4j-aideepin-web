@@ -3,8 +3,8 @@ import type { Ref } from 'vue'
 import { computed, nextTick, onActivated, onDeactivated, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { NAutoComplete, NButton, NIcon, NInput, NSelect, NTabPane, NTabs, useDialog, useMessage } from 'naive-ui'
-import type { MessageReactive, SelectOption } from 'naive-ui'
+import { NAutoComplete, NButton, NIcon, NInput, NTabPane, NTabs, useDialog, useMessage } from 'naive-ui'
+import type { MessageReactive } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { v4 as uuidv4 } from 'uuid'
 import { Message } from './components'
@@ -12,14 +12,14 @@ import { useScroll } from './hooks/useScroll'
 import { useChat } from './hooks/useChat'
 import { useCopyCode } from './hooks/useCopyCode'
 import HeaderComponent from './components/Header/index.vue'
-import { HoverButton, SvgIcon } from '@/components/common'
+import InputToolbar from './InputToolbar.vue'
+import { SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAppStore, useChatStore, usePromptStore } from '@/store'
 import { defaultConv } from '@/store/modules/chat/helper'
 import api from '@/api'
 import { t } from '@/locales'
 import { debounce } from '@/utils/functions/debounce'
-
 let controller = new AbortController()
 
 const pageSize = 10
@@ -38,7 +38,7 @@ const messages = computed(() => {
   return chatStore.getMsgsByConv(curConvUuid)
 })
 const currConv = computed(() => chatStore.getCurConv || defaultConv())
-
+const imageUuids = ref<string[]>([])
 const prompt = ref<string>('')
 const loading = ref<boolean>(false)
 const loadingMsgs = ref<boolean>(false)
@@ -60,10 +60,6 @@ messages.value.forEach((item) => {
     updateMessageSomeFields(curConvUuid, item.uuid, { loading: false })
 })
 
-function handleChangeModel(value: string, option: SelectOption) {
-  appStore.setSelectedLLM(value)
-}
-
 function handleSubmit() {
   createChatTask()
 }
@@ -76,6 +72,7 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
       conversationUuid: curConvUuid,
       regenerateQuestionUuid,
       modelName: appStore.selectedLLM.modelName,
+      imageUrls: imageUuids.value,
     },
     signal: controller.signal,
     startCallback(chunk) {
@@ -176,9 +173,11 @@ async function createChatTask() {
         inversion: false,
         error: false,
         aiModelPlatform: appStore.selectedLLM.modelPlatform,
+        attachments: [],
       }],
       inversion: true,
       error: false,
+      attachments: [],
     },
     true,
   )
@@ -225,6 +224,7 @@ async function onRegenerate(questionUuid: string) {
       inversion: false,
       error: false,
       loading: true,
+      attachments: [],
     },
   )
 
@@ -432,6 +432,10 @@ function toggleUsingContext() {
     ms.warning(t('chat.turnOffContext'))
 }
 
+function imagesChange(uuids: string[]) {
+  imageUuids.value = uuids
+}
+
 watch(
   () => currConv.value.loadedFirstPageMsg,
   () => {
@@ -489,11 +493,24 @@ onDeactivated(() => {
 
           <template v-else>
             <div v-for="(question, index) of messages" :key="index">
-              <Message
-                :date-time="question.createTime" :text="question.remark" type="text" :inversion="true"
-                :error="question.error" :loading="false" @regenerate="onRegenerate(question.uuid)"
-                @delete="handleDelete(question.uuid, '', true)"
-              />
+              <!-- 多模态的请求消息，携带有附件 -->
+              <template v-if="question.attachments.length > 0">
+                <Message
+                  :date-time="question.createTime" :text="question.remark" :image-urls="question.attachments"
+                  type="text-image" :inversion="true" :error="question.error" :loading="false"
+                  @regenerate="onRegenerate(question.uuid)" @delete="handleDelete(question.uuid, '', true)"
+                />
+              </template>
+              <!-- 非多模态的请求消息，没有附件 -->
+              <template v-if="question.attachments.length === 0">
+                <Message
+                  :date-time="question.createTime" :text="question.remark" type="text" :inversion="true"
+                  :error="question.error" :loading="false" @regenerate="onRegenerate(question.uuid)"
+                  @delete="handleDelete(question.uuid, '', true)"
+                />
+              </template>
+
+              <!-- LLM的多条回复消息 -->
               <template v-if="question.children.length > 1">
                 <NTabs
                   v-model:value="tabsActiveTab[index]" pane-wrapper-style="margin: -30px -30px"
@@ -514,6 +531,7 @@ onDeactivated(() => {
                 </NTabs>
               </template>
 
+              <!-- LLM的单条回复消息 -->
               <template v-if="question.children.length === 1">
                 <Message
                   :date-time="question.children[0].createTime" :text="question.children[0].remark" type="text"
@@ -537,23 +555,9 @@ onDeactivated(() => {
       </div>
     </main>
     <footer :class="footerClass">
-      <div class="w-full max-w-screen-xl m-auto">
+      <div class="w-full max-w-screen-xl m-auto border-t">
+        <InputToolbar @images-change="imagesChange" />
         <div class="flex items-center space-x-2">
-          <HoverButton
-            v-if="!isMobile"
-            :tooltip="currConv.understandContextEnable ? $t('chat.understandContextEnable') : $t('chat.understandContextDisable')"
-            @click="toggleUsingContext"
-          >
-            <span
-              class="text-xl"
-              :class="{ 'text-[#4b9e5f]': currConv.understandContextEnable, 'text-[#a8071a]': !currConv.understandContextEnable }"
-            >
-              <SvgIcon icon="ri:chat-history-line" />
-            </span>
-          </HoverButton>
-          <div class="w-48">
-            <NSelect :value="appStore.selectedLLM.modelId" :options="appStore.llms" @update:value="handleChangeModel" />
-          </div>
           <NAutoComplete v-model:value="prompt" class="grow" :options="searchOptions" :get-show="getShow">
             <template #default="{ handleInput, handleBlur, handleFocus }">
               <NInput

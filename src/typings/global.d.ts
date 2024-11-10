@@ -27,6 +27,7 @@ interface AiModelInfo{
   modelName: string
   modelPlatform: string
   enable: boolean
+  inputTypes: string
 
   //for NSelector
   value: string

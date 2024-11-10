@@ -10,6 +10,7 @@ declare namespace Chat {
 		error?: boolean
 		loading?: boolean
 		aiModelPlatform?: string
+		attachments: string[]
 	}
 
 	interface ConversationPreset {
@@ -95,7 +96,7 @@ declare namespace Chat {
 	interface DrawState {
 		loadingUuid: string
 		loading: boolean
-		aiImages: AiImageItem[]
+		aiImages: AiImageItem[] //倒序，队尾的为最新数据
 	}
 
 	interface AiImageItem {

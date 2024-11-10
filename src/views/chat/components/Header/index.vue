@@ -32,9 +32,9 @@ function onScrollToTop() {
     nextTick(() => scrollRef.scrollTop = 0)
 }
 
-function handleExport() {
-  emit('export')
-}
+// function handleExport() {
+//   emit('export')
+// }
 
 function toggleUsingContext() {
   emit('toggleUsingContext')
@@ -67,11 +67,11 @@ function toggleUsingContext() {
             <SvgIcon icon="ri:chat-history-line" />
           </span>
         </HoverButton>
-        <HoverButton @click="handleExport">
+        <!-- <HoverButton @click="handleExport">
           <span class="text-xl text-[#4f555e] dark:text-white">
             <SvgIcon icon="ri:download-2-line" />
           </span>
-        </HoverButton>
+        </HoverButton> -->
       </div>
     </div>
   </header>

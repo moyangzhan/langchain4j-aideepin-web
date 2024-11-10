@@ -14,7 +14,7 @@ import OutPutImage from '@/assets/image_edit_output.webp'
 import api from '@/api'
 
 interface Emit {
-  (e: 'scrollToBottom'): void
+  (e: 'submitted'): void
 }
 const emit = defineEmits<Emit>()
 const ms = useMessage()
@@ -102,7 +102,7 @@ async function handleSubmit(prompt: string) {
     drawStore.setLoadingUuid(uuid)
     drawStore.pushOne(aiImage)
 
-    emit('scrollToBottom')
+    emit('submitted')
     setTimeout(() => {
       checkProcess(uuid)
     }, 5000)

@@ -52,6 +52,15 @@ export const useKbStore = defineStore('kb-store', {
         return false
       }
     },
+    getSelectedKb(state: KnowledgeBase.KbState) {
+      let kbInfo = state.myKbInfos.find(item => item.uuid === state.activeKbUuid)
+      if (kbInfo)
+        return kbInfo
+      kbInfo = state.publicKbInfos.find(item => item.uuid === state.activeKbUuid)
+      if (kbInfo)
+        return kbInfo
+      return null
+    },
   },
 
   actions: {

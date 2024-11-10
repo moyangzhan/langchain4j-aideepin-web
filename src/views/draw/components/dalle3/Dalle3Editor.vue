@@ -4,7 +4,7 @@ import { NTab, NTabPane, NTabs } from 'naive-ui'
 import Dalle3GenerateImage from './GenerateImage.vue'
 
 interface Emit {
-  (e: 'scrollToBottom'): void
+  (e: 'submitted'): void
 }
 interface TabObj {
   name: string
@@ -23,8 +23,8 @@ function handleClick(tabOjb: TabObj) {
   tabOjb.tab = tabPanelShow.value ? `${tabOjb.defaultTab} ↓` : `${tabOjb.defaultTab} ↑`
 }
 
-function handleScrollToBottom() {
-  emit('scrollToBottom')
+function handleDataSubmitted() {
+  emit('submitted')
 }
 </script>
 
@@ -41,7 +41,7 @@ function handleScrollToBottom() {
         :tab-props="{ style: 'display:none' }"
       >
         <transition name="collapse">
-          <Dalle3GenerateImage v-show="tabPanelShow" @scroll-to-bottom="handleScrollToBottom" />
+          <Dalle3GenerateImage v-show="tabPanelShow" @submitted="handleDataSubmitted" />
         </transition>
       </NTabPane>
     </NTabs>

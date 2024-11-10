@@ -1,8 +1,9 @@
 <script setup lang='ts'>
 import { computed, h, ref } from 'vue'
-import { NButton, NDropdown, NEmpty, NImage, NSpace, NSpin, useDialog } from 'naive-ui'
+import { NButton, NDropdown, NEmpty, NIcon, NImage, NSpace, NSpin, useDialog } from 'naive-ui'
 import type { ImageRenderToolbarProps } from 'naive-ui'
 import { Delete24Regular } from '@vicons/fluent'
+import { Reload } from '@vicons/ionicons5'
 import AvatarComponent from './Avatar.vue'
 import TextComponent from './Text.vue'
 import { SvgIcon } from '@/components/common'
@@ -171,7 +172,13 @@ function renderToolbarOut2(imageUrl: string) {
         <!-- render image -->
         <template v-if="type === 'image' || type === 'text-image'">
           <template v-if="loading">
-            <NSpin size="medium" />
+            <NSpin size="medium">
+              <template #icon>
+                <NIcon>
+                  <Reload />
+                </NIcon>
+              </template>
+            </NSpin>
           </template>
           <template v-else>
             <template v-if="!imageUrls || imageUrls.length === 0">
@@ -181,7 +188,9 @@ function renderToolbarOut2(imageUrl: string) {
               <!-- <NImageGroup :render-toolbar="renderToolbar"> -->
               <NSpace>
                 <template v-for="imageUrl in imageUrls" :key="imageUrl">
-                  <NImage v-if="imageUrl" width="100" :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic" :render-toolbar="renderToolbarOut2(imageUrl)" />
+                  <NImage v-if="imageUrl && imageUrl.indexOf('/image') !== -1" width="100" :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic" :render-toolbar="renderToolbarOut2(imageUrl)" />
+                  <!-- imageUrl is uuid -->
+                  <NImage v-if="imageUrl && imageUrl.indexOf('/image') === -1" width="100" :src="`/api/image/${imageUrl}?token=${token}`" :fallback-src="NoPic" :render-toolbar="renderToolbarOut2(imageUrl)" />
                 </template>
               </NSpace>
               <!-- </NImageGroup> -->

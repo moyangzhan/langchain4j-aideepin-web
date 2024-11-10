@@ -9,7 +9,7 @@ import { useDrawStore } from '@/store'
 import api from '@/api'
 
 interface Emit {
-  (e: 'scrollToBottom'): void
+  (e: 'submitted'): void
 }
 const emit = defineEmits<Emit>()
 const drawStore = useDrawStore()
@@ -40,7 +40,7 @@ async function handleSubmit(prompt: string) {
     drawStore.setLoadingUuid(uuid)
     drawStore.pushOne(aiImage)
 
-    emit('scrollToBottom')
+    emit('submitted')
 
     console.log(`checkProcess111:${uuid}`)
     setTimeout(() => {

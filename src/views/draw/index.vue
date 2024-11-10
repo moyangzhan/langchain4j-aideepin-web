@@ -1,8 +1,7 @@
 <script setup lang='ts'>
 import { computed, nextTick, onMounted, ref } from 'vue'
-import { NFlex, NRadio, NRadioGroup, useMessage } from 'naive-ui'
+import { NFlex, NRadio, NRadioGroup, useLoadingBar, useMessage } from 'naive-ui'
 import type { MessageReactive } from 'naive-ui'
-import { useScroll } from '../chat/hooks/useScroll'
 import DisplayStyleInChat from './components/DisplayStyleInChat.vue'
 import DisplayStyleInGallery from './components/DisplayStyleInGallery.vue'
 import Dalle2Editor from './components/dalle2/Dalle2Editor.vue'
@@ -14,14 +13,15 @@ import { debounce } from '@/utils/functions/debounce'
 
 const appStore = useAppStore()
 const ms = useMessage()
+const loaddingBar = useLoadingBar()
 const { isMobile } = useBasicLayout()
-const { scrollRef, scrollTo, scrollToBottom } = useScroll()
+const chatStyleViewRef = ref()
+const galleryStyleViewRef = ref()
 const drawStore = useDrawStore()
 const loading = ref<boolean>(false)
 const loadedAll = ref<boolean>(false)
 const nextPageMaxImageId = ref<number>(Number.MAX_SAFE_INTEGER)
 const selectedDisplayStyle = ref<string>('chatStyle')
-let prevScrollTop: number
 let loadingms: MessageReactive
 
 async function loadNextPage(event?: any) {
@@ -31,54 +31,31 @@ async function loadNextPage(event?: any) {
   if (loadedAll.value)
     return
 
+  loaddingBar.start()
   loading.value = true
-  loadingms && loadingms.destroy()
-  loadingms = ms.loading(
-    '加载中...', {
-      duration: 3000,
-    },
-  )
-  let scrollPosition = 0
-  if (event)
-    scrollPosition = event.target.scrollHeight - event.target.scrollTop
-
   try {
-    const { data } = await api.fetchAiImages<Chat.AiImageListResp>(nextPageMaxImageId.value, 12)
+    const { data } = await api.fetchAiImages<Chat.AiImageListResp>(nextPageMaxImageId.value, 20)
     if (data.imageItems.length > 0) {
       nextPageMaxImageId.value = data.minId
       drawStore.unshiftImages(data.imageItems)
       nextTick(() => {
-        if (!event)
-          scrollToBottom()
-        else
-          scrollTo(event.target.scrollHeight - scrollPosition)
+        chatStyleViewRef.value.dataLoaded()
       })
     } else {
       loadedAll.value = true
-      loadingms.destroy()
       loadingms = ms.warning('没有更多了', {
-        duration: 1000,
+        duration: 3000,
       })
     }
   } catch (error) {
     console.error(error)
   } finally {
     loading.value = false
-    loadingms.destroy()
+    loaddingBar.finish()
   }
 }
 
 const handleLoadMoreImages = debounce(loadNextPage, 300)
-async function handleScroll(event: any) {
-  const scrollTop = event.target.scrollTop
-  if (
-    scrollTop < 50
-    && (scrollTop < prevScrollTop || prevScrollTop === undefined)
-  )
-    handleLoadMoreImages(event)
-
-  prevScrollTop = scrollTop
-}
 
 /**
  * 删除一个作图任务（包括提示词及生成的图片）
@@ -112,8 +89,9 @@ const footerClass = computed(() => {
   return classes
 })
 
-function handleScrollToBottom() {
-  scrollToBottom()
+function submitted() {
+  chatStyleViewRef.value.dataLoaded()
+  galleryStyleViewRef.value.dataLoaded()
 }
 
 function handleChangeModel(value: string) {
@@ -122,8 +100,6 @@ function handleChangeModel(value: string) {
 
 function handleDisplayChange(value: string) {
   selectedDisplayStyle.value = value
-  if (value === 'chatStyle')
-    scrollToBottom()
 }
 
 onMounted(() => {
@@ -134,7 +110,7 @@ onMounted(() => {
 <template>
   <div class="flex flex-col w-full h-full">
     <main class="flex-1 overflow-hidden">
-      <NFlex justify="space-between" class="w-full max-w-screen-xl m-auto" :class="[isMobile ? 'p-2' : 'p-4']">
+      <NFlex justify="space-between" class="w-full max-w-screen-xl m-auto" :class="[isMobile ? 'p-2' : 'px-4 pb-4']">
         <NRadioGroup
           :value="appStore.selectedImageModel.modelId" name="imageModelRadioGroup" size="small"
           @update:value="handleChangeModel"
@@ -143,7 +119,10 @@ onMounted(() => {
             {{ imageModel.modelName }}
           </NRadio>
         </NRadioGroup>
-        <NRadioGroup :value="selectedDisplayStyle" name="displayStyleRadioGroup" size="small" @update:value="handleDisplayChange">
+        <NRadioGroup
+          :value="selectedDisplayStyle" name="displayStyleRadioGroup" size="small"
+          @update:value="handleDisplayChange"
+        >
           <NRadio value="chatStyle">
             聊天风格
           </NRadio>
@@ -152,17 +131,19 @@ onMounted(() => {
           </NRadio>
         </NRadioGroup>
       </NFlex>
-      <div id="scrollRef" ref="scrollRef" class="h-full overflow-hidden overflow-y-auto" @scroll="handleScroll">
-        <div>
-          <DisplayStyleInChat v-show="selectedDisplayStyle === 'chatStyle'" @del="handleDelete" @del-one-image="handleDelOneImage" />
-          <DisplayStyleInGallery v-show="selectedDisplayStyle === 'galleryStyle'" @del="handleDelete" @del-one-image="handleDelOneImage" />
-        </div>
-      </div>
+      <DisplayStyleInChat
+        v-show="selectedDisplayStyle === 'chatStyle'" ref="chatStyleViewRef" @del="handleDelete"
+        @del-one-image="handleDelOneImage" @load-more="handleLoadMoreImages"
+      />
+      <DisplayStyleInGallery
+        v-show="selectedDisplayStyle === 'galleryStyle'" ref="galleryStyleViewRef"
+        @del="handleDelete" @del-one-image="handleDelOneImage" @load-more="handleLoadMoreImages"
+      />
     </main>
     <footer :class="footerClass">
       <div class="w-full max-w-screen-xl m-auto">
-        <Dalle2Editor v-show="appStore.selectedImageModel.modelName === 'dall-e-2'" @scroll-to-bottom="handleScrollToBottom" />
-        <Dalle3Editor v-show="appStore.selectedImageModel.modelName === 'dall-e-3'" @scroll-to-bottom="handleScrollToBottom" />
+        <Dalle2Editor v-show="appStore.selectedImageModel.modelName === 'dall-e-2'" @submitted="submitted" />
+        <Dalle3Editor v-show="appStore.selectedImageModel.modelName === 'dall-e-3'" @submitted="submitted" />
       </div>
     </footer>
   </div>
