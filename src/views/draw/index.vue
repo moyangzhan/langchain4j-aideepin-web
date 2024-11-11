@@ -1,7 +1,6 @@
 <script setup lang='ts'>
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { NFlex, NRadio, NRadioGroup, useLoadingBar, useMessage } from 'naive-ui'
-import type { MessageReactive } from 'naive-ui'
 import DisplayStyleInChat from './components/DisplayStyleInChat.vue'
 import DisplayStyleInGallery from './components/DisplayStyleInGallery.vue'
 import Dalle2Editor from './components/dalle2/Dalle2Editor.vue'
@@ -22,7 +21,6 @@ const loading = ref<boolean>(false)
 const loadedAll = ref<boolean>(false)
 const nextPageMaxImageId = ref<number>(Number.MAX_SAFE_INTEGER)
 const selectedDisplayStyle = ref<string>('chatStyle')
-let loadingms: MessageReactive
 
 async function loadNextPage(event?: any) {
   if (loading.value)
@@ -43,7 +41,7 @@ async function loadNextPage(event?: any) {
       })
     } else {
       loadedAll.value = true
-      loadingms = ms.warning('没有更多了', {
+      ms.warning('没有更多了', {
         duration: 3000,
       })
     }
