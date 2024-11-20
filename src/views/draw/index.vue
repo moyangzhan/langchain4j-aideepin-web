@@ -1,19 +1,22 @@
 <script setup lang='ts'>
-import { computed, nextTick, onMounted, ref } from 'vue'
-import { NFlex, NRadio, NRadioGroup, useLoadingBar, useMessage } from 'naive-ui'
+import { computed, ref, watch } from 'vue'
+import { NFlex, NRadio, NRadioGroup, useDialog, useLoadingBar, useMessage } from 'naive-ui'
 import DisplayStyleInChat from './components/DisplayStyleInChat.vue'
 import DisplayStyleInGallery from './components/DisplayStyleInGallery.vue'
 import Dalle2Editor from './components/dalle2/Dalle2Editor.vue'
 import Dalle3Editor from './components/dalle3/Dalle3Editor.vue'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useAppStore, useDrawStore } from '@/store'
+import { useAppStore, useAuthStore, useDrawStore } from '@/store'
 import api from '@/api'
 import { debounce } from '@/utils/functions/debounce'
+import { t } from '@/locales'
 
 const appStore = useAppStore()
+const dialog = useDialog()
 const ms = useMessage()
 const loaddingBar = useLoadingBar()
 const { isMobile } = useBasicLayout()
+const authStore = useAuthStore()
 const chatStyleViewRef = ref()
 const galleryStyleViewRef = ref()
 const drawStore = useDrawStore()
@@ -22,7 +25,7 @@ const loadedAll = ref<boolean>(false)
 const nextPageMaxImageId = ref<number>(Number.MAX_SAFE_INTEGER)
 const selectedDisplayStyle = ref<string>('chatStyle')
 
-async function loadNextPage(event?: any) {
+async function loadNextPage(callback: Function) {
   if (loading.value)
     return
 
@@ -32,19 +35,19 @@ async function loadNextPage(event?: any) {
   loaddingBar.start()
   loading.value = true
   try {
-    const { data } = await api.fetchAiImages<Chat.AiImageListResp>(nextPageMaxImageId.value, 20)
-    if (data.imageItems.length > 0) {
+    const { data } = await api.fetchDraws<Chat.DrawListResp>(nextPageMaxImageId.value, 20)
+    if (data.draws.length > 0) {
       nextPageMaxImageId.value = data.minId
-      drawStore.unshiftImages(data.imageItems)
-      nextTick(() => {
-        chatStyleViewRef.value.dataLoaded()
-      })
+      drawStore.unshiftImages(data.draws)
     } else {
       loadedAll.value = true
       ms.warning('没有更多了', {
         duration: 3000,
       })
     }
+
+    callback()
+    console.log('draw loadNextPage')
   } catch (error) {
     console.error(error)
   } finally {
@@ -53,19 +56,24 @@ async function loadNextPage(event?: any) {
   }
 }
 
-const handleLoadMoreImages = debounce(loadNextPage, 300)
+const handleLoadMoreDraws = debounce(loadNextPage, 300)
 
 /**
  * 删除一个作图任务（包括提示词及生成的图片）
  */
-async function handleDelete(uuid: string) {
-  console.log(`delete image,uuid:${uuid}`)
+async function handleDelDraw(uuid: string, prompt: string) {
   if (loading.value)
     return
-
-  const ret = await api.imageDel<boolean>(uuid)
-  if (ret)
-    drawStore.deleteAiImage(uuid)
+  dialog.warning({
+    title: `删除绘图【${prompt.substring(0, 11)}】?`,
+    content: '删除内容: 1: 提示词; 2: 该提示词生成的所有图片',
+    positiveText: t('common.yes'),
+    negativeText: t('common.no'),
+    onPositiveClick: async () => {
+      drawStore.deleteDraw(uuid)
+      await api.drawDel<boolean>(uuid)
+    },
+  })
 }
 
 /**
@@ -75,9 +83,17 @@ async function handleDelOneImage(uuid: string, fileUrl: string) {
   if (loading.value)
     return
   const fileUuid = fileUrl.replace('/image/', '')
-  const ret = await api.aiImageFileDel<boolean>(uuid, fileUuid)
+  const ret = await api.drawFileDel<boolean>(uuid, fileUuid)
   if (ret)
     drawStore.deleteOneFile(uuid, fileUuid)
+}
+
+async function handleSetPublic(uuid: string, isPublic: boolean) {
+  const ret = await api.drawSetPublic<boolean>(uuid, isPublic)
+  if (ret) {
+    drawStore.setPublic(uuid, isPublic)
+    ms.warning(`该绘图任务已经${isPublic ? '可以公开访问' : '关闭外部访问权限'}`)
+  }
 }
 
 const footerClass = computed(() => {
@@ -88,8 +104,8 @@ const footerClass = computed(() => {
 })
 
 function submitted() {
-  chatStyleViewRef.value.dataLoaded()
-  galleryStyleViewRef.value.dataLoaded()
+  chatStyleViewRef.value.gotoBottom()
+  galleryStyleViewRef.value.togoTop()
 }
 
 function handleChangeModel(value: string) {
@@ -100,9 +116,18 @@ function handleDisplayChange(value: string) {
   selectedDisplayStyle.value = value
 }
 
-onMounted(() => {
-  handleLoadMoreImages()
-})
+watch(
+  () => authStore.token,
+  () => {
+    if (authStore.token) {
+      console.log('draw first load', authStore.token)
+      handleLoadMoreDraws(() => {
+        console.log('draw loaded first page')
+      })
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -130,12 +155,14 @@ onMounted(() => {
         </NRadioGroup>
       </NFlex>
       <DisplayStyleInChat
-        v-show="selectedDisplayStyle === 'chatStyle'" ref="chatStyleViewRef" @del="handleDelete"
-        @del-one-image="handleDelOneImage" @load-more="handleLoadMoreImages"
+        v-show="selectedDisplayStyle === 'chatStyle'" ref="chatStyleViewRef"
+        @set-public="handleSetPublic" @del-draw="handleDelDraw" @del-one-image="handleDelOneImage"
+        @load-more="handleLoadMoreDraws"
       />
       <DisplayStyleInGallery
         v-show="selectedDisplayStyle === 'galleryStyle'" ref="galleryStyleViewRef"
-        @del="handleDelete" @del-one-image="handleDelOneImage" @load-more="handleLoadMoreImages"
+        :draws="drawStore.imagesOrderByIdDesc" @del-draw="handleDelDraw" @del-one-image="handleDelOneImage"
+        @load-more="handleLoadMoreDraws"
       />
     </main>
     <footer :class="footerClass">

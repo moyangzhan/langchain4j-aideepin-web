@@ -1,97 +1,130 @@
 <script setup lang='ts'>
 import { ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import { NButton, NEmpty, NFlex, NIcon, NImage, NImageGroup, NModal, NSpin, useDialog } from 'naive-ui'
+import { NButton, NEmpty, NFlex, NIcon, NImage, NImageGroup, NModal, NSpin, useDialog, useMessage } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { Reload } from '@vicons/ionicons5'
 import { useScroll } from '../../chat/hooks/useScroll'
-import { useAuthStore, useDrawStore } from '@/store'
+import { useAuthStore, useDrawStore, useGalleryStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { t } from '@/locales'
+import LoginTip from '@/views/user/LoginTip.vue'
 import NoPic from '@/assets/no_pic.png'
+import api from '@/api'
+import { t } from '@/locales'
 
+const props = withDefaults(defineProps<Props>(), {
+  draws: () => [],
+  delBtnEnable: true,
+  starBtnEnable: true,
+})
 const emit = defineEmits<Emit>()
-const { scrollRef, scrollToTop } = useScroll()
+const { scrollRef, scrollToTop, scrollToBottom } = useScroll()
 const dialog = useDialog()
 const authStore = useAuthStore()
-const token = ref<string>(authStore.token)
+const galleryStore = useGalleryStore()
+const ms = useMessage()
 const { isMobile } = useBasicLayout()
 const drawStore = useDrawStore()
-const { aiImages } = storeToRefs<any>(drawStore)
+const token = ref<string>(authStore.token)
 const showDetailModal = ref<boolean>(false)
-const modalData = ref<ModalData>({ uuid: '', url: '', prompt: '' })
+const modalData = ref<ModalData>({ uuid: '', url: '', prompt: '', modelName: '', star: false })
 let prevScrollTop = 0
 
 interface ModalData {
   uuid: string
   url: string
   prompt: string
+  modelName: string
+  star: boolean
 }
 
 interface Emit {
   // (e: 'del', uuid: string): void
-  (e: 'delOneImage', uuid: string, imageUrl: string): void
-  (e: 'loadMore'): void
+  (e: 'delDraw', uuid: string, prompt: string): void
+  (e: 'toggleStar', uuid: string): void
+  (e: 'loadMore', callback: Function): void
 }
 
-// function handleDelete(uuid: string) {
-//   emit('del', uuid)
-// }
-
-function handleDeleteOneImage(uuid: string, imageUrl: string) {
-  dialog.warning({
-    title: '是否要删除该图片',
-    content: '删除图片后不可恢复',
-    positiveText: t('common.yes'),
-    negativeText: t('common.no'),
-    onPositiveClick: async () => {
-      showDetailModal.value = false
-      emit('delOneImage', uuid, imageUrl)
-    },
-  })
+interface Props {
+  draws: Chat.Draw[]
+  delBtnEnable?: boolean
+  starBtnEnable?: boolean
+  loginBtnEnable?: boolean
+}
+function handleDelDraw(uuid: string, prompt: string) {
+  showDetailModal.value = false
+  emit('delDraw', uuid, prompt)
 }
 
-function openImage(imageUrl: string, item: Chat.AiImageItem) {
+async function handleStar(uuid: string) {
+  if (!authStore.token) {
+    authStore.setLoginView(true)
+    return
+  }
+  if (modalData.value.star) {
+    dialog.warning({
+      title: '是否要删除该收藏',
+      content: '从收藏列表中删除该绘图',
+      positiveText: t('common.yes'),
+      negativeText: t('common.no'),
+      onPositiveClick: async () => {
+        galleryStore.unStarDraw(uuid)
+        await api.drawStarOrUnStar(uuid)
+      },
+    })
+  } else {
+    const { data } = await api.drawStarOrUnStar<Chat.Draw>(uuid)
+    galleryStore.starDraw(data)
+    ms.success('success')
+  }
+}
+function openImage(imageUrl: string, item: Chat.Draw) {
   showDetailModal.value = true
-  modalData.value.url = imageUrl
+  // 将小图路径换成大图
+  modalData.value.url = imageUrl.replace('thumbnail', 'image')
   modalData.value.uuid = item.uuid
   modalData.value.prompt = item.prompt || ''
+  modalData.value.modelName = item.aiModelName
+  modalData.value.star = item.isStar
   console.log(item)
 }
 
-function dataLoaded() {
+function gotoTop() {
   scrollToTop()
+}
+
+function gotoBottom() {
+  scrollToBottom()
 }
 
 async function handleScroll(event: any) {
   // 聊天模式时拉到最上面时加载新数据，画廊模式拉到最下面加载新数据
   const scrollTop = event.target.scrollTop
-  if (prevScrollTop < scrollTop && event.target.scrollHeight - event.target.scrollTop - event.target.clientHeight < 50)
-    emit('loadMore')
-
+  if (prevScrollTop < scrollTop && event.target.scrollHeight - event.target.scrollTop - event.target.clientHeight < 50) {
+    emit('loadMore', () => {
+      console.log('gallery loaded')
+    })
+  }
   prevScrollTop = scrollTop
 }
 
-defineExpose({ dataLoaded })
+defineExpose({ gotoTop, gotoBottom })
 </script>
 
 <template>
   <div ref="scrollRef" class="h-full overflow-hidden overflow-y-auto" @scroll="handleScroll">
     <div>
-      <div
-        id="image-wrapper" class="w-full max-w-screen-xl m-auto dark:bg-[#101014]"
-        :class="[isMobile ? 'p-2' : 'p-4']"
-      >
-        <template v-if="!aiImages.length">
-          <div class="flex items-center justify-center mt-4 text-center text-neutral-400">
+      <div class="w-full max-w-screen-xl m-auto dark:bg-[#101014]" :class="[isMobile ? 'p-2' : 'p-4']">
+        <template v-if="props.draws.length === 0">
+          <div v-if="!loginBtnEnable" class="flex items-center justify-center mt-4 text-center text-neutral-400">
             <NIcon :component="Cat" size="32" />
             <span class="pl-1">Roar~</span>
           </div>
+          <LoginTip v-if="loginBtnEnable && !authStore.token" />
         </template>
         <template v-else>
           <NImageGroup>
             <NFlex>
-              <template v-for="(item) of aiImages.slice().reverse()" :key="item.uuid">
+              <template v-for="(item) of props.draws" :key="item.uuid">
                 <template v-if="item.uuid === drawStore.loadingUuid">
                   <NSpin size="medium">
                     <template #icon>
@@ -102,14 +135,17 @@ defineExpose({ dataLoaded })
                   </NSpin>
                 </template>
                 <template v-else>
-                  <template v-if="item.uuid !== drawStore.loadingUuid && (!item.imageUrlList || item.imageUrlList.length === 0)">
+                  <template
+                    v-if="item.uuid !== drawStore.loadingUuid && (!item.imageUrls || item.imageUrls.length === 0)"
+                  >
                     <NEmpty description="找不到图片" />
                   </template>
-                  <template v-if="item.imageUrlList && item.imageUrlList.length > 0">
-                    <template v-for="imageUrl in item.imageUrlList" :key="imageUrl">
+                  <template v-if="item.imageUrls && item.imageUrls.length > 0">
+                    <template v-for="imageUrl in item.imageUrls" :key="imageUrl">
                       <NImage
-                        v-if="imageUrl && item.uuid !== drawStore.loadingUuid" width="200" :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic"
-                        object-fit="scale-down" preview-disabled @click="openImage(imageUrl, item)"
+                        v-if="imageUrl && item.uuid !== drawStore.loadingUuid" width="200"
+                        :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic" object-fit="scale-down"
+                        preview-disabled @click="openImage(imageUrl, item)"
                       />
                     </template>
                   </template>
@@ -129,8 +165,12 @@ defineExpose({ dataLoaded })
         <template #footer>
           <NFlex vertical>
             <NFlex>提示词：{{ modalData.prompt }}</NFlex>
+            <NFlex>模型：{{ modalData.modelName }}</NFlex>
             <NFlex justify="end">
-              <NButton quaternary type="error" @click="handleDeleteOneImage(modalData.uuid, modalData.url)">
+              <NButton v-show="props.starBtnEnable" quaternary type="info" @click="handleStar(modalData.uuid)">
+                {{ modalData.star ? '取消收藏' : '收藏' }}
+              </NButton>
+              <NButton v-show="props.delBtnEnable" quaternary type="error" @click="handleDelDraw(modalData.uuid, modalData.prompt)">
                 删除
               </NButton>
             </NFlex>

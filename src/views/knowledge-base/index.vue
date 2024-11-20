@@ -1,9 +1,8 @@
 <script setup lang='ts'>
 import type { Ref } from 'vue'
-import { computed, nextTick, onActivated, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onActivated, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NCollapse, NCollapseItem, NFlex, NIcon, NInput, NModal, NSelect, useDialog, useMessage } from 'naive-ui'
-import type { MessageReactive } from 'naive-ui'
+import { NButton, NCollapse, NCollapseItem, NFlex, NIcon, NInput, NModal, NSelect, useDialog, useLoadingBar, useMessage } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { Message } from '../chat/components'
 import { useScroll } from '../chat/hooks/useScroll'
@@ -12,7 +11,7 @@ import HeaderComponent from './Header/index.vue'
 import RefGraph from './RefGraph.vue'
 import { SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useAppStore, useKbStore } from '@/store'
+import { useAppStore, useAuthStore, useKbStore } from '@/store'
 import api from '@/api'
 import { t } from '@/locales'
 import { debounce } from '@/utils/functions/debounce'
@@ -25,6 +24,8 @@ const ms = useMessage()
 const dialog = useDialog()
 const appStore = useAppStore()
 const kbStore = useKbStore()
+const authStore = useAuthStore()
+const loaddingBar = useLoadingBar()
 const { isMobile } = useBasicLayout()
 const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom, scrollTo } = useScroll()
 const { kbUuid: currKbUuid } = route.params as { kbUuid: string }
@@ -42,7 +43,6 @@ const sseRequesting = ref<boolean>(false)
 const pageSize = 20
 let currentPage = 1
 let prevScrollTop: number
-let loadingms: MessageReactive
 
 useCopyCode()
 
@@ -139,30 +139,23 @@ async function handleSubmit() {
   }
 }
 
-async function loadMoreMessage(event: any) {
+async function loadMoreMessage(callback?: Function) {
   if (kbStore.loadingRecords.get(currKbUuid) || loadedAll.value)
     return
 
-  loadingms = ms.loading(
-    '加载中...', {
-      duration: 3000,
-    })
+  loaddingBar.start()
   try {
     kbStore.setLoadingRecords(currKbUuid, true)
 
-    const scrollPosition = event.target.scrollHeight - event.target.scrollTop
     const { data } = await api.knowledgeBaseQaRecordSearch<KnowledgeBase.QaRecordListResp>(currKbUuid, '', currentPage, pageSize)
     console.log('kb record response:', data)
     if (data.records)
       kbStore.appendRecords(currKbUuid, data.records)
 
-    nextTick(() => scrollTo(event.target.scrollHeight - scrollPosition))
-
     if (data.records.length < pageSize) {
       loadedAll.value = true
-      loadingms.destroy()
-      loadingms = ms.warning('没有更多了', {
-        duration: 1000,
+      ms.warning('没有更多了', {
+        duration: 3000,
       })
     }
   } catch (error) {
@@ -170,15 +163,23 @@ async function loadMoreMessage(event: any) {
   } finally {
     currentPage++
     kbStore.setLoadingRecords(currKbUuid, false)
-    loadingms.destroy()
+    loaddingBar.finish()
+
+    if (callback)
+      callback()
   }
 }
 const handleLoadMoreMessage = debounce(loadMoreMessage, 300)
 async function handleScroll(event: any) {
   const scrollTop = event.target.scrollTop
-  if (scrollTop < 50 && (scrollTop < prevScrollTop || prevScrollTop === undefined))
-    handleLoadMoreMessage(event)
-
+  const lastScrollClient = event.target.scrollHeight
+  if (scrollTop < 50 && (scrollTop < prevScrollTop || prevScrollTop === undefined)) {
+    handleLoadMoreMessage(() => {
+      nextTick(() => {
+        scrollTo(event.target.scrollHeight - lastScrollClient)
+      })
+    })
+  }
   prevScrollTop = scrollTop
 }
 
@@ -260,8 +261,7 @@ const footerClass = computed(() => {
   return classes
 })
 
-onMounted(async () => {
-  console.log('knowledge-base onmounted', currKbUuid)
+async function firstLoad() {
   if (!!qaRecords.value && !kbStore.loadingRecords.get(currKbUuid) && !kbStore.kbUuidToQaRecords.get(currKbUuid)) {
     try {
       kbStore.setLoadingRecords(currKbUuid, true)
@@ -281,6 +281,21 @@ onMounted(async () => {
     if (inputRef.value && !isMobile.value)
       inputRef.value?.focus()
   }
+}
+
+watch(
+  () => authStore.token,
+  () => {
+    if (authStore.token) {
+      console.log('kb first load')
+      firstLoad()
+    }
+  },
+  { immediate: true },
+)
+
+onMounted(async () => {
+  console.log('knowledge-base onmounted', currKbUuid)
 })
 
 onUnmounted(() => {

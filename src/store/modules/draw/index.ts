@@ -5,28 +5,33 @@ export const useDrawStore = defineStore('draw-store', {
     return {
       loadingUuid: '',
       loading: false,
-      aiImages: [],
+      myDraws: [],
     }
   },
 
   getters: {
-    allImages(state: Chat.DrawState) {
-      return state.aiImages
+    images(state: Chat.DrawState) {
+      return state.myDraws
+    },
+    imagesOrderByIdDesc(state: Chat.DrawState) {
+      return state.myDraws.slice().reverse()
     },
   },
 
   actions: {
 
-    pushOne(aiImage: Chat.AiImageItem) {
-      this.aiImages.push(aiImage)
+    pushOne(draw: Chat.Draw) {
+      this.myDraws.push(draw)
     },
 
-    unshiftImages(aiImages: Chat.AiImageItem[]) {
-      this.aiImages = aiImages.concat(this.aiImages)
+    unshiftImages(aiImages: Chat.Draw[]) {
+      aiImages.forEach(item => item.imageUrls = item.imageUuids.map(uuid => `/my-thumbnail/${uuid}`))
+      this.myDraws = aiImages.concat(this.myDraws)
     },
 
-    unshift(image: Chat.AiImageItem) {
-      this.aiImages.unshift(image)
+    unshift(image: Chat.Draw) {
+      image.imageUrls = image.imageUuids.map(uuid => `/my-thumbnail/${uuid}`)
+      this.myDraws.unshift(image)
     },
 
     setLoading(loading: boolean) {
@@ -37,22 +42,29 @@ export const useDrawStore = defineStore('draw-store', {
       this.loadingUuid = uuid
     },
 
-    updateAiImage(uuid: string, edit: Chat.AiImageItem) {
-      const index = this.aiImages.findIndex(item => item.uuid === uuid)
+    updateAiImage(uuid: string, edit: Chat.Draw) {
+      const index = this.myDraws.findIndex(item => item.uuid === uuid)
       if (index !== -1)
-        this.aiImages[index] = { ...this.aiImages[index], ...edit }
+        this.myDraws[index] = { ...this.myDraws[index], ...edit }
     },
 
-    async deleteAiImage(uuid: string) {
-      const index = this.aiImages.findIndex(item => item.uuid === uuid)
-      this.aiImages.splice(index, 1)
+    setPublic(uuid: string, isPublic: boolean) {
+      const index = this.myDraws.findIndex(item => item.uuid === uuid)
+      if (index !== -1)
+        this.myDraws[index].isPublic = isPublic
+    },
+
+    async deleteDraw(uuid: string) {
+      const index = this.myDraws.findIndex(item => item.uuid === uuid)
+      if (index > -1)
+        this.myDraws.splice(index, 1)
     },
 
     async deleteOneFile(uuid: string, fileUuid: string) {
-      const aiImage = this.aiImages.find(item => item.uuid === uuid)
+      const aiImage = this.myDraws.find(item => item.uuid === uuid)
       if (aiImage) {
-        const idx = aiImage.imageUrlList?.findIndex(url => url.indexOf(fileUuid) > 0)
-        aiImage.imageUrlList?.splice(idx, 1)
+        const idx = aiImage.imageUuids?.findIndex(url => url.indexOf(fileUuid) > 0)
+        aiImage.imageUuids?.splice(idx, 1)
       }
     },
 

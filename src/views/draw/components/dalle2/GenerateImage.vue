@@ -35,7 +35,7 @@ async function handleSubmit(prompt: string) {
       createTime: curDate,
       interactingMethod: 1,
       processStatus: 1,
-      imageUrlList: [],
+      imageUuids: [],
     }
     drawStore.setLoadingUuid(uuid)
     drawStore.pushOne(aiImage)

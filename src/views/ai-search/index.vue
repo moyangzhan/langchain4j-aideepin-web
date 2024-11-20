@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import type { Ref } from 'vue'
-import { computed, nextTick, onActivated, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onActivated, onUnmounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { NButton, NCollapse, NCollapseItem, NIcon, NInput, NSelect, useDialog, useMessage } from 'naive-ui'
 import type { MessageReactive } from 'naive-ui'
@@ -12,7 +12,7 @@ import { useCopyCode } from '../chat/hooks/useCopyCode'
 import HeaderComponent from '../chat/components/Header/index.vue'
 import { HoverButton, SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useAiSearchStore, useAppStore } from '@/store'
+import { useAiSearchStore, useAppStore, useAuthStore } from '@/store'
 import api from '@/api'
 import { t } from '@/locales'
 import { debounce } from '@/utils/functions/debounce'
@@ -25,6 +25,7 @@ const ms = useMessage()
 const dialog = useDialog()
 const appStore = useAppStore()
 const aiSearchStore = useAiSearchStore()
+const authStore = useAuthStore()
 const { loadedAll, nextLoadingMaxId, loadingRecords, sseRequesting, records } = storeToRefs<any>(aiSearchStore)
 const { isMobile } = useBasicLayout()
 const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom, scrollTo } = useScroll()
@@ -234,7 +235,7 @@ const footerClass = computed(() => {
   return classes
 })
 
-onMounted(async () => {
+async function firstLoad() {
   if (!!records.value && !loadingRecords.value && !sseRequesting.value) {
     try {
       aiSearchStore.setLoadingRecords(true)
@@ -252,7 +253,16 @@ onMounted(async () => {
     if (inputRef.value && !isMobile.value)
       inputRef.value?.focus()
   }
-})
+}
+
+watch(
+  () => authStore.token,
+  () => {
+    if (authStore.token)
+      firstLoad()
+  },
+  { immediate: true },
+)
 
 onUnmounted(() => {
   if (sseRequesting.value)

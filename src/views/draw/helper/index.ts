@@ -14,7 +14,7 @@ export async function checkProcess(uuid: string) {
     return
   }
   beginLoading = new Date()
-  const imageResp = await api.fetchAiImage<Chat.AiImageItem>(uuid)
+  const imageResp = await api.fetchDraw<Chat.Draw>(uuid)
   if (imageResp.success) {
     drawStore.updateAiImage(uuid, imageResp.data)
     if (imageResp.data.processStatus === 1) {

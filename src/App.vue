@@ -3,15 +3,16 @@ import { NButton, NConfigProvider, NIcon, NLayout, NLayoutSider, NMenu, NSpace, 
 import type { MenuOption } from 'naive-ui'
 import type { Component } from 'vue'
 import { defineAsyncComponent, h, onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
-import { ChatboxEllipsesOutline, ImagesOutline, LibraryOutline, SearchOutline, SettingsOutline } from '@vicons/ionicons5'
+import { RouterLink, useRoute } from 'vue-router'
+import { ChatboxEllipsesOutline, ColorPaletteOutline, ImagesOutline, LibraryOutline, PersonCircleOutline, SearchOutline, SettingsOutline } from '@vicons/ionicons5'
 
 import { Prompt as PromptIcon } from '@vicons/tabler'
 import { NaiveProvider, PromptStore } from '@/components/common'
 import { useTheme } from '@/hooks/useTheme'
 import { useLanguage } from '@/hooks/useLanguage'
 import { t } from '@/locales'
-import { useAppStore, useChatStore, useKbStore } from '@/store'
+import { useAppStore, useAuthStore, useChatStore, useKbStore } from '@/store'
+import Login from '@/views/user/Login.vue'
 import api from '@/api'
 
 const Setting = defineAsyncComponent(() => import('@/components/common/Setting/index.vue'))
@@ -19,11 +20,29 @@ const Setting = defineAsyncComponent(() => import('@/components/common/Setting/i
 const appStore = useAppStore()
 const chatStore = useChatStore()
 const kbStore = useKbStore()
+const authStore = useAuthStore()
 const { theme, themeOverrides } = useTheme()
 const { language } = useLanguage()
-const activeKey = ref<string>('menu-chat')
+const route = useRoute()
+const routeName = route.name as string
+console.log(`menu-${routeName.toLowerCase()}`)
+const activeKey = ref<string>('`menu-chat')
 const showPrompt = ref<boolean>(false)
 const showSetting = ref<boolean>(false)
+
+const menuKeyToRouteNames = new Map<string, string[]>(
+  [
+    ['chat', ['Chat', 'ChatDetail']],
+    ['draw', ['Draw']],
+    ['gallery', ['Root', 'Gallery']],
+    ['knowledge-base', ['QAIndex', 'QADetail', 'KnowledgeBaseManage', 'KnowledgeBaseManageDetail']],
+    ['aisearch', ['AiSearch']],
+  ])
+
+menuKeyToRouteNames.forEach((val, key) => {
+  if (val.includes(routeName))
+    activeKey.value = `menu-${key.toLowerCase()}`
+})
 
 const menuOptions: MenuOption[] = [
   {
@@ -45,7 +64,7 @@ const menuOptions: MenuOption[] = [
   },
   {
     key: 'menu-draw',
-    icon: renderIcon(ImagesOutline),
+    icon: renderIcon(ColorPaletteOutline),
     label: () =>
       h(
         RouterLink,
@@ -54,11 +73,25 @@ const menuOptions: MenuOption[] = [
             name: 'Draw',
           },
         },
-        { default: () => '画图' },
+        { default: () => '绘画' },
       ),
   },
   {
-    key: 'knowledge-base',
+    key: 'menu-gallery',
+    icon: renderIcon(ImagesOutline),
+    label: () =>
+      h(
+        RouterLink,
+        {
+          to: {
+            name: 'Gallery',
+          },
+        },
+        { default: () => '画廊' },
+      ),
+  },
+  {
+    key: 'menu-knowledge-base',
     icon: renderIcon(LibraryOutline),
     label: () =>
       h(
@@ -75,7 +108,7 @@ const menuOptions: MenuOption[] = [
       ),
   },
   {
-    key: 'ai-search',
+    key: 'menu-aisearch',
     icon: renderIcon(SearchOutline),
     label: () =>
       h(
@@ -120,7 +153,7 @@ onMounted(async () => {
               </template>
               {{ t('store.siderButton') }}
             </NTooltip>
-            <NTooltip trigger="hover" placement="right" style="margin-left: 1.5rem;">
+            <NTooltip v-if="authStore.token" trigger="hover" placement="right" style="margin-left: 1.5rem;">
               <template #trigger>
                 <NButton text style="font-size: 26px;" class="cursor-pointer" @click="showSetting = true">
                   <NIcon>
@@ -130,6 +163,16 @@ onMounted(async () => {
               </template>
               {{ t('setting.setting') }}
             </NTooltip>
+            <NTooltip v-if="!authStore.token" trigger="hover" placement="right" style="margin-left: 1.5rem;">
+              <template #trigger>
+                <NButton text style="font-size: 26px;" class="cursor-pointer" @click="authStore.setLoginView(true)">
+                  <NIcon>
+                    <PersonCircleOutline />
+                  </NIcon>
+                </NButton>
+              </template>
+              登录
+            </NTooltip>
           </NSpace>
         </NLayoutSider>
         <NLayout>
@@ -137,13 +180,16 @@ onMounted(async () => {
             <RouterView :key="routePath" />
           </KeepAlive> -->
           <RouterView v-slot="{ Component, route }">
-            <KeepAlive><component :is="Component" :key="route.fullPath" /></KeepAlive>
+            <KeepAlive>
+              <component :is="Component" :key="route.fullPath" />
+            </KeepAlive>
           </RouterView>
         </NLayout>
       </NLayout>
 
       <PromptStore v-model:visible="showPrompt" />
       <Setting v-model:visible="showSetting" />
+      <Login />
     </NaiveProvider>
   </NConfigProvider>
 </template>

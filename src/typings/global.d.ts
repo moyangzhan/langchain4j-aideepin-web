@@ -18,6 +18,7 @@ interface CreateImageResult{
 
 interface AuthState {
   token: string
+  showLoginModal: boolean
 }
 
 interface AiModelInfo{

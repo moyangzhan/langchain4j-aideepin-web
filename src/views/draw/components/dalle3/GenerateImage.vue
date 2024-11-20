@@ -25,17 +25,20 @@ async function handleSubmit(prompt: string) {
     const uuid = resp.data.uuid
     drawStore.setLoadingUuid(uuid)
     const curDate = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
-    const aiImage = {
+    const draw = {
       id: 0,
       uuid,
       prompt,
       createTime: curDate,
       interactingMethod: 1,
       processStatus: 1,
-      imageUrlList: [],
+      imageUuids: [],
+      imageUrls: [],
+      isPublic: false,
+      aiModelName: 'dall-e-3',
     }
     drawStore.setLoadingUuid(uuid)
-    drawStore.pushOne(aiImage)
+    drawStore.pushOne(draw)
 
     emit('submitted')
 

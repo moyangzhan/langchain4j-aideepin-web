@@ -233,15 +233,39 @@ function promptEdit<T>(id: number, title: string, remark: string) {
   })
 }
 
-function fetchAiImage<T = any>(uuid: string) {
+function fetchDraw<T = any>(uuid: string) {
   return get<T>({
-    url: `/ai-image/detail/${uuid}`,
+    url: `/draw/detail/${uuid}`,
   })
 }
 
-function fetchAiImages<T = any>(maxId: number, pageSize: number) {
+function fetchDraws<T = any>(maxId: number, pageSize: number) {
   return get<T>({
-    url: `/ai-image/list?maxId=${maxId}&pageSize=${pageSize}`,
+    url: `/draw/list?maxId=${maxId}&pageSize=${pageSize}`,
+  })
+}
+
+function fetchStarDraws<T = any>(maxId: number, pageSize: number) {
+  return get<T>({
+    url: `/draw/star/mine?maxId=${maxId}&pageSize=${pageSize}`,
+  })
+}
+
+function fetchPublicDraws<T = any>(maxId: number, pageSize: number) {
+  return get<T>({
+    url: `/draw/public/list?maxId=${maxId}&pageSize=${pageSize}`,
+  })
+}
+
+function fetchPublicDrawDetail<T = any>(uuid: string) {
+  return get<T>({
+    url: `/draw/public/detail/${uuid}`,
+  })
+}
+
+function drawStarOrUnStar<T = any>(uuid: string) {
+  return post<T>({
+    url: `/draw/star/toggle/${uuid}`,
   })
 }
 
@@ -253,21 +277,21 @@ function fileDel<T = any>(uuid: string) {
 
 function imageGenerate<T = any>(modelName: string, prompt: string, size: string, number: number, quality?: string) {
   return post<T>({
-    url: '/ai-image/generation',
+    url: '/draw/generation',
     data: { modelName, prompt, size, number, quality },
   })
 }
 
 function imageEdit<T = any>(originalImage: string, maskImage: string, prompt: string, size: string, number: number) {
   return post<T>({
-    url: '/ai-image/edit',
+    url: '/draw/edit',
     data: { modelName: 'dall-e-2', originalImage, maskImage, prompt, size, number },
   })
 }
 
 function imageVariation<T = any>(originalImage: string, size: string, number: number) {
   return post<T>({
-    url: '/ai-image/variation',
+    url: '/draw/variation',
     data: { modelName: 'dall-e-2', originalImage, size, number },
   })
 }
@@ -277,9 +301,15 @@ function imageVariation<T = any>(originalImage: string, size: string, number: nu
  * @param uuid 作图任务uuid
  * @returns
  */
-function imageDel<T = any>(uuid: string) {
+function drawDel<T = any>(uuid: string) {
   return post<T>({
-    url: `/ai-image/del/${uuid}`,
+    url: `/draw/del/${uuid}`,
+  })
+}
+
+function drawSetPublic<T = any>(uuid: string, isPublic: boolean) {
+  return post<T>({
+    url: `/draw/set-public/${uuid}?isPublic=${isPublic}`,
   })
 }
 
@@ -289,9 +319,21 @@ function imageDel<T = any>(uuid: string) {
  * @param fileUuid 图片文件uuid
  * @returns
  */
-function aiImageFileDel<T = any>(uuid: string, fileUuid: string) {
+function drawFileDel<T = any>(uuid: string, fileUuid: string) {
   return post<T>({
-    url: `/ai-image/file/del/${fileUuid}?uuid=${uuid}`,
+    url: `/draw/file/del/${fileUuid}?uuid=${uuid}`,
+  })
+}
+
+function drawPublicImage<T = any>(uuid: string, imageUuid: string) {
+  return post<T>({
+    url: `/draw/public/image/${uuid}/${imageUuid}`,
+  })
+}
+
+function drawThumbnailImage<T = any>(uuid: string, imageUuid: string) {
+  return post<T>({
+    url: `/draw/public/thumnbnail/${uuid}/${imageUuid}`,
   })
 }
 
@@ -501,13 +543,20 @@ export default {
   promptEdit,
   promptAutocomplete,
   fileDel,
-  fetchAiImage,
-  fetchAiImages,
-  aiImageFileDel,
+  fetchDraw,
+  fetchDraws,
+  fetchStarDraws,
+  fetchPublicDraws,
+  fetchPublicDrawDetail,
+  drawFileDel,
+  drawStarOrUnStar,
   imageGenerate,
   imageEdit,
   imageVariation,
-  imageDel,
+  drawDel,
+  drawSetPublic,
+  drawPublicImage,
+  drawThumbnailImage,
   messageDel,
   knowledgeBaseInfo,
   knowledgeBaseStar,

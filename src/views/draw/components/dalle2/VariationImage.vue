@@ -73,11 +73,11 @@ async function handleSubmit() {
     const aiImage = {
       id: 0,
       uuid,
-      originalImageUrl: originalUrl,
+      originalImageUuid: originalUrl,
       createTime: curDate,
       interactingMethod: 3,
       processStatus: 1,
-      imageUrlList: [],
+      imageUuids: [],
     }
     drawStore.setLoadingUuid(uuid)
     drawStore.pushOne(aiImage)

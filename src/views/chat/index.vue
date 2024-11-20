@@ -3,7 +3,7 @@ import type { Ref } from 'vue'
 import { computed, nextTick, onActivated, onDeactivated, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { NAutoComplete, NButton, NIcon, NInput, NTabPane, NTabs, useDialog, useMessage } from 'naive-ui'
+import { NAutoComplete, NButton, NIcon, NInput, NTabPane, NTabs, useDialog, useLoadingBar, useMessage } from 'naive-ui'
 import type { MessageReactive } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { v4 as uuidv4 } from 'uuid'
@@ -13,9 +13,10 @@ import { useChat } from './hooks/useChat'
 import { useCopyCode } from './hooks/useCopyCode'
 import HeaderComponent from './components/Header/index.vue'
 import InputToolbar from './InputToolbar.vue'
+import LoginTip from '@/views/user/LoginTip.vue'
 import { SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useAppStore, useChatStore, usePromptStore } from '@/store'
+import { useAppStore, useAuthStore, useChatStore, usePromptStore } from '@/store'
 import { defaultConv } from '@/store/modules/chat/helper'
 import api from '@/api'
 import { t } from '@/locales'
@@ -28,6 +29,8 @@ const ms = useMessage()
 const dialog = useDialog()
 const appStore = useAppStore()
 const chatStore = useChatStore()
+const authStore = useAuthStore()
+const loaddingBar = useLoadingBar()
 const { isMobile } = useBasicLayout()
 const { addMessage, unshiftAnswer, updateMessageSomeFields, appendChunk } = useChat()
 const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom, scrollTo } = useScroll()
@@ -248,26 +251,20 @@ function selectedLatestAnswer(questionUuid: string) {
   })
 }
 
-async function loadMoreMessage(event: any) {
+async function loadMoreMessage(callback?: Function) {
   if (currConv.value.loadedAll || loadingMsgs.value)
     return
 
   loadingMsgs.value = true
-  loadingms = ms.loading(
-    '加载中...', {
-      duration: 3000,
-    })
+  loaddingBar.start()
   try {
-    const scrollPosition = event.target.scrollHeight - event.target.scrollTop
     const minMsgUuid = chatStore.getCurConv?.minMsgUuid || ''
     const { data } = await api.fetchMessages<Chat.ConvMsgListResp>(curConvUuid, minMsgUuid, pageSize)
 
-    nextTick(() => scrollTo(event.target.scrollHeight - scrollPosition))
     if (data.msgList.length < pageSize) {
       chatStore.updateConv(curConvUuid, { minMsgUuid: data.minMsgUuid, loadedAll: true })
-      loadingms.destroy()
-      loadingms = ms.warning('没有更多了', {
-        duration: 1000,
+      ms.warning('没有更多了', {
+        duration: 3000,
       })
     } else {
       chatStore.updateConv(curConvUuid, { minMsgUuid: data.minMsgUuid })
@@ -277,15 +274,24 @@ async function loadMoreMessage(event: any) {
     console.error(`loadMoreMessage${error}`)
   } finally {
     loadingMsgs.value = false
-    loadingms.destroy()
+    loaddingBar.finish()
+
+    if (callback)
+      callback()
   }
 }
+
 const handleLoadMoreMessage = debounce(loadMoreMessage, 300)
 async function handleScroll(event: any) {
   const scrollTop = event.target.scrollTop
-  if (scrollTop < 50 && (scrollTop < prevScrollTop || prevScrollTop === undefined))
-    handleLoadMoreMessage(event)
-
+  const lastScrollClient = event.target.scrollHeight
+  if (scrollTop < 50 && (scrollTop < prevScrollTop || prevScrollTop === undefined)) {
+    handleLoadMoreMessage(() => {
+      nextTick(() => {
+        scrollTo(event.target.scrollHeight - lastScrollClient)
+      })
+    })
+  }
   prevScrollTop = scrollTop
 }
 
@@ -484,7 +490,10 @@ onDeactivated(() => {
           id="image-wrapper" class="w-full max-w-screen-xl m-auto dark:bg-[#101014]"
           :class="[isMobile ? 'p-2' : 'p-4']"
         >
-          <template v-if="!messages.length">
+          <template v-if="!authStore.token">
+            <LoginTip />
+          </template>
+          <template v-else-if="!messages.length">
             <div class="flex items-center justify-center mt-4 text-center text-neutral-400">
               <NIcon :component="Cat" size="32" />
               <span class="pl-1">Roar~</span>

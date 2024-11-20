@@ -96,23 +96,35 @@ declare namespace Chat {
 	interface DrawState {
 		loadingUuid: string
 		loading: boolean
-		aiImages: AiImageItem[] //倒序，队尾的为最新数据
+		myDraws: Draw[] //倒序，队尾的为最新数据
 	}
 
-	interface AiImageItem {
+
+	interface Draw {
 		id?: number
 		uuid: string
 		prompt?: string
-		originalImageUrl?: string
-		maskImageUrl?: string
+		aiModelName: string
+		originalImageUuid?: string
+		maskImageUuid?: string
 		interactingMethod: number
 		processStatus: number   //1:processing,2:fail,3:success
-		imageUrlList: string[]
+		imageUuids: string[]
+		imageUrls: string[] //由imageUuids转换得到
 		createTime: string
+		isPublic: boolean
+		isStar: boolean
 	}
 
-	interface AiImageListResp {
+	interface DrawListResp {
 		minId: number
-		imageItems: AiImageItem[]
+		draws: Draw[]
+	}
+
+	interface GalleryState {
+		loadingUuid: string
+		loading: boolean
+		publicDraws: Draw[]
+		myStarDraws: Draw[]
 	}
 }

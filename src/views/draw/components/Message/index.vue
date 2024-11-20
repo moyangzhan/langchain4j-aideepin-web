@@ -4,13 +4,12 @@ import { NButton, NDropdown, NEmpty, NIcon, NImage, NSpace, NSpin, useDialog } f
 import type { ImageRenderToolbarProps } from 'naive-ui'
 import { Delete24Regular } from '@vicons/fluent'
 import { Reload } from '@vicons/ionicons5'
-import AvatarComponent from './Avatar.vue'
-import TextComponent from './Text.vue'
+import AvatarComponent from '@/views/chat/components/Message/Avatar.vue'
+import TextComponent from '@/views/chat/components/Message/Text.vue'
 import { SvgIcon } from '@/components/common'
 import { copyText } from '@/utils/format'
 import { useIconRender } from '@/hooks/useIconRender'
 import { t } from '@/locales'
-import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAuthStore } from '@/store'
 import NoPic from '@/assets/no_pic.png'
 
@@ -27,38 +26,49 @@ interface Props {
   text?: string
   imageUrls?: string[]
   inversion?: boolean
-  regenerate?: boolean
   showAvatar?: boolean
   error?: boolean
   loading?: boolean
   type: string // text,text-image,image
+  isPublic: boolean
 
   aiModelPlatform?: string // openai,dashscope,qianfan,ollama
 }
 
 interface Emit {
-  (ev: 'regenerate'): void
   (ev: 'delete'): void
   (ev: 'delOneImage', fileUrl: string): void
+  (ev: 'setPublic', publicOrPrivate: boolean): void
 }
-
-const { isMobile } = useBasicLayout()
 
 const { iconRender } = useIconRender()
 
 const textRef = ref<HTMLElement>()
 
-const asRawText = ref(props.inversion)
-
 const messageRef = ref<HTMLElement>()
 
 const options = computed(() => {
+  let setPublicOrPrivate = null
+  if (props.isPublic) {
+    setPublicOrPrivate = {
+      label: '私有',
+      key: 'setPrivate',
+      icon: iconRender({ icon: 'ri:lock-line' }),
+    }
+  } else {
+    setPublicOrPrivate = {
+      label: '公开',
+      key: 'setPublic',
+      icon: iconRender({ icon: 'ri:cloud-line' }),
+    }
+  }
   const common = [
     {
       label: t('chat.copy'),
       key: 'copyText',
       icon: iconRender({ icon: 'ri:file-copy-2-line' }),
     },
+    setPublicOrPrivate,
     {
       label: t('common.delete'),
       key: 'delete',
@@ -66,33 +76,23 @@ const options = computed(() => {
     },
   ]
 
-  if (!props.inversion) {
-    common.unshift({
-      label: asRawText.value ? t('chat.preview') : t('chat.showRawText'),
-      key: 'toggleRenderType',
-      icon: iconRender({ icon: asRawText.value ? 'ic:outline-code-off' : 'ic:outline-code' }),
-    })
-  }
-
   return common
 })
 
-function handleSelect(key: 'copyText' | 'delete' | 'toggleRenderType') {
+function handleSelect(key: 'copyText' | 'setPublic' | 'setPrivate' | 'delete') {
   switch (key) {
     case 'copyText':
       copyText({ text: props.text ?? '' })
       return
-    case 'toggleRenderType':
-      asRawText.value = !asRawText.value
+    case 'setPublic':
+      emit('setPublic', true)
+      return
+    case 'setPrivate':
+      emit('setPublic', false)
       return
     case 'delete':
       emit('delete')
   }
-}
-
-function handleRegenerate() {
-  messageRef.value?.scrollIntoView()
-  emit('regenerate')
 }
 
 function handleDelImage(imageUrl: string) {
@@ -142,25 +142,16 @@ function renderToolbarOut2(imageUrl: string) {
       <p class="text-xs text-[#b4bbc4]" :class="[inversion ? 'text-right' : 'text-left']">
         {{ dateTime }}
       </p>
+      <!-- 先渲染文字 -->
       <div class="flex items-start gap-1 mt-2" :class="[inversion ? 'flex-row-reverse' : 'flex-row']">
-        <!-- 消息框侧边下拉选择列表 -->
         <template v-if="type === 'text' || type === 'text-image'">
           <TextComponent
             ref="textRef" :inversion="inversion" :error="error" :text="text" :loading="loading"
-            :as-raw-text="asRawText"
+            :as-raw-text="true"
           />
+          <!-- 消息框侧边下拉选择列表 -->
           <div class="flex flex-col">
-            <button
-              v-if="regenerate"
-              class="mb-2 transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-300"
-              @click="handleRegenerate"
-            >
-              <SvgIcon icon="ri:restart-line" />
-            </button>
-            <NDropdown
-              :trigger="isMobile ? 'click' : 'hover'" :placement="!inversion ? 'right' : 'left'"
-              :options="options" @select="handleSelect"
-            >
+            <NDropdown trigger="click" :placement="!inversion ? 'right' : 'left'" :options="options" @select="handleSelect">
               <button class="transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-200">
                 <SvgIcon icon="ri:more-2-fill" />
               </button>
@@ -168,6 +159,7 @@ function renderToolbarOut2(imageUrl: string) {
           </div>
         </template>
       </div>
+      <!-- 再渲染图片 -->
       <NSpace class="mt-1" :style="inversion ? 'justify-content:flex-end;' : ''">
         <!-- render image -->
         <template v-if="type === 'image' || type === 'text-image'">
@@ -185,14 +177,12 @@ function renderToolbarOut2(imageUrl: string) {
               <NEmpty description="找不到图片" />
             </template>
             <template v-if="imageUrls && imageUrls.length > 0">
-              <!-- <NImageGroup :render-toolbar="renderToolbar"> -->
               <NSpace>
                 <template v-for="imageUrl in imageUrls" :key="imageUrl">
                   <NImage v-if="imageUrl && imageUrl.indexOf('http') === 0" width="100" :src="imageUrl" :fallback-src="NoPic" :render-toolbar="renderToolbarOut2(imageUrl)" />
-                  <NImage v-if="imageUrl && imageUrl.indexOf('http') === -1" width="100" :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic" :render-toolbar="renderToolbarOut2(imageUrl)" />
+                  <NImage v-if="imageUrl && imageUrl.indexOf('http') === -1" width="100" :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic" :render-toolbar="renderToolbarOut2(imageUrl)" :preview-src="`/api${imageUrl.replace('thumbnail', 'image')}?token=${token}`" />
                 </template>
               </NSpace>
-              <!-- </NImageGroup> -->
             </template>
           </template>
         </template>

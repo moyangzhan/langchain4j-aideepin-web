@@ -5,12 +5,10 @@ import { store } from '@/store'
 export const useAuthStore = defineStore('auth-store', {
   state: (): AuthState => ({
     token: getToken(),
+    showLoginModal: false,
   }),
 
   getters: {
-    isChatGPTAPI(): boolean {
-      return true
-    },
   },
 
   actions: {
@@ -18,12 +16,19 @@ export const useAuthStore = defineStore('auth-store', {
     setToken(token: string) {
       document.cookie = `Authorization=${token}`
       this.token = token
+      this.showLoginModal = false
       setToken(token)
     },
 
     removeToken() {
+      console.log('remove token')
       this.token = ''
       removeToken()
+    },
+
+    setLoginView(show: boolean) {
+      console.log('set login view', show)
+      this.showLoginModal = show
     },
   },
 })
