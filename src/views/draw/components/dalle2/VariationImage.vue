@@ -78,6 +78,10 @@ async function handleSubmit() {
       interactingMethod: 3,
       processStatus: 1,
       imageUuids: [],
+      imageUrls: [],
+      isPublic: false,
+      isStar: false,
+      aiModelName: 'dall-e-2',
     }
     drawStore.setLoadingUuid(uuid)
     drawStore.pushOne(aiImage)

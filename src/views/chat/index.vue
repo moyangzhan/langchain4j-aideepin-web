@@ -4,7 +4,6 @@ import { computed, nextTick, onActivated, onDeactivated, onMounted, onUnmounted,
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { NAutoComplete, NButton, NIcon, NInput, NTabPane, NTabs, useDialog, useLoadingBar, useMessage } from 'naive-ui'
-import type { MessageReactive } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { v4 as uuidv4 } from 'uuid'
 import { Message } from './components'
@@ -53,7 +52,6 @@ const promptStore = usePromptStore()
 // 使用storeToRefs，保证store修改后，联想部分能够重新渲染
 const { promptList: promptTemplateList } = storeToRefs<any>(promptStore)
 let prevScrollTop: number
-let loadingms: MessageReactive
 
 useCopyCode()
 

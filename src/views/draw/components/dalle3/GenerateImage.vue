@@ -35,6 +35,7 @@ async function handleSubmit(prompt: string) {
       imageUuids: [],
       imageUrls: [],
       isPublic: false,
+      isStar: false,
       aiModelName: 'dall-e-3',
     }
     drawStore.setLoadingUuid(uuid)
