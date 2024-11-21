@@ -44,8 +44,10 @@ export const useDrawStore = defineStore('draw-store', {
 
     updateAiImage(uuid: string, edit: Chat.Draw) {
       const index = this.myDraws.findIndex(item => item.uuid === uuid)
-      if (index !== -1)
+      if (index !== -1) {
+        edit.imageUrls = edit.imageUuids.map(uuid => `/my-thumbnail/${uuid}`)
         this.myDraws[index] = { ...this.myDraws[index], ...edit }
+      }
     },
 
     setPublic(uuid: string, isPublic: boolean) {
