@@ -109,6 +109,7 @@ declare namespace Chat {
 		maskImageUuid?: string
 		interactingMethod: number
 		processStatus: number   //1:processing,2:fail,3:success
+		processStatusRemark: string
 		imageUuids: string[]
 		imageUrls: string[] //由imageUuids转换得到
 		createTime: string

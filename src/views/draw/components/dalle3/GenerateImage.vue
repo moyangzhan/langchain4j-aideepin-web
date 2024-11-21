@@ -1,11 +1,11 @@
 <script setup lang='ts'>
 import { ref } from 'vue'
-import format from 'date-fns/format'
 import { NCol, NRadio, NRadioGroup, NRow, NSpace, useMessage } from 'naive-ui'
 import SearchInput from '@/views/draw/components/SearchInput.vue'
 import { checkProcess } from '@/views/draw/helper'
 import { useDrawStore } from '@/store'
 import api from '@/api'
+import { emptyDraw } from '@/utils/functions'
 
 interface Emit {
   (e: 'submitted'): void
@@ -24,21 +24,11 @@ async function handleSubmit(prompt: string) {
     const resp = await api.imageGenerate<CreateImageResult>('dall-e-3', prompt, selectedImageSize.value, 1, selectedImageQuality.value)
     const uuid = resp.data.uuid
     drawStore.setLoadingUuid(uuid)
-    const curDate = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
-    const draw = {
-      id: 0,
-      uuid,
-      prompt,
-      createTime: curDate,
-      interactingMethod: 1,
-      processStatus: 1,
-      imageUuids: [],
-      imageUrls: [],
-      isPublic: false,
-      isStar: false,
-      aiModelName: 'dall-e-3',
-    }
-    drawStore.setLoadingUuid(uuid)
+
+    const draw = emptyDraw()
+    draw.uuid = uuid
+    draw.prompt = prompt
+    draw.aiModelName = 'dall-e-3'
     drawStore.pushOne(draw)
 
     emit('submitted')

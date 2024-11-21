@@ -1,12 +1,12 @@
 <script setup lang='ts'>
 import { ref } from 'vue'
-import format from 'date-fns/format'
 import { useMessage } from 'naive-ui'
 import CommonProperty from './CommonProperty.vue'
 import SearchInput from '@/views/draw/components/SearchInput.vue'
 import { checkProcess } from '@/views/draw/helper'
 import { useDrawStore } from '@/store'
 import api from '@/api'
+import { emptyDraw } from '@/utils/functions'
 
 interface Emit {
   (e: 'submitted'): void
@@ -27,26 +27,15 @@ async function handleSubmit(prompt: string) {
     const resp = await api.imageGenerate<CreateImageResult>('dall-e-2', prompt, selectedImageSize.value, generateImageNumber.value)
     const uuid = resp.data.uuid
     drawStore.setLoadingUuid(uuid)
-    const curDate = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
-    const aiImage = {
-      id: 0,
-      uuid,
-      prompt,
-      createTime: curDate,
-      interactingMethod: 1,
-      processStatus: 1,
-      imageUuids: [],
-      imageUrls: [],
-      isPublic: false,
-      isStar: false,
-      aiModelName: 'dall-e-2',
-    }
-    drawStore.setLoadingUuid(uuid)
-    drawStore.pushOne(aiImage)
+
+    const draw = emptyDraw()
+    draw.uuid = uuid
+    draw.prompt = prompt
+    draw.aiModelName = 'dall-e-2'
+    drawStore.pushOne(draw)
 
     emit('submitted')
 
-    console.log(`checkProcess111:${uuid}`)
     setTimeout(() => {
       console.log(`checkProcess:${uuid}`)
       checkProcess(uuid)

@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { NCard, NCol, NCollapseTransition, NIcon, NImage, NRow, NSpace, NSwitch, NTooltip, NUpload, useMessage } from 'naive-ui'
 import type { UploadFileInfo } from 'naive-ui'
 import { QuestionCircle16Regular } from '@vicons/fluent'
-import format from 'date-fns/format'
 import CommonProperty from './CommonProperty.vue'
 import SearchInput from '@/views/draw/components/SearchInput.vue'
 import { checkProcess } from '@/views/draw/helper'
@@ -12,6 +11,7 @@ import OriginalImage from '@/assets/image_edit_original.webp'
 import MaskImage from '@/assets/image_edit_mask.webp'
 import OutPutImage from '@/assets/image_edit_output.webp'
 import api from '@/api'
+import { emptyDraw } from '@/utils/functions'
 
 interface Emit {
   (e: 'submitted'): void
@@ -20,7 +20,6 @@ const emit = defineEmits<Emit>()
 const ms = useMessage()
 const drawStore = useDrawStore()
 const authStore = useAuthStore()
-const token = ref<string>(authStore.token)
 const showTip = ref<boolean>(false)
 const selectedImageSize = ref<string>('')
 const generateImageNumber = ref<number>(0)
@@ -86,25 +85,16 @@ async function handleSubmit(prompt: string) {
   try {
     const resp = await api.imageEdit<CreateImageResult>(originalImage.value, maskImage.value, prompt, selectedImageSize.value, generateImageNumber.value)
     const uuid = resp.data.uuid
-    const curDate = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
-    const maskUrl = maskImage.value ? `/image/${maskImage.value}` : ''
-    const originalUrl = `/image/${originalImage.value}`
-    const aiImage = {
-      id: 0,
-      uuid,
-      originalImageUuid: originalUrl,
-      maskImageUuid: maskUrl,
-      createTime: curDate,
-      interactingMethod: 2,
-      processStatus: 1,
-      imageUuids: [],
-      imageUrls: [],
-      isPublic: false,
-      isStar: false,
-      aiModelName: 'dall-e-2',
-    }
+
+    const draw = emptyDraw()
+    draw.uuid = uuid
+    draw.originalImageUuid = originalImage.value
+    draw.maskImageUuid = maskImage.value ? maskImage.value : ''
+    draw.interactingMethod = 2
+    draw.aiModelName = 'dall-e-2'
+
     drawStore.setLoadingUuid(uuid)
-    drawStore.pushOne(aiImage)
+    drawStore.pushOne(draw)
 
     emit('submitted')
     setTimeout(() => {
@@ -220,7 +210,7 @@ async function handleSubmit(prompt: string) {
       </NCol>
       <NCol :span="12">
         <NUpload
-          :action="`/api/image/upload?token=${token}`" :max="1" response-type="text" list-type="image-card"
+          :action="`/api/image/upload?token=${authStore.token}`" :max="1" response-type="text" list-type="image-card"
           :default-file-list="originalImageList" @before-upload="beforeUpload" @finish="handleOriginalFinish"
           @remove="removeOriginalImage"
         >
@@ -242,7 +232,7 @@ async function handleSubmit(prompt: string) {
       </NCol>
       <NCol :span="12">
         <NUpload
-          :action="`/api/image/upload?token=${token}`" :max="1" response-type="text" list-type="image-card"
+          :action="`/api/image/upload?token=${authStore.token}`" :max="1" response-type="text" list-type="image-card"
           :default-file-list="maskImageList" @before-upload="beforeUpload" @finish="handleMaskFinish"
           @remove="removeMaskImage"
         >

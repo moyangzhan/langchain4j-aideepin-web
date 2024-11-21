@@ -24,6 +24,8 @@ export async function checkProcess(uuid: string) {
     } else {
       drawStore.setLoading(false)
       drawStore.setLoadingUuid('')
+      if (imageResp.data.processStatus === 2)
+        window.$message && window.$message.error(imageResp.data.processStatusRemark)
     }
   }
 }

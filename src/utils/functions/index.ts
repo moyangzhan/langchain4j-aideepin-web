@@ -92,3 +92,22 @@ export function emptyAiModel() {
     disabled: false,
   }
 }
+
+export function emptyDraw() {
+  return {
+    id: 0,
+    uuid: '',
+    prompt: '',
+    createTime: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+    interactingMethod: 1,
+    processStatus: 1,
+    processStatusRemark: '',
+    originalImageUuid: '',
+    maskImageUuid: '',
+    imageUuids: [],
+    imageUrls: [],
+    isPublic: false,
+    isStar: false,
+    aiModelName: '',
+  }
+}

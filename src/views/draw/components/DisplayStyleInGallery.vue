@@ -24,7 +24,6 @@ const galleryStore = useGalleryStore()
 const ms = useMessage()
 const { isMobile } = useBasicLayout()
 const drawStore = useDrawStore()
-const token = ref<string>(authStore.token)
 const showDetailModal = ref<boolean>(false)
 const modalData = ref<ModalData>({ uuid: '', url: '', prompt: '', modelName: '', star: false })
 let prevScrollTop = 0
@@ -136,15 +135,20 @@ defineExpose({ gotoTop, gotoBottom })
                 </template>
                 <template v-else>
                   <template
-                    v-if="item.uuid !== drawStore.loadingUuid && (!item.imageUrls || item.imageUrls.length === 0)"
+                    v-if="item.uuid !== drawStore.loadingUuid && item.processStatus === 2"
+                  >
+                    <NEmpty :description="`异常：${item.processStatusRemark}`" />
+                  </template>
+                  <template
+                    v-else-if="item.uuid !== drawStore.loadingUuid && (!item.imageUrls || item.imageUrls.length === 0)"
                   >
                     <NEmpty description="找不到图片" />
                   </template>
-                  <template v-if="item.imageUrls && item.imageUrls.length > 0">
+                  <template v-else-if="item.imageUrls && item.imageUrls.length > 0">
                     <template v-for="imageUrl in item.imageUrls" :key="imageUrl">
                       <NImage
                         v-if="imageUrl && item.uuid !== drawStore.loadingUuid" width="200"
-                        :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic" object-fit="scale-down"
+                        :src="`/api${imageUrl}?token=${authStore.token}`" :fallback-src="NoPic" object-fit="scale-down"
                         preview-disabled @click="openImage(imageUrl, item)"
                       />
                     </template>
@@ -158,7 +162,7 @@ defineExpose({ gotoTop, gotoBottom })
       <NModal v-model:show="showDetailModal" preset="card" style="max-width: 600px" :bordered="true">
         <NFlex justify="center">
           <NImage
-            v-if="modalData.url" :src="`/api${modalData.url}?token=${token}`" :fallback-src="NoPic"
+            v-if="modalData.url" :src="`/api${modalData.url}?token=${authStore.token}`" :fallback-src="NoPic"
             object-fit="scale-down"
           />
         </NFlex>

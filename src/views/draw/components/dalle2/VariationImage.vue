@@ -2,11 +2,11 @@
 import { ref } from 'vue'
 import { NButton, NCol, NRow, NUpload, useMessage } from 'naive-ui'
 import type { UploadFileInfo } from 'naive-ui'
-import format from 'date-fns/format'
 import CommonProperty from './CommonProperty.vue'
 import { checkProcess } from '@/views/draw/helper'
 import { useAuthStore, useDrawStore } from '@/store'
 import api from '@/api'
+import { emptyDraw } from '@/utils/functions'
 
 interface Emit {
   (e: 'submitted'): void
@@ -15,7 +15,6 @@ const emit = defineEmits<Emit>()
 const drawStore = useDrawStore()
 const ms = useMessage()
 const authStore = useAuthStore()
-const token = ref<string>(authStore.token)
 const originalImage = ref<string>('')
 const selectedImageSize = ref<string>('')
 const generateImageNumber = ref<number>(0)
@@ -68,23 +67,13 @@ async function handleSubmit() {
     const uuid = resp.data.uuid
     drawStore.setLoadingUuid(uuid)
 
-    const originalUrl = `/ai-image/${originalImage.value}`
-    const curDate = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
-    const aiImage = {
-      id: 0,
-      uuid,
-      originalImageUuid: originalUrl,
-      createTime: curDate,
-      interactingMethod: 3,
-      processStatus: 1,
-      imageUuids: [],
-      imageUrls: [],
-      isPublic: false,
-      isStar: false,
-      aiModelName: 'dall-e-2',
-    }
-    drawStore.setLoadingUuid(uuid)
-    drawStore.pushOne(aiImage)
+    const draw = emptyDraw()
+    draw.uuid = uuid
+    draw.originalImageUuid = originalImage.value
+    draw.interactingMethod = 3
+    draw.aiModelName = 'dall-e-2'
+    drawStore.pushOne(draw)
+
     emit('submitted')
     setTimeout(() => {
       checkProcess(uuid)
@@ -105,7 +94,7 @@ async function handleSubmit() {
       </NCol>
       <NCol :span="12">
         <NUpload
-          :action="`/api/image/upload?token=${token}`" :max="1" response-type="text" list-type="image-card"
+          :action="`/api/image/upload?token=${authStore.token}`" :max="1" response-type="text" list-type="image-card"
           @before-upload="beforeUpload" @finish="handleOriginalFinish" @remove="removeOriginalImage"
         >
           上传小于4MB的PNG图片
