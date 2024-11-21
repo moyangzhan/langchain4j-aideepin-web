@@ -105,7 +105,7 @@ const footerClass = computed(() => {
 
 function submitted() {
   chatStyleViewRef.value.gotoBottom()
-  galleryStyleViewRef.value.togoTop()
+  galleryStyleViewRef.value.gotoTop()
 }
 
 function handleChangeModel(value: string) {
