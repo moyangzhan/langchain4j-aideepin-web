@@ -55,7 +55,7 @@ export const useGalleryStore = defineStore('gallery-store', {
 
     starDraw(draw: Chat.Draw) {
       draw.imageUrls = draw.imageUuids.map(uuid => `/draw/public/thumbnail/${draw.uuid}/${uuid}`)
-      draw.isStar = !draw.isStar
+      draw.isStar = true
       this.myStarDraws.unshift(draw)
 
       const hit = this.publicDraws.find(pd => pd.uuid === draw.uuid)

@@ -9,6 +9,7 @@ import { useScroll } from '../chat/hooks/useScroll'
 import { useCopyCode } from '../chat/hooks/useCopyCode'
 import HeaderComponent from './Header/index.vue'
 import RefGraph from './RefGraph.vue'
+import LoginTip from '@/views/user/LoginTip.vue'
 import { SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAppStore, useAuthStore, useKbStore } from '@/store'
@@ -317,7 +318,8 @@ onActivated(async () => {
           id="image-wrapper" class="w-full max-w-screen-xl m-auto dark:bg-[#101014]"
           :class="[isMobile ? 'p-2' : 'p-4']"
         >
-          <template v-if="!qaRecords.length">
+          <LoginTip v-if="!authStore.token" />
+          <template v-else-if="!qaRecords.length">
             <div class="flex items-center justify-center mt-4 text-center text-neutral-400">
               <NIcon :component="Cat" size="32" />
               <span class="pl-1">Roar~</span>

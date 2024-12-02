@@ -1,15 +1,17 @@
 <script setup lang='ts'>
 import { ref } from 'vue'
-import { NButton, NEmpty, NFlex, NIcon, NImage, NImageGroup, NModal, NSpin, useDialog, useMessage } from 'naive-ui'
+import { NAvatar, NButton, NEmpty, NFlex, NIcon, NImage, NImageGroup, NModal, NSpin, NTag, useMessage } from 'naive-ui'
+import { Star24Filled, Star24Regular } from '@vicons/fluent'
 import { Cat } from '@vicons/fa'
 import { Reload } from '@vicons/ionicons5'
+import { ModelAlt } from '@vicons/carbon'
 import { useScroll } from '../../chat/hooks/useScroll'
 import { useAuthStore, useDrawStore, useGalleryStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
+import defaultAvatar from '@/assets/avatar.jpg'
 import LoginTip from '@/views/user/LoginTip.vue'
 import NoPic from '@/assets/no_pic.png'
 import api from '@/api'
-import { t } from '@/locales'
 
 const props = withDefaults(defineProps<Props>(), {
   draws: () => [],
@@ -18,22 +20,24 @@ const props = withDefaults(defineProps<Props>(), {
 })
 const emit = defineEmits<Emit>()
 const { scrollRef, scrollToTop, scrollToBottom } = useScroll()
-const dialog = useDialog()
 const authStore = useAuthStore()
 const galleryStore = useGalleryStore()
 const ms = useMessage()
 const { isMobile } = useBasicLayout()
 const drawStore = useDrawStore()
 const showDetailModal = ref<boolean>(false)
-const modalData = ref<ModalData>({ uuid: '', url: '', prompt: '', modelName: '', star: false })
+const modalData = ref<ModalData>({ uuid: '', url: '', prompt: '', aiModelName: '', userUuid: '', userName: '', starCount: 0, isStar: false })
 let prevScrollTop = 0
 
 interface ModalData {
   uuid: string
   url: string
   prompt: string
-  modelName: string
-  star: boolean
+  aiModelName: string
+  userUuid: string
+  userName: string
+  isStar: boolean
+  starCount: number
 }
 
 interface Emit {
@@ -59,31 +63,22 @@ async function handleStar(uuid: string) {
     authStore.setLoginView(true)
     return
   }
-  if (modalData.value.star) {
-    dialog.warning({
-      title: '是否要删除该收藏',
-      content: '从收藏列表中删除该绘图',
-      positiveText: t('common.yes'),
-      negativeText: t('common.no'),
-      onPositiveClick: async () => {
-        galleryStore.unStarDraw(uuid)
-        await api.drawStarOrUnStar(uuid)
-      },
-    })
+  if (modalData.value.isStar) {
+    galleryStore.unStarDraw(uuid)
+    const { data } = await api.drawStarOrUnStar(uuid)
+    Object.assign(modalData.value, data)
   } else {
     const { data } = await api.drawStarOrUnStar<Chat.Draw>(uuid)
     galleryStore.starDraw(data)
     ms.success('success')
+    Object.assign(modalData.value, data)
   }
 }
-function openImage(imageUrl: string, item: Chat.Draw) {
+function openDraw(imageUrl: string, item: Chat.Draw) {
   showDetailModal.value = true
+  Object.assign(modalData.value, item)
   // 将小图路径换成大图
   modalData.value.url = imageUrl.replace('thumbnail', 'image')
-  modalData.value.uuid = item.uuid
-  modalData.value.prompt = item.prompt || ''
-  modalData.value.modelName = item.aiModelName
-  modalData.value.star = item.isStar
   console.log(item)
 }
 
@@ -123,8 +118,8 @@ defineExpose({ gotoTop, gotoBottom })
         <template v-else>
           <NImageGroup>
             <NFlex>
-              <template v-for="(item) of props.draws" :key="item.uuid">
-                <template v-if="item.uuid === drawStore.loadingUuid">
+              <template v-for="draw of props.draws" :key="draw.uuid">
+                <template v-if="draw.uuid === drawStore.loadingUuid">
                   <NSpin size="medium">
                     <template #icon>
                       <NIcon>
@@ -134,22 +129,20 @@ defineExpose({ gotoTop, gotoBottom })
                   </NSpin>
                 </template>
                 <template v-else>
-                  <template
-                    v-if="item.uuid !== drawStore.loadingUuid && item.processStatus === 2"
-                  >
-                    <NEmpty :description="`异常：${item.processStatusRemark}`" />
+                  <template v-if="draw.uuid !== drawStore.loadingUuid && draw.processStatus === 2">
+                    <NEmpty :description="`异常：${draw.processStatusRemark}`" />
                   </template>
                   <template
-                    v-else-if="item.uuid !== drawStore.loadingUuid && (!item.imageUrls || item.imageUrls.length === 0)"
+                    v-else-if="draw.uuid !== drawStore.loadingUuid && (!draw.imageUrls || draw.imageUrls.length === 0)"
                   >
                     <NEmpty description="找不到图片" />
                   </template>
-                  <template v-else-if="item.imageUrls && item.imageUrls.length > 0">
-                    <template v-for="imageUrl in item.imageUrls" :key="imageUrl">
+                  <template v-else-if="draw.imageUrls && draw.imageUrls.length > 0">
+                    <template v-for="imageUrl in draw.imageUrls" :key="imageUrl">
                       <NImage
-                        v-if="imageUrl && item.uuid !== drawStore.loadingUuid" width="200"
+                        v-if="imageUrl && draw.uuid !== drawStore.loadingUuid" width="200"
                         :src="`/api${imageUrl}?token=${authStore.token}`" :fallback-src="NoPic" object-fit="scale-down"
-                        preview-disabled @click="openImage(imageUrl, item)"
+                        preview-disabled @click="openDraw(imageUrl, draw)"
                       />
                     </template>
                   </template>
@@ -168,13 +161,45 @@ defineExpose({ gotoTop, gotoBottom })
         </NFlex>
         <template #footer>
           <NFlex vertical>
+            <NFlex justify="space-between" aling="center">
+              <!-- 不可点击按钮组 -->
+              <NFlex align="center">
+                <NTag size="large" :bordered="false" :color="{ color: '#ff000000' }">
+                  {{ modalData.userName }}
+                  <template #avatar>
+                    <NAvatar
+                      :src="`/api/user/avatar/${modalData.userUuid}`" size="large" :fallback-src="defaultAvatar"
+                      color="#ff0000000"
+                    />
+                  </template>
+                </NTag>
+                <NTag size="medium" :bordered="false" round :color="{ color: '#ff000000' }">
+                  {{ modalData.aiModelName }}
+                  <template #icon>
+                    <NIcon :component="ModelAlt" />
+                  </template>
+                </NTag>
+              </NFlex>
+              <!-- 可点击按钮组 -->
+              <NFlex align="center">
+                <NTag
+                  size="medium" :bordered="false" round :color="{ color: '#ff000000' }" checkable
+                  @click="handleStar(modalData.uuid)"
+                >
+                  {{ modalData.starCount }}
+                  <template #icon>
+                    <NIcon v-show="!modalData.isStar" :component="Star24Regular" />
+                    <NIcon v-show="modalData.isStar" :component="Star24Filled" color="#eac54f" />
+                  </template>
+                </NTag>
+              </NFlex>
+            </NFlex>
             <NFlex>提示词：{{ modalData.prompt }}</NFlex>
-            <NFlex>模型：{{ modalData.modelName }}</NFlex>
             <NFlex justify="end">
-              <NButton v-show="props.starBtnEnable" quaternary type="info" @click="handleStar(modalData.uuid)">
-                {{ modalData.star ? '取消收藏' : '收藏' }}
-              </NButton>
-              <NButton v-show="props.delBtnEnable" quaternary type="error" @click="handleDelDraw(modalData.uuid, modalData.prompt)">
+              <NButton
+                v-show="props.delBtnEnable" quaternary type="error"
+                @click="handleDelDraw(modalData.uuid, modalData.prompt)"
+              >
                 删除
               </NButton>
             </NFlex>

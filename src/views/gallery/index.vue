@@ -53,7 +53,7 @@ async function loadNextPublicPage() {
 }
 
 /**
- * 加载我的收藏
+ * 加载我的点赞
  */
 async function loadNextStarPage() {
   if (loadingFav.value)
@@ -110,7 +110,7 @@ onMounted(() => {
             公开图片
           </NRadio>
           <NRadio value="favView">
-            我的收藏
+            我的点赞
           </NRadio>
         </NRadioGroup>
       </NFlex>

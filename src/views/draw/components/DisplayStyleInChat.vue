@@ -5,13 +5,15 @@ import { Cat } from '@vicons/fa'
 import { nextTick, watch } from 'vue'
 import { useScroll } from '../../chat/hooks/useScroll'
 import Message from './Message/index.vue'
-import { useDrawStore } from '@/store'
+import { useAuthStore, useDrawStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
+import LoginTip from '@/views/user/LoginTip.vue'
 
 const emit = defineEmits<Emit>()
 const { scrollRef, scrollToBottom, scrollTo } = useScroll()
 const { isMobile } = useBasicLayout()
 const drawStore = useDrawStore()
+const authStore = useAuthStore()
 const { myDraws } = storeToRefs<any>(drawStore)
 let prevScrollTop: number
 
@@ -69,7 +71,8 @@ defineExpose({ gotoBottom })
 <template>
   <div ref="scrollRef" class="h-full overflow-hidden overflow-y-auto" @scroll="handleScroll">
     <div class="w-full max-w-screen-xl m-auto dark:bg-[#101014]" :class="[isMobile ? 'p-2' : 'p-4']">
-      <template v-if="myDraws.length === 0">
+      <LoginTip v-if="!authStore.token" />
+      <template v-else-if="myDraws.length === 0">
         <div class="flex items-center justify-center mt-4 text-center text-neutral-400">
           <NIcon :component="Cat" size="32" />
           <span class="pl-1">Roar~</span>
@@ -78,6 +81,7 @@ defineExpose({ gotoBottom })
       <template v-else>
         <div>
           <template v-for="(item) of myDraws" :key="item.uuid">
+            <!-- 增加显示绘图统计数据，如starCount,isPublic -->
             <Message
               v-if="item.interactingMethod === 1" :date-time="item.createTime" :text="item.prompt"
               :is-public="item.isPublic" :inversion="true" type="text" @delete="handleDelDraw(item.uuid, item.prompt)"

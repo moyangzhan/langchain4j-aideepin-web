@@ -431,7 +431,7 @@ function knowledgeBaseGraph<T = any>(kbItemUuid: string, maxVertextId: number, m
 
 function knowledgeBaseGraphRef<T = any>(recordUuid: string) {
   return get<T>({
-    url: `/knowledge-base/qa/record/graph-ref/${recordUuid}`,
+    url: `/knowledge-base/qa/graph-ref/${recordUuid}`,
   })
 }
 
@@ -448,32 +448,32 @@ function knowledgeBaseQaSseAsk(params: {
 
 function knowledgeBaseQaRecordSearch<T = any>(kbUuid: string, keyword: string, currentPage: number, pageSize: number) {
   return get<T>({
-    url: `/knowledge-base/qa/record/search?kbUuid=${kbUuid}&keyword=${keyword}&currentPage=${currentPage}&pageSize=${pageSize}`,
+    url: `/knowledge-base/qa/search?kbUuid=${kbUuid}&keyword=${keyword}&currentPage=${currentPage}&pageSize=${pageSize}`,
   })
 }
 
 function knowledgeBaseQaRecordAdd<T = any>(uuid: string, QaContent: { question: string; modelName: string }) {
   return post<T>({
-    url: `/knowledge-base/qa/record/add/${uuid}`,
+    url: `/knowledge-base/qa/add/${uuid}`,
     data: QaContent,
   })
 }
 
 function knowledgeBaseQaRecordDel<T = any>(uuid: string) {
   return post<T>({
-    url: `/knowledge-base/qa/record/del/${uuid}`,
+    url: `/knowledge-base/qa/del/${uuid}`,
   })
 }
 
 function knowledgeBaseQaRecordClear<T = any>() {
   return post<T>({
-    url: '/knowledge-base/qa/record/clear',
+    url: '/knowledge-base/qa/clear',
   })
 }
 
 function knowledgeBaseRecordReference<T = any>(recordUuid: string) {
   return get<T>({
-    url: `/knowledge-base/qa/record/reference/${recordUuid}`,
+    url: `/knowledge-base/qa/reference/${recordUuid}`,
   })
 }
 

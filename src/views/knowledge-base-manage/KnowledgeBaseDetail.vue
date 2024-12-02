@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import type { UploadFileInfo, UploadInst } from 'naive-ui'
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
-import { NBreadcrumb, NBreadcrumbItem, NButton, NCard, NDataTable, NFlex, NIcon, NInput, NModal, NP, NSpace, NSwitch, NText, NUpload, NUploadDragger, useDialog, useMessage } from 'naive-ui'
+import { NBreadcrumb, NBreadcrumbItem, NButton, NCard, NDataTable, NFlex, NIcon, NInput, NModal, NP, NSpace, NText, NUpload, NUploadDragger, useDialog, useMessage } from 'naive-ui'
 import { ArchiveOutline } from '@vicons/ionicons5'
 import { Cloud32Regular, LockClosed32Regular } from '@vicons/fluent'
 import { useRoute } from 'vue-router'
@@ -28,8 +28,9 @@ const kbItemUuidForGraph = ref<string>('')
 const loading = ref(false)
 const submitting = ref(false)
 const showItemEditModal = ref(false)
+const showUploadModal = ref(false)
 const itemList = ref<KnowledgeBase.Item[]>([])
-const indexAfterUpload = ref(true)
+const indexAfterUpload = ref(false)
 const uploadRef = ref<UploadInst | null>(null)
 const headers = { Authorization: '' }
 const fileListLength = ref(0)
@@ -63,7 +64,7 @@ const showGraph = (selected: KnowledgeBase.Item = knowledgeBaseEmptyItem()) => {
   kbItemUuidForGraph.value = selected.uuid
 }
 
-const changeItemShowModal = (selected: KnowledgeBase.Item = knowledgeBaseEmptyItem()) => {
+const changeEditModal = (selected: KnowledgeBase.Item = knowledgeBaseEmptyItem()) => {
   if (selected.kbId !== '0') {
     Object.assign(tmpItem, selected)
   } else {
@@ -78,7 +79,7 @@ function rowKey(row: KnowledgeBase.Item) {
   return row.uuid
 }
 
-const columns = createColumns(showEmbeddingList, showGraph, showFileContent, changeItemShowModal, deleteKbItem)
+const columns = createColumns(showEmbeddingList, showGraph, showFileContent, changeEditModal, deleteKbItem)
 
 /**
  * 索引文档
@@ -97,6 +98,7 @@ async function textIndexing() {
     await api.knowledgeBaseItemsIndexing(checkedItemRowKeys.value)
     indexingCheck()
     ms.success('索引任务后台执行中')
+    search(1)
   } catch (error: any) {
     ms.error(error.message ?? 'error')
   } finally {
@@ -147,6 +149,10 @@ function onUploadChange(options: { fileList: UploadFileInfo[] }) {
 
 function onUploadSubmit() {
   uploadRef.value?.submit()
+  setTimeout(() => {
+    showUploadModal.value = false
+    search(1)
+  }, 3000)
 }
 
 function onUploadFinish({
@@ -250,6 +256,53 @@ watch(
       </template>
       {{ curKnowledgeBase.remark }}
     </NCard>
+    <NCard style="margin-top: 12px" title="已生成的知识点" hoverable>
+      <div class="flex gap-3 mb-4" :class="[isMobile ? 'flex-col' : 'flex-row justify-between']">
+        <div class="flex items-left gap-2">
+          <NButton type="primary" size="small" @click="changeEditModal()">
+            新增（按表单）
+          </NButton>
+          <NButton type="primary" size="small" @click="() => showUploadModal = !showUploadModal">
+            新增（按文件）
+          </NButton>
+          <NButton type="primary" size="small" @click="textIndexing()">
+            索引选中内容
+          </NButton>
+        </div>
+        <div class="flex items-center">
+          <NInput v-model:value="searchValue" style="width: 100%" @keyup="onKeyUpSearch" />
+          <NButton type="primary" ghost @click="search(1)">
+            搜索
+          </NButton>
+        </div>
+      </div>
+      <NDataTable
+        remote :loading="loading" :max-height="400" :columns="columns" :data="itemList"
+        :pagination="paginationReactive" :single-line="false" :bordered="true" :row-key="rowKey"
+        @update:checked-row-keys="onHandleCheckedRowKeys" @update:page="onHandlePageChange"
+      />
+    </NCard>
+  </div>
+
+  <NModal v-model:show="showItemEditModal" style="width: 90%; max-height: 700px;" preset="card" title="知识点-新增|编辑">
+    <NSpace vertical>
+      {{ t('store.title') }}
+      <NInput v-model:value="tmpItem.title" maxlength="100" show-count />
+      摘要
+      <NInput
+        v-model:value="tmpItem.brief" type="textarea" maxlength="200" show-count
+        :autosize="{ minRows: 2, maxRows: 5 }"
+      />
+      内容
+      <NInput v-model:value="tmpItem.remark" type="textarea" show-count :autosize="{ minRows: 5, maxRows: 10 }" />
+      <NButton block type="primary" :disabled="inputStatus" @click="() => { saveOrUpdate() }">
+        {{ t('common.confirm') }}
+      </NButton>
+    </NSpace>
+  </NModal>
+
+  <!-- Upload files -->
+  <NModal v-model:show="showUploadModal" style="width: 90%; max-height: 700px;" preset="card" title="知识点-上传">
     <NCard style="margin-top: 12px" title="上传文档以生成知识点" hoverable>
       <NSpace vertical>
         <NUpload
@@ -277,62 +330,9 @@ watch(
           <NButton type="primary" :disabled="!fileListLength" @click="onUploadSubmit">
             上传并生成知识点
           </NButton>
-          <NFlex class="items-center">
-            <NSwitch v-model:value="indexAfterUpload">
-              <template #checked>
-                自动索引（向量化、图谱化）
-              </template>
-              <template #unchecked>
-                不自动索引
-              </template>
-            </NSwitch>
-          </NFlex>
         </NFlex>
       </NSpace>
     </NCard>
-    <NCard style="margin-top: 12px" title="已生成的知识点" hoverable>
-      <div class="flex gap-3 mb-4" :class="[isMobile ? 'flex-col' : 'flex-row justify-between']">
-        <div class="flex items-left gap-2">
-          <NButton type="primary" size="small" @click="changeItemShowModal()">
-            {{ $t('common.add') }}
-          </NButton>
-          <NButton type="primary" size="small" @click="textIndexing()">
-            索引选中内容
-          </NButton>
-        </div>
-        <div class="flex items-center">
-          <NInput v-model:value="searchValue" style="width: 100%" @keyup="onKeyUpSearch" />
-          <NButton type="primary" ghost @click="search(1)">
-            搜索
-          </NButton>
-        </div>
-      </div>
-      <NDataTable
-        remote :loading="loading" :max-height="400" :columns="columns" :data="itemList"
-        :pagination="paginationReactive" :single-line="false" :bordered="true" :row-key="rowKey"
-        @update:checked-row-keys="onHandleCheckedRowKeys" @update:page="onHandlePageChange"
-      />
-    </NCard>
-  </div>
-
-  <NModal
-    v-model:show="showItemEditModal" style="width: 90%; max-height: 700px;" preset="card"
-    title="知识点-新增|编辑"
-  >
-    <NSpace vertical>
-      {{ t('store.title') }}
-      <NInput v-model:value="tmpItem.title" maxlength="100" show-count />
-      摘要
-      <NInput
-        v-model:value="tmpItem.brief" type="textarea" maxlength="200" show-count
-        :autosize="{ minRows: 2, maxRows: 5 }"
-      />
-      内容
-      <NInput v-model:value="tmpItem.remark" type="textarea" show-count :autosize="{ minRows: 5, maxRows: 10 }" />
-      <NButton block type="primary" :disabled="inputStatus" @click="() => { saveOrUpdate() }">
-        {{ t('common.confirm') }}
-      </NButton>
-    </NSpace>
   </NModal>
 
   <NModal v-model:show="showEmbeddingListModal" style="width: 90%; " preset="card" title="嵌入列表">
