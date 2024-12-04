@@ -19,15 +19,25 @@ export const useGalleryStore = defineStore('gallery-store', {
     appendPublicDraws(draws: Chat.Draw[]) {
       if (draws.length === 0)
         return
+      draws.forEach((item) => {
+        if (this.publicDraws.findIndex(pd => pd.uuid === item.uuid) === -1) {
+          item.imageUrls = item.imageUuids.map(uuid => `/draw/public/thumbnail/${item.uuid}/${uuid}`)
+          this.publicDraws.push(item)
+        }
+      })
+    },
 
-      draws.forEach(item => item.imageUrls = item.imageUuids.map(uuid => `/draw/public/thumbnail/${item.uuid}/${uuid}`))
-      this.publicDraws.push(...draws)
+    setPublic(uuid: string, isPublic: boolean) {
+      const hit = this.publicDraws.find(item => item.uuid === uuid)
+      if (hit)
+        hit.isPublic = isPublic
     },
 
     appendStarDraws(draws: Chat.Draw[]) {
       if (draws.length === 0)
         return
 
+      const needAdd: Chat.Draw[] = []
       draws.forEach((item) => {
         item.imageUrls = item.imageUuids.map(uuid => `/draw/public/thumbnail/${item.uuid}/${uuid}`)
         item.isStar = true
@@ -35,8 +45,12 @@ export const useGalleryStore = defineStore('gallery-store', {
         const hit = this.publicDraws.find(pd => pd.uuid === item.uuid)
         if (hit)
           hit.isStar = true
+
+        const myStarExist = this.myStarDraws.find(pd => pd.uuid === item.uuid)
+        if (!myStarExist)
+          needAdd.push(item)
       })
-      this.myStarDraws.push(...draws)
+      this.myStarDraws.push(...needAdd)
     },
 
     setLoading(loading: boolean) {
@@ -47,20 +61,27 @@ export const useGalleryStore = defineStore('gallery-store', {
       this.loadingUuid = uuid
     },
 
-    unStarDraw(uuid: string) {
-      const index = this.myStarDraws.findIndex(item => item.uuid === uuid)
+    unStarDraw(draw: Chat.Draw) {
+      const index = this.myStarDraws.findIndex(item => item.uuid === draw.uuid)
       if (index > -1)
         this.myStarDraws.splice(index, 1)
+
+      const hit = this.publicDraws.find(pd => pd.uuid === draw.uuid)
+      if (hit)
+        Object.assign(hit, draw)
     },
 
     starDraw(draw: Chat.Draw) {
       draw.imageUrls = draw.imageUuids.map(uuid => `/draw/public/thumbnail/${draw.uuid}/${uuid}`)
-      draw.isStar = true
-      this.myStarDraws.unshift(draw)
-
-      const hit = this.publicDraws.find(pd => pd.uuid === draw.uuid)
+      const hit = this.myStarDraws.find(pd => pd.uuid === draw.uuid)
       if (hit)
-        hit.isStar = !draw.isStar
+        Object.assign(hit, draw)
+      else
+        this.myStarDraws.unshift(draw)
+
+      const hit2 = this.publicDraws.find(pd => pd.uuid === draw.uuid)
+      if (hit2)
+        Object.assign(hit2, draw)
     },
 
   },

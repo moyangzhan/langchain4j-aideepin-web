@@ -84,6 +84,7 @@ export function emptyAiModel() {
     modelName: '',
     modelPlatform: '',
     enable: false,
+    isFree: false,
     inputTypes: 'text',
 
     // for NSelector

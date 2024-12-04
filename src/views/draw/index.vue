@@ -6,7 +6,7 @@ import DisplayStyleInGallery from './components/DisplayStyleInGallery.vue'
 import Dalle2Editor from './components/dalle2/Dalle2Editor.vue'
 import Dalle3Editor from './components/dalle3/Dalle3Editor.vue'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useAppStore, useAuthStore, useDrawStore } from '@/store'
+import { useAppStore, useAuthStore, useDrawStore, useGalleryStore } from '@/store'
 import api from '@/api'
 import { debounce } from '@/utils/functions/debounce'
 import { t } from '@/locales'
@@ -17,9 +17,10 @@ const ms = useMessage()
 const loaddingBar = useLoadingBar()
 const { isMobile } = useBasicLayout()
 const authStore = useAuthStore()
+const drawStore = useDrawStore()
+const galleryStore = useGalleryStore()
 const chatStyleViewRef = ref()
 const galleryStyleViewRef = ref()
-const drawStore = useDrawStore()
 const loading = ref<boolean>(false)
 const loadedAll = ref<boolean>(false)
 const nextPageMaxImageId = ref<number>(Number.MAX_SAFE_INTEGER)
@@ -92,6 +93,7 @@ async function handleSetPublic(uuid: string, isPublic: boolean) {
   const ret = await api.drawSetPublic<boolean>(uuid, isPublic)
   if (ret) {
     drawStore.setPublic(uuid, isPublic)
+    galleryStore.setPublic(uuid, isPublic)
     ms.warning(`该绘图任务已经${isPublic ? '可以公开访问' : '关闭外部访问权限'}`)
   }
 }

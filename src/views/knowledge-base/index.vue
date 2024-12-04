@@ -2,7 +2,7 @@
 import type { Ref } from 'vue'
 import { computed, nextTick, onActivated, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NCollapse, NCollapseItem, NFlex, NIcon, NInput, NModal, NSelect, useDialog, useLoadingBar, useMessage } from 'naive-ui'
+import { NButton, NCollapse, NCollapseItem, NFlex, NIcon, NInput, NModal, useDialog, useLoadingBar, useMessage } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { Message } from '../chat/components'
 import { useScroll } from '../chat/hooks/useScroll'
@@ -10,7 +10,7 @@ import { useCopyCode } from '../chat/hooks/useCopyCode'
 import HeaderComponent from './Header/index.vue'
 import RefGraph from './RefGraph.vue'
 import LoginTip from '@/views/user/LoginTip.vue'
-import { SvgIcon } from '@/components/common'
+import { LLMSelector, SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAppStore, useAuthStore, useKbStore } from '@/store'
 import api from '@/api'
@@ -49,10 +49,6 @@ useCopyCode()
 
 if (currKbUuid === 'default' && !!kbStore.activeKbUuid)
   router.replace({ name: 'QADetail', params: { kbUuid: kbStore.activeKbUuid } })
-
-function handleChangeModel(value: string) {
-  appStore.setSelectedLLM(value)
-}
 
 async function handleSubmit() {
   const message = prompt.value
@@ -370,7 +366,7 @@ onActivated(async () => {
       <div class="w-full max-w-screen-xl m-auto">
         <div class="flex items-center justify-between space-x-2">
           <div class="w-48">
-            <NSelect :value="appStore.selectedLLM.modelId" :options="appStore.llms" @update:value="handleChangeModel" />
+            <LLMSelector />
           </div>
           <NInput
             ref="inputRef" v-model:value="prompt" type="textarea" :placeholder="placeholder"

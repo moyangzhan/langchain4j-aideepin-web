@@ -1,8 +1,8 @@
 <script setup lang='ts'>
 import { computed, ref, watch } from 'vue'
-import { NList, NListItem, NSelect, NUpload, useMessage } from 'naive-ui'
-import type { SelectOption, UploadFileInfo } from 'naive-ui'
-import { HoverButton, SvgIcon } from '@/components/common'
+import { NList, NListItem, NUpload, useMessage } from 'naive-ui'
+import type { UploadFileInfo } from 'naive-ui'
+import { HoverButton, LLMSelector, SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAppStore, useAuthStore, useChatStore } from '@/store'
 import { defaultConv } from '@/store/modules/chat/helper'
@@ -65,10 +65,6 @@ function handlerRemove({ file }: { file: UploadFileInfo }) {
   emit('imagesChange', uploadedUuidList.value)
 }
 
-function handleChangeModel(value: string, option: SelectOption) {
-  appStore.setSelectedLLM(value)
-}
-
 function toggleUsingContext() {
   api.convToggleUsingContext(currConv.value.uuid, !currConv.value.understandContextEnable)
   currConv.value.understandContextEnable = !currConv.value.understandContextEnable
@@ -95,11 +91,8 @@ watch(
 <template>
   <div class="flex flex-col space-x-2 input-tool-bar">
     <div class="flex space-x-2 items-center">
-      <div class="w-48">
-        <NSelect
-          size="small" :value="appStore.selectedLLM.modelId" :options="appStore.llms"
-          @update:value="handleChangeModel"
-        />
+      <div>
+        <LLMSelector />
       </div>
       <HoverButton
         v-if="!isMobile"

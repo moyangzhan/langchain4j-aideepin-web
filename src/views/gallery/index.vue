@@ -15,7 +15,7 @@ const favViewRef = ref()
 const galleryStore = useGalleryStore()
 const loadingPublic = ref<boolean>(false)
 const loadedPublicAll = ref<boolean>(false)
-const loadingFav = ref<boolean>(false)
+const loadingStarredList = ref<boolean>(false)
 const loadedFavAll = ref<boolean>(false)
 const nextPageMaxIdByPublic = ref<number>(Number.MAX_SAFE_INTEGER)
 const nextPageMaxIdByStar = ref<number>(Number.MAX_SAFE_INTEGER)
@@ -56,14 +56,14 @@ async function loadNextPublicPage() {
  * 加载我的点赞
  */
 async function loadNextStarPage() {
-  if (loadingFav.value)
+  if (loadingStarredList.value)
     return
 
   if (loadedFavAll.value)
     return
 
   loaddingBar.start()
-  loadingFav.value = true
+  loadingStarredList.value = true
   try {
     const { data } = await api.fetchStarDraws<Chat.DrawListResp>(nextPageMaxIdByStar.value, 20)
     if (data.draws.length > 0) {
@@ -78,7 +78,7 @@ async function loadNextStarPage() {
   } catch (error) {
     console.error(error)
   } finally {
-    loadingFav.value = false
+    loadingStarredList.value = false
     loaddingBar.finish()
   }
 }

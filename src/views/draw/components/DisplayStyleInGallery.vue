@@ -64,9 +64,9 @@ async function handleStar(uuid: string) {
     return
   }
   if (modalData.value.isStar) {
-    galleryStore.unStarDraw(uuid)
-    const { data } = await api.drawStarOrUnStar(uuid)
+    const { data } = await api.drawStarOrUnStar<Chat.Draw>(uuid)
     Object.assign(modalData.value, data)
+    galleryStore.unStarDraw(data)
   } else {
     const { data } = await api.drawStarOrUnStar<Chat.Draw>(uuid)
     galleryStore.starDraw(data)

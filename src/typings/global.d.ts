@@ -28,6 +28,7 @@ interface AiModelInfo{
   modelName: string
   modelPlatform: string
   enable: boolean
+  isFree: boolean
   inputTypes: string
 
   //for NSelector
