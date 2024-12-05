@@ -10,7 +10,7 @@ import { Message } from '../chat/components'
 import { useScroll } from '../chat/hooks/useScroll'
 import { useCopyCode } from '../chat/hooks/useCopyCode'
 import HeaderComponent from '../chat/components/Header/index.vue'
-import { HoverButton, SvgIcon } from '@/components/common'
+import { HoverButton, LLMSelector, SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAiSearchStore, useAppStore, useAuthStore } from '@/store'
 import api from '@/api'
@@ -36,10 +36,6 @@ const inputRef = ref<Ref | null>(null)
 let prevScrollTop: number
 
 useCopyCode()
-
-function handleChangeModel(value: string) {
-  appStore.setSelectedLLM(value)
-}
 
 function handleChangeEngine(value: string) {
   appStore.setSelectedSearchEngine(value)
@@ -351,7 +347,7 @@ onActivated(async () => {
             />
           </div>
           <div class="w-48">
-            <NSelect :value="appStore.selectedLLM.modelId" :options="appStore.llms" @update:value="handleChangeModel" />
+            <LLMSelector />
           </div>
           <NInput
             ref="inputRef" v-model:value="prompt" type="textarea" :placeholder="placeholder"
