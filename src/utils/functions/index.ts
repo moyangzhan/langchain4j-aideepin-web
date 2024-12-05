@@ -88,7 +88,7 @@ export function emptyAiModel() {
     inputTypes: 'text',
 
     // for NSelector
-    value: '',
+    key: '',
     label: '',
     disabled: false,
   }

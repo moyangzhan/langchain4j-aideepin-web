@@ -1,11 +1,11 @@
-<script setup lang='ts'>
+<script setup lang="ts">
 import { h } from 'vue'
-import { NSelect, NTooltip } from 'naive-ui'
-import type { SelectOption } from 'naive-ui'
+import { NButton, NDropdown, NTooltip } from 'naive-ui'
 import type { VNode } from 'vue'
+import type { DropdownGroupOption, DropdownOption } from 'naive-ui'
 import { useAppStore } from '@/store'
 const appStore = useAppStore()
-function renderOption({ node, option }: { node: VNode; option: SelectOption }) {
+function renderOption({ node, option }: { node: VNode; option: DropdownOption | DropdownGroupOption }) {
   if (option.enable && option.isFree) {
     return h(NTooltip, null, {
       trigger: () => node,
@@ -16,8 +16,7 @@ function renderOption({ node, option }: { node: VNode; option: SelectOption }) {
   }
 }
 
-function renderLabel(option: SelectOption) {
-  console.log('option', option)
+function renderDropdownLabel(option: DropdownOption) {
   return [
     h(
       'span',
@@ -30,14 +29,18 @@ function renderLabel(option: SelectOption) {
   ]
 }
 
-function handleChangeModel(value: string, option: SelectOption) {
-  appStore.setSelectedLLM(value)
+function handleSelect(key: string | number) {
+  appStore.setSelectedLLM(`${key}`)
 }
 </script>
 
 <template>
-  <NSelect
-    style="max-width: 500px" size="small" :value="appStore.selectedLLM.modelId" :options="appStore.llms"
-    :render-label="renderLabel" :render-option="renderOption" @update:value="handleChangeModel"
-  />
+  <NDropdown
+    size="small" placement="top-start" trigger="click" :show-arrow="true" :render-label="renderDropdownLabel"
+    :render-option="renderOption" :options="appStore.llms" @select="handleSelect"
+  >
+    <NButton icon-placement="right">
+      {{ appStore.selectedLLM.modelName }}
+    </NButton>
+  </NDropdown>
 </template>

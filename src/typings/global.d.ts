@@ -32,7 +32,7 @@ interface AiModelInfo{
   inputTypes: string
 
   //for NSelector
-  value: string
+  key: string
   label: string
   disabled: boolean
 }
@@ -44,7 +44,7 @@ interface SearchEngineInfo{
   enable: boolean,
 
   //for NSelector
-  value: string,
+  key: string,
   label: string,
   disabled: boolean
 }

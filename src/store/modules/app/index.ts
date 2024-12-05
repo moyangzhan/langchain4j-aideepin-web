@@ -50,7 +50,7 @@ export const useAppStore = defineStore('app-store', {
       engines.forEach((item) => {
         item.disabled = !item.enable
         item.label = item.name
-        item.value = item.name
+        item.key = item.name
       })
       this.searchEngines = engines
       if (!this.selectedSearchEngine) {
@@ -63,7 +63,7 @@ export const useAppStore = defineStore('app-store', {
       llms.forEach((item) => {
         item.disabled = !item.enable
         item.label = item.modelName
-        item.value = item.modelId
+        item.key = item.modelId
       })
       this.llms = llms
       if (this.selectedLLM.modelId === 'default') {
@@ -76,7 +76,7 @@ export const useAppStore = defineStore('app-store', {
       imageModels.forEach((item) => {
         item.disabled = !item.enable
         item.label = item.modelName
-        item.value = item.modelName
+        item.key = item.modelName
       })
       this.imageModels = imageModels
       if (this.selectedImageModel.modelId === 'default') {

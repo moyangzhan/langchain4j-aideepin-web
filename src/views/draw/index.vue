@@ -134,7 +134,7 @@ watch(
 
 <template>
   <div class="flex flex-col w-full h-full">
-    <main class="flex-1 overflow-hidden">
+    <header>
       <NFlex justify="space-between" class="w-full max-w-screen-xl m-auto" :class="[isMobile ? 'p-2' : 'px-4 pb-4']">
         <NRadioGroup
           :value="appStore.selectedImageModel.modelId" name="imageModelRadioGroup" size="small"
@@ -156,6 +156,8 @@ watch(
           </NRadio>
         </NRadioGroup>
       </NFlex>
+    </header>
+    <main class="flex-1 overflow-hidden">
       <DisplayStyleInChat
         v-show="selectedDisplayStyle === 'chatStyle'" ref="chatStyleViewRef"
         @set-public="handleSetPublic" @del-draw="handleDelDraw" @del-one-image="handleDelOneImage"
