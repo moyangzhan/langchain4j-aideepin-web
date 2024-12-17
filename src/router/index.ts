@@ -3,20 +3,19 @@ import type { RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { setupPageGuard } from './permission'
 import { ChatLayout } from '@/views/chat/layout'
-import gallery from '@/views/gallery/index.vue'
 import { KnowledgeBaseLayout } from '@/views/knowledge-base/layout'
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Root',
-    component: gallery,
-    redirect: '/gallery',
+    component: ChatLayout,
+    redirect: '/chat/default',
     children: [
       {
-        path: '/gallery',
-        name: 'Gallery',
-        component: () => import('@/views/gallery/index.vue'),
+        path: '/chat/:uuid',
+        name: 'ChatDetail',
+        component: () => import('@/views/chat/index.vue'),
       },
     ],
   },
@@ -42,11 +41,11 @@ const routes: RouteRecordRaw[] = [
     name: 'Draw',
     component: () => import('@/views/draw/index.vue'),
   },
-  // {
-  //   path: '/gallery',
-  //   name: 'Gallery',
-  //   component: () => import('@/views/gallery/index.vue'),
-  // },
+  {
+    path: '/gallery',
+    name: 'Gallery',
+    component: () => import('@/views/gallery/index.vue'),
+  },
   {
     path: '/qa',
     component: KnowledgeBaseLayout,

@@ -110,5 +110,8 @@ export function emptyDraw() {
     isPublic: false,
     isStar: false,
     aiModelName: '',
+    starCount: 0,
+    userUuid: '',
+    userName: '',
   }
 }

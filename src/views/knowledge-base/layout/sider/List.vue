@@ -31,10 +31,6 @@ async function initList() {
         }
       })
     }
-
-    const { data: publicData } = await api.knowledgeBaseSearchPublic<KnowledgeBase.InfoListResp>('', currentPage.value, pageSize)
-    if (publicData.records)
-      kbStore.setPublicKbInfos(publicData.records)
   } finally {
     kbStore.setLoadingKbList(false)
   }
@@ -43,6 +39,12 @@ async function initList() {
 async function initStarredList() {
   const starListResp = await api.knowledgeBaseStarListMine<KnowledgeBase.KbStarListResp>(1, 100)
   kbStore.appStarInfos(starListResp.data.records)
+}
+
+async function initPublicList() {
+  const { data: publicData } = await api.knowledgeBaseSearchPublic<KnowledgeBase.InfoListResp>('', currentPage.value, pageSize)
+  if (publicData.records)
+    kbStore.setPublicKbInfos(publicData.records)
 }
 
 watch(
@@ -71,6 +73,7 @@ watch(
 
 onMounted(() => {
   console.log('list onMounted')
+  initPublicList()
   if (authStoreRef.value.token) {
     initList()
     initStarredList()

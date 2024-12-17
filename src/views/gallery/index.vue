@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import { onMounted, ref } from 'vue'
 import { NFlex, NRadio, NRadioGroup, useLoadingBar, useMessage } from 'naive-ui'
-import DisplayStyleInGallery from '../draw/components/DisplayStyleInGallery.vue'
+import DrawList from './DrawList.vue'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useGalleryStore } from '@/store'
 import api from '@/api'
@@ -114,18 +114,13 @@ onMounted(() => {
           </NRadio>
         </NRadioGroup>
       </NFlex>
-      <DisplayStyleInGallery
-        v-show="publicOrFavor === 'publicView'" ref="publicViewRef"
-        :draws="galleryStore.publicDraws"
-        :del-btn-enable="false"
-        @load-more="handleLoadMorePublicDraws"
+      <DrawList
+        v-show="publicOrFavor === 'publicView'" ref="publicViewRef" from-page-type="public"
+        :draws="galleryStore.publicDraws" @load-more="handleLoadMorePublicDraws"
       />
-      <DisplayStyleInGallery
-        v-show="publicOrFavor === 'favView'" ref="favViewRef"
-        :draws="galleryStore.myStarDraws"
-        :del-btn-enable="false"
-        :login-btn-enable="true"
-        @load-more="handleLoadMoreStarDraw"
+      <DrawList
+        v-show="publicOrFavor === 'favView'" ref="favViewRef" from-page-type="starred"
+        :draws="galleryStore.myStarDraws" :login-btn-enable="true" @load-more="handleLoadMoreStarDraw"
       />
     </main>
   </div>

@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { NAutoComplete, NButton, NCol, NInput, NRow } from 'naive-ui'
-import { useDrawStore, usePromptStore } from '@/store'
+import { useAuthStore, useDrawStore, usePromptStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { debounce } from '@/utils/functions/debounce'
 import { t } from '@/locales'
@@ -14,6 +14,7 @@ interface Emit {
 const emit = defineEmits<Emit>()
 const promptStore = usePromptStore()
 const drawStore = useDrawStore()
+const authStore = useAuthStore()
 const { promptList: promptTemplate } = storeToRefs<any>(promptStore)
 const prompt = ref<string>('')
 const { isMobile } = useBasicLayout()
@@ -48,6 +49,10 @@ function handleEnter(event: KeyboardEvent) {
 }
 
 function handleSubmit() {
+  if (!authStore.token) {
+    authStore.setLoginView(true)
+    return
+  }
   drawStore.setLoading(true)
   setTimeout(() => {
     drawStore.setLoading(false)

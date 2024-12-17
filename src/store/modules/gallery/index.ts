@@ -27,10 +27,12 @@ export const useGalleryStore = defineStore('gallery-store', {
       })
     },
 
-    setPublic(uuid: string, isPublic: boolean) {
-      const hit = this.publicDraws.find(item => item.uuid === uuid)
+    setPublic(draw: Chat.Draw) {
+      const hit = this.publicDraws.find(item => item.uuid === draw.uuid)
       if (hit)
-        hit.isPublic = isPublic
+        hit.isPublic = draw.isPublic
+      else
+        this.publicDraws.unshift(draw)
     },
 
     appendStarDraws(draws: Chat.Draw[]) {

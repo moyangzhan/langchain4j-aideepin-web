@@ -103,7 +103,7 @@ declare namespace Chat {
 	interface Draw {
 		id?: number
 		uuid: string
-		prompt?: string
+		prompt: string
 		aiModelName: string
 		originalImageUuid?: string
 		maskImageUuid?: string
@@ -115,11 +115,30 @@ declare namespace Chat {
 		createTime: string
 		isPublic: boolean
 		isStar: boolean
+		starCount: number
+		
+		userUuid: string
+		userName: string
 	}
 
 	interface DrawListResp {
 		minId: number
 		draws: Draw[]
+	}
+
+	interface DrawComment {
+		uuid: string
+		userUuid: string
+		userName: string
+		drawUuid: string
+		remark: string
+		createTime: string
+	}
+
+	interface DrawCommentsResp{
+		records: Chat.DrawComment[]
+		total: number
+		current: number
 	}
 
 	interface GalleryState {

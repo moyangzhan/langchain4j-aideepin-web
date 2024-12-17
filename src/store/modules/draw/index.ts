@@ -24,9 +24,9 @@ export const useDrawStore = defineStore('draw-store', {
       this.myDraws.push(draw)
     },
 
-    unshiftImages(aiImages: Chat.Draw[]) {
-      aiImages.forEach(item => item.imageUrls = item.imageUuids.map(uuid => `/my-thumbnail/${uuid}`))
-      this.myDraws = aiImages.concat(this.myDraws)
+    unshiftImages(draws: Chat.Draw[]) {
+      draws.forEach(item => item.imageUrls = item.imageUuids.map(uuid => `/my-thumbnail/${uuid}`))
+      this.myDraws.unshift(...draws)
     },
 
     unshift(image: Chat.Draw) {
@@ -42,8 +42,8 @@ export const useDrawStore = defineStore('draw-store', {
       this.loadingUuid = uuid
     },
 
-    updateAiImage(uuid: string, edit: Chat.Draw) {
-      const index = this.myDraws.findIndex(item => item.uuid === uuid)
+    updateDraw(edit: Chat.Draw) {
+      const index = this.myDraws.findIndex(item => item.uuid === edit.uuid)
       if (index !== -1) {
         edit.imageUrls = edit.imageUuids.map(uuid => `/my-thumbnail/${uuid}`)
         this.myDraws[index] = { ...this.myDraws[index], ...edit }

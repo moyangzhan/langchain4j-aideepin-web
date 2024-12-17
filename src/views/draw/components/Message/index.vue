@@ -22,20 +22,18 @@ const authStore = useAuthStore()
 const token = ref<string>(authStore.token)
 
 interface Props {
-  dateTime?: string
-  text?: string
-  imageUrls?: string[]
+  draw: Chat.Draw
   inversion?: boolean
   showAvatar?: boolean
   error?: boolean
   loading?: boolean
   type: string // text,text-image,image
-  isPublic: boolean
 
   aiModelPlatform?: string // openai,dashscope,qianfan,ollama
 }
 
 interface Emit {
+  (ev: 'openDetail', uuid: string): void
   (ev: 'delete'): void
   (ev: 'delOneImage', fileUrl: string): void
   (ev: 'setPublic', publicOrPrivate: boolean): void
@@ -49,7 +47,7 @@ const messageRef = ref<HTMLElement>()
 
 const options = computed(() => {
   let setPublicOrPrivate = null
-  if (props.isPublic) {
+  if (props.draw.isPublic) {
     setPublicOrPrivate = {
       label: '私有',
       key: 'setPrivate',
@@ -82,7 +80,7 @@ const options = computed(() => {
 function handleSelect(key: 'copyText' | 'setPublic' | 'setPrivate' | 'delete') {
   switch (key) {
     case 'copyText':
-      copyText({ text: props.text ?? '' })
+      copyText({ text: props.draw.prompt ?? '' })
       return
     case 'setPublic':
       emit('setPublic', true)
@@ -127,6 +125,10 @@ function renderToolbarOut2(imageUrl: string) {
     ]
   }
 }
+
+function openDetail(uuid: string) {
+  emit('openDetail', uuid)
+}
 </script>
 
 <template>
@@ -140,18 +142,21 @@ function renderToolbarOut2(imageUrl: string) {
     </div>
     <div class="overflow-hidden text-sm " :class="[inversion ? 'items-end' : 'items-start']">
       <p class="text-xs text-[#b4bbc4]" :class="[inversion ? 'text-right' : 'text-left']">
-        {{ dateTime }}
+        {{ draw.createTime }}
       </p>
-      <!-- 先渲染文字 -->
+      <!-- 1、渲染文字 -->
       <div class="flex items-start gap-1 mt-2" :class="[inversion ? 'flex-row-reverse' : 'flex-row']">
         <template v-if="type === 'text' || type === 'text-image'">
           <TextComponent
-            ref="textRef" :inversion="inversion" :error="error" :text="text" :loading="loading"
+            ref="textRef" :inversion="inversion" :error="error" :text="draw.prompt" :loading="loading"
             :as-raw-text="true"
           />
           <!-- 消息框侧边下拉选择列表 -->
           <div class="flex flex-col">
-            <NDropdown trigger="click" :placement="!inversion ? 'right' : 'left'" :options="options" @select="handleSelect">
+            <NDropdown
+              trigger="click" :placement="!inversion ? 'right' : 'left'" :options="options"
+              @select="handleSelect"
+            >
               <button class="transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-200">
                 <SvgIcon icon="ri:more-2-fill" />
               </button>
@@ -159,7 +164,7 @@ function renderToolbarOut2(imageUrl: string) {
           </div>
         </template>
       </div>
-      <!-- 再渲染图片 -->
+      <!-- 2、渲染图片 -->
       <NSpace class="mt-1" :style="inversion ? 'justify-content:flex-end;' : ''">
         <!-- render image -->
         <template v-if="type === 'image' || type === 'text-image'">
@@ -173,14 +178,21 @@ function renderToolbarOut2(imageUrl: string) {
             </NSpin>
           </template>
           <template v-else>
-            <template v-if="!imageUrls || imageUrls.length === 0">
+            <template v-if="!draw.imageUrls || draw.imageUrls.length === 0">
               <NEmpty description="找不到图片" />
             </template>
-            <template v-if="imageUrls && imageUrls.length > 0">
+            <template v-if="draw.imageUrls && draw.imageUrls.length > 0">
               <NSpace>
-                <template v-for="imageUrl in imageUrls" :key="imageUrl">
-                  <NImage v-if="imageUrl && imageUrl.indexOf('http') === 0" width="100" :src="imageUrl" :fallback-src="NoPic" :render-toolbar="renderToolbarOut2(imageUrl)" />
-                  <NImage v-if="imageUrl && imageUrl.indexOf('http') === -1" width="100" :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic" :render-toolbar="renderToolbarOut2(imageUrl)" :preview-src="`/api${imageUrl.replace('thumbnail', 'image')}?token=${token}`" />
+                <template v-for="imageUrl in draw.imageUrls" :key="imageUrl">
+                  <NImage
+                    v-if="imageUrl && imageUrl.indexOf('http') === 0" width="100" :src="imageUrl"
+                    :fallback-src="NoPic" preview-disabled :render-toolbar="renderToolbarOut2(imageUrl)"
+                  />
+                  <NImage
+                    v-if="imageUrl && imageUrl.indexOf('http') === -1" width="100"
+                    :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic"
+                    :render-toolbar="renderToolbarOut2(imageUrl)" preview-disabled @click="openDetail(draw.uuid)"
+                  />
                 </template>
               </NSpace>
             </template>

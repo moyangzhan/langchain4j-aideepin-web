@@ -51,6 +51,9 @@ if (currKbUuid === 'default' && !!kbStore.activeKbUuid)
   router.replace({ name: 'QADetail', params: { kbUuid: kbStore.activeKbUuid } })
 
 async function handleSubmit() {
+  if (!authStore.checkLoginOrShow())
+    return
+
   const message = prompt.value
 
   if (!message || message.trim() === '')

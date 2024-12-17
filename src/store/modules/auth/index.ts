@@ -30,6 +30,14 @@ export const useAuthStore = defineStore('auth-store', {
       console.log('set login view', show)
       this.showLoginModal = show
     },
+
+    checkLoginOrShow() {
+      if (!this.token) {
+        this.showLoginModal = true
+        return false
+      }
+      return true
+    },
   },
 })
 

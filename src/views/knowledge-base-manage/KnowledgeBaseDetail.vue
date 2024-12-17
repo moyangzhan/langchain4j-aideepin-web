@@ -1,10 +1,10 @@
 <script setup lang='ts'>
-import type { UploadFileInfo, UploadInst } from 'naive-ui'
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
-import { NBreadcrumb, NBreadcrumbItem, NButton, NCard, NDataTable, NFlex, NIcon, NInput, NModal, NP, NSpace, NText, NUpload, NUploadDragger, useDialog, useMessage } from 'naive-ui'
+import { NAlert, NBreadcrumb, NBreadcrumbItem, NButton, NCard, NCheckbox, NCheckboxGroup, NDataTable, NFlex, NIcon, NInput, NModal, NP, NSpace, NText, NUpload, NUploadDragger, useDialog, useMessage } from 'naive-ui'
 import { ArchiveOutline } from '@vicons/ionicons5'
 import { Cloud32Regular, LockClosed32Regular } from '@vicons/fluent'
 import { useRoute } from 'vue-router'
+import type { UploadFileInfo, UploadInst } from 'naive-ui'
 import ItemEmbeddingList from './ItemEmbeddingList.vue'
 import ItemGraph from './ItemGraph.vue'
 import { createColumns } from './itemColumns'
@@ -20,17 +20,19 @@ const route = useRoute()
 const { kbUuid: curKbUuid } = route.params as { kbUuid: string; kbId: string }
 console.log('knowledge-base uuid', curKbUuid)
 
-const showEmbeddingListModal = ref(false)
-const showGraphModal = ref(false)
+const showEmbeddingListModal = ref<boolean>(false)
+const showGraphModal = ref<boolean>(false)
 const kbItemUuidForEmbeddingList = ref<string>('')
 const kbItemUuidForGraph = ref<string>('')
 
-const loading = ref(false)
-const submitting = ref(false)
-const showItemEditModal = ref(false)
-const showUploadModal = ref(false)
+const loading = ref<boolean>(false)
+const submitting = ref<boolean>(false)
+const showItemEditModal = ref<boolean>(false)
+const showUploadModal = ref<boolean>(false)
+const showIndexModal = ref<boolean>(false)
 const itemList = ref<KnowledgeBase.Item[]>([])
 const indexAfterUpload = ref(false)
+const indexTypeSelected = ref<string[]>(['embedding'])
 const uploadRef = ref<UploadInst | null>(null)
 const headers = { Authorization: '' }
 const fileListLength = ref(0)
@@ -81,6 +83,10 @@ function rowKey(row: KnowledgeBase.Item) {
 
 const columns = createColumns(showEmbeddingList, showGraph, showFileContent, changeEditModal, deleteKbItem)
 
+function changeIndexModal() {
+  showIndexModal.value = true
+}
+
 /**
  * 索引文档
  */
@@ -89,13 +95,18 @@ async function textIndexing() {
     ms.warning('至少选中一行')
     return
   }
+  if (indexTypeSelected.value.length === 0) {
+    ms.warning('至少选中一种索引类型')
+    return
+  }
   if (loading.value) {
     ms.warning('indexing')
     return
   }
+  showIndexModal.value = false
   loading.value = true
   try {
-    await api.knowledgeBaseItemsIndexing(checkedItemRowKeys.value)
+    await api.knowledgeBaseItemsIndexing(checkedItemRowKeys.value, indexTypeSelected.value)
     indexingCheck()
     ms.success('索引任务后台执行中')
     search(1)
@@ -265,7 +276,7 @@ watch(
           <NButton type="primary" size="small" @click="() => showUploadModal = !showUploadModal">
             新增（按文件）
           </NButton>
-          <NButton type="primary" size="small" @click="textIndexing()">
+          <NButton type="primary" size="small" @click="changeIndexModal()">
             索引选中内容
           </NButton>
         </div>
@@ -340,5 +351,21 @@ watch(
   </NModal>
   <NModal v-model:show="showGraphModal" style="width: 90%;" display-directive="show" preset="card" title="图谱">
     <ItemGraph :kb-item-uuid="kbItemUuidForGraph" />
+  </NModal>
+  <NModal v-model:show="showIndexModal" style="width: 90%; max-width:550px" preset="card" title="选择索引类型">
+    <NFlex vertical>
+      <NAlert title="说明" type="info">
+        对文档进行<span style="font-weight: bold">图谱化</span>时会使用到大语言模型，需要消耗一定量的Token
+      </NAlert>
+      <NCheckboxGroup v-model:value="indexTypeSelected" class="my-2">
+        <NFlex vertical>
+          <NCheckbox value="embedding" label="向量化" />
+          <NCheckbox value="graphical" label="图谱化" />
+        </NFlex>
+      </NCheckboxGroup>
+      <NButton type="primary" size="small" @click="textIndexing()">
+        确定
+      </NButton>
+    </NFlex>
   </NModal>
 </template>

@@ -1,16 +1,14 @@
 <script setup lang='ts'>
 import { onMounted, ref } from 'vue'
 import { NModal } from 'naive-ui'
-import DrawDetail from './DrawDetail.vue'
-import CommonDraws from './CommonDraws.vue'
+import CommonDraws from '@/views/draw/components/CommonDraws.vue'
+import DrawDetail from '@/views/draw/components/DrawDetail.vue'
 import { emptyDraw } from '@/utils/functions'
 
 withDefaults(defineProps<Props>(), {
   draws: () => [],
-  showDelBtn: true,
 })
 const emit = defineEmits<Emit>()
-const commonDrawsRef = ref()
 const modalMainHeight = ref<number>(600)
 const showDetailModal = ref<boolean>(false)
 const selectedDraw = ref<Chat.Draw>(emptyDraw())
@@ -21,6 +19,9 @@ interface Emit {
 
 interface Props {
   draws: Chat.Draw[]
+  showDelBtn?: boolean
+  loginBtnEnable?: boolean
+  fromPageType: string
 }
 
 function loadMore() {
@@ -32,6 +33,7 @@ function loadMore() {
 function openDraw(item: Chat.Draw) {
   showDetailModal.value = true
   selectedDraw.value = item
+  console.log(item)
 }
 
 function handleDelDraw(uuid: string, prompt: string) {
@@ -39,24 +41,15 @@ function handleDelDraw(uuid: string, prompt: string) {
 }
 
 onMounted(() => {
-  modalMainHeight.value = (window.innerHeight - 100)
+  modalMainHeight.value = (window.innerHeight - 110)
 })
-
-function gotoTop() {
-  commonDrawsRef.value.scrollToTop()
-}
-
-function gotoBottom() {
-  commonDrawsRef.value.scrollToBottom()
-}
-defineExpose({ gotoTop, gotoBottom })
 </script>
 
 <template>
   <div class="h-full overflow-y-auto">
-    <CommonDraws ref="commonDrawsRef" :draws="draws" @clickDraw="openDraw" @loadMore="loadMore" />
+    <CommonDraws :draws="draws" @clickDraw="openDraw" @loadMore="loadMore" />
     <NModal v-model:show="showDetailModal" preset="card" style="width:95%" :bordered="true">
-      <DrawDetail from-page-type="mineInGallery" :draw-uuid="selectedDraw.uuid" @draw-deleted="handleDelDraw" />
+      <DrawDetail :from-page-type="fromPageType" :draw-uuid="selectedDraw.uuid" @draw-deleted="handleDelDraw" />
     </NModal>
   </div>
 </template>

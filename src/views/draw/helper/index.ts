@@ -6,7 +6,6 @@ const initLoadingDate = new Date(1970, 1, 1)
 let beginLoading: Date = new Date(1970, 1, 1)
 
 export async function checkProcess(uuid: string) {
-  console.log(`checkProcess222:${uuid}`)
   if (beginLoading.getTime() !== initLoadingDate.getTime() && new Date().getTime() - beginLoading.getTime() * 1000 > 25 * 1000) {
     drawStore.setLoading(false)
     drawStore.setLoadingUuid('')
@@ -16,7 +15,7 @@ export async function checkProcess(uuid: string) {
   beginLoading = new Date()
   const imageResp = await api.fetchDraw<Chat.Draw>(uuid)
   if (imageResp.success) {
-    drawStore.updateAiImage(uuid, imageResp.data)
+    drawStore.updateDraw(imageResp.data)
     if (imageResp.data.processStatus === 1) {
       setTimeout(() => {
         checkProcess(uuid)

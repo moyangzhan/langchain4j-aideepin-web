@@ -133,6 +133,7 @@ function commonSseProcess(
       params.errorCallback(error)
       throw error
     },
+    openWhenHidden: true,
   })
 }
 
@@ -239,6 +240,42 @@ function fetchDraw<T = any>(uuid: string) {
   })
 }
 
+function fetchNewerPublicDraw<T = any>(uuid: string) {
+  return get<T>({
+    url: `/draw/detail/newer-public/${uuid}`,
+  })
+}
+
+function fetchOlderPublicDraw<T = any>(uuid: string) {
+  return get<T>({
+    url: `/draw/detail/older-public/${uuid}`,
+  })
+}
+
+function fetchNewerStarredDraw<T = any>(uuid: string) {
+  return get<T>({
+    url: `/draw/detail/newer-starred/${uuid}`,
+  })
+}
+
+function fetchOlderStarredDraw<T = any>(uuid: string) {
+  return get<T>({
+    url: `/draw/detail/older-starred/${uuid}`,
+  })
+}
+
+function fetchNewerMineDraw<T = any>(uuid: string) {
+  return get<T>({
+    url: `/draw/detail/newer-mine/${uuid}`,
+  })
+}
+
+function fetchOlderMineDraw<T = any>(uuid: string) {
+  return get<T>({
+    url: `/draw/detail/older-mine/${uuid}`,
+  })
+}
+
 function fetchDraws<T = any>(maxId: number, pageSize: number) {
   return get<T>({
     url: `/draw/list?maxId=${maxId}&pageSize=${pageSize}`,
@@ -257,15 +294,22 @@ function fetchPublicDraws<T = any>(maxId: number, pageSize: number) {
   })
 }
 
-function fetchPublicDrawDetail<T = any>(uuid: string) {
+function fetchDrawComments<T = any>(uuid: string, curentPage: number, pageSize: number) {
   return get<T>({
-    url: `/draw/public/detail/${uuid}`,
+    url: `/draw/comment/list/${uuid}?curentPage=${curentPage}&pageSize=${pageSize}`,
   })
 }
 
 function drawStarOrUnStar<T = any>(uuid: string) {
   return post<T>({
     url: `/draw/star/toggle/${uuid}`,
+  })
+}
+
+function drawCommentAdd<T = any>(uuid: string, comment: string) {
+  return post<T>({
+    url: '/draw/comment/add',
+    data: { drawUuid: uuid, comment },
   })
 }
 
@@ -346,14 +390,14 @@ function messageDel<T = any>(uuid: string) {
 function knowledgeBaseSearchMine<T>(keyword: string, currentPage: number, pageSize: number) {
   const search = keyword === undefined ? '' : `keyword=${keyword}&`
   return get<T>({
-    url: `/knowledge-base/searchMine?${search}currentPage=${currentPage}&pageSize=${pageSize}`,
+    url: `/knowledge-base/mine/search?${search}currentPage=${currentPage}&pageSize=${pageSize}`,
   })
 }
 
 function knowledgeBaseSearchPublic<T>(keyword: string, currentPage: number, pageSize: number) {
   const search = keyword === undefined ? '' : `keyword=${keyword}&`
   return get<T>({
-    url: `/knowledge-base/searchPublic?${search}currentPage=${currentPage}&pageSize=${pageSize}`,
+    url: `/knowledge-base/public/search?${search}currentPage=${currentPage}&pageSize=${pageSize}`,
   })
 }
 
@@ -382,11 +426,12 @@ function knowledgeBaseDelete<T = any>(uuid: string) {
   })
 }
 
-function knowledgeBaseItemsIndexing<T = any>(uuids: string[]) {
+function knowledgeBaseItemsIndexing<T = any>(uuids: string[], indexTypes: string[]) {
   return post<T>({
     url: '/knowledge-base/item/indexing-list',
     data: {
       uuids,
+      indexTypes,
     },
   })
 }
@@ -544,10 +589,16 @@ export default {
   promptAutocomplete,
   fileDel,
   fetchDraw,
+  fetchNewerPublicDraw,
+  fetchOlderPublicDraw,
+  fetchNewerStarredDraw,
+  fetchOlderStarredDraw,
+  fetchNewerMineDraw,
+  fetchOlderMineDraw,
   fetchDraws,
   fetchStarDraws,
   fetchPublicDraws,
-  fetchPublicDrawDetail,
+  fetchDrawComments,
   drawFileDel,
   drawStarOrUnStar,
   imageGenerate,
@@ -557,6 +608,7 @@ export default {
   drawSetPublic,
   drawPublicImage,
   drawThumbnailImage,
+  drawCommentAdd,
   messageDel,
   knowledgeBaseInfo,
   knowledgeBaseStar,

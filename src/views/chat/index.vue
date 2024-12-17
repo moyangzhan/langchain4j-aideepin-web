@@ -146,6 +146,11 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
 }
 
 async function createChatTask() {
+  if (!authStore.token) {
+    authStore.setLoginView(true)
+    return
+  }
+
   const message = prompt.value
 
   if (loading.value)
