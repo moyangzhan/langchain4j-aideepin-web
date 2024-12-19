@@ -56,9 +56,10 @@ function handleDelDraw(uuid: string, prompt: string) {
 async function handleSetPublic(uuid: string, isPublic: boolean) {
   const ret = await api.drawSetPublic<Chat.Draw>(uuid, isPublic)
   if (ret) {
+    calcImageUrls(ret.data)
     drawStore.setPublic(uuid, isPublic)
     galleryStore.setPublic(ret.data)
-    currentDraw.value = ret.data
+    currentDraw.value.isPublic = ret.data.isPublic
     ms.warning(`该绘图任务已经${isPublic ? '可以公开访问' : '关闭外部访问权限'}`)
   }
 }
@@ -145,13 +146,17 @@ async function fetchNext() {
 function assignNewToCurrentDraw(newDraw: Chat.Draw) {
   currentDraw.value = newDraw
   currentDrawUuid.value = currentDraw.value.uuid
-  currentDraw.value.imageUrls = currentDraw.value.imageUuids.map((item) => {
-    if (currentDraw.value.isPublic)
-      return `/draw/public/image/${currentDraw.value.uuid}/${item}`
+  calcImageUrls(currentDraw.value)
+  fetchComments()
+}
+
+function calcImageUrls(draw: Chat.Draw) {
+  draw.imageUrls = draw.imageUuids.map((item) => {
+    if (draw.isPublic)
+      return `/draw/public/image/${draw.uuid}/${item}`
     else
       return `/image/${item}`
   })
-  fetchComments()
 }
 
 async function handleSubmit() {

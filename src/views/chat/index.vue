@@ -94,7 +94,6 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
         question = messages.value[messages.value.length - 1]
       }
       try {
-        console.log('====:', chunk)
         for (let i = 0; i < chunk.length; i++) {
           appendChunk(
             curConvUuid,
