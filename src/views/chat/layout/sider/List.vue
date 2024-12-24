@@ -17,6 +17,7 @@ const authStoreRef = ref<AuthState>(authStore)
 const showModal = ref<boolean>(false)
 const tmpUuid = ref<string>('')
 const tmpTitle = ref<string>('')
+const tmpRemark = ref<string>('')
 const tmpSystemMessage = ref<string>('')
 const mouseEnterKbUuid = ref<string>('')
 
@@ -45,12 +46,13 @@ function openEditView(item: Chat.Conversation, event?: KeyboardEvent) {
   showModal.value = true
   tmpUuid.value = item.uuid
   tmpTitle.value = item.title
+  tmpRemark.value = item.remark
   tmpSystemMessage.value = item.aiSystemMessage
 }
 
 function handleEdit(event?: KeyboardEvent) {
   event?.stopPropagation()
-  const conv = { uuid: tmpUuid.value, title: tmpTitle.value, aiSystemMessage: tmpSystemMessage.value }
+  const conv = { uuid: tmpUuid.value, title: tmpTitle.value, remark: tmpRemark.value, aiSystemMessage: tmpSystemMessage.value }
   api.convEdit(conv)
   chatStore.updateConv(conv.uuid, conv)
   showModal.value = false
@@ -134,8 +136,18 @@ onMounted(() => {
 <template>
   <NModal v-model:show="showModal" style="width: 90%; max-width: 640px" preset="card">
     <NSpace vertical justify="space-between">
-      <NInput v-model:value="tmpTitle" type="text" size="large" :placeholder="$t('store.title')" />
-      <NInput v-model:value="tmpSystemMessage" type="textarea" size="large" :placeholder="$t('setting.role')" />
+      <div class="text-neutral-500">
+        名称
+      </div>
+      <NInput v-model:value="tmpTitle" type="text" size="large" placeholder="如：李白" />
+      <div class="text-neutral-500">
+        备注
+      </div>
+      <NInput v-model:value="tmpRemark" type="textarea" placeholder="如：多年写诗经验" />
+      <div class="text-neutral-500">
+        角色设定
+      </div>
+      <NInput v-model:value="tmpSystemMessage" type="textarea" placeholder="如：你是唐朝的李白，诗才出众，被誉为诗仙" />
       <NFlex justify="space-between">
         <NButton type="primary" @click="handleEdit()">
           {{ $t('common.save') }}

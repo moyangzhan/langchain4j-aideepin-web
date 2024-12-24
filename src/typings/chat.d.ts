@@ -33,6 +33,7 @@ declare namespace Chat {
 	interface Conversation {
 		title: string
 		uuid: string
+		remark: string
 		aiSystemMessage: string
 		understandContextEnable: boolean
 		loadedAll: boolean

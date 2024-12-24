@@ -16,7 +16,7 @@ function fetchConvs<T = any>() {
   })
 }
 
-function convAdd<T = any>(params: { title: string; aiSystemMessage: string }) {
+function convAdd<T = any>(params: { title: string; remark: string; aiSystemMessage: string }) {
   return post<T>({
     url: '/conversation/add',
     data: {

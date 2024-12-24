@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import { onMounted, ref, watch } from 'vue'
-import { NButton, NFlex, NInput, NList, NListItem, NModal, NScrollbar, NTabPane, NTabs, NThing, useMessage } from 'naive-ui'
+import { NButton, NFlex, NFormItem, NInput, NList, NListItem, NModal, NScrollbar, NTabPane, NTabs, NThing, useMessage } from 'naive-ui'
 import { useAuthStore, useChatStore } from '@/store'
 import api from '@/api'
 
@@ -11,6 +11,7 @@ const loadingPresetConvs = ref<boolean>(false)
 const loadingRels = ref<boolean>(false)
 const tmpTitle = ref<string>('')
 const tmpRemark = ref<string>('')
+const tmpAiSystemMessage = ref<string>('')
 const showModal = ref<boolean>(false)
 const chatStore = useChatStore()
 const ms = useMessage()
@@ -55,14 +56,14 @@ async function handleSave(event?: KeyboardEvent) {
     return
 
   convSaving.value = true
-  const params = { title: tmpTitle.value, aiSystemMessage: tmpRemark.value }
+  const params = { title: tmpTitle.value, remark: tmpRemark.value, aiSystemMessage: tmpAiSystemMessage.value }
   try {
     const { data: newConv } = await api.convAdd<Chat.Conversation>(params)
     chatStore.addConv(newConv)
 
     showModal.value = false
     tmpTitle.value = ''
-    tmpRemark.value = ''
+    tmpAiSystemMessage.value = ''
   } catch (error: any) {
     console.log('addConv error', error)
     if (error.message) {
@@ -127,8 +128,18 @@ defineExpose({ toggleModal })
     <NTabs type="line" justify-content="space-evenly" animated>
       <NTabPane name="newConv" tab="新的角色">
         <NFlex class="grow" justify="space-between" vertical>
-          <NInput v-model:value="tmpTitle" type="text" size="large" :placeholder="$t('store.title')" />
-          <NInput v-model:value="tmpRemark" type="textarea" size="large" :placeholder="$t('setting.role')" />
+          <NFormItem label="名称" :show-feedback="false" :show-require-mark="true">
+            <NInput v-model:value="tmpTitle" type="text" size="large" placeholder="如：李白" />
+          </NFormItem>
+          <NFormItem label="备注" :show-feedback="false">
+            <NInput v-model:value="tmpRemark" type="text" size="large" placeholder="如：多年写诗经验" />
+          </NFormItem>
+          <NFormItem label="角色设定" :show-feedback="false">
+            <NInput
+              v-model:value="tmpAiSystemMessage" type="textarea" size="large"
+              placeholder="如：你是唐朝的李白，诗才出众，被誉为诗仙"
+            />
+          </NFormItem>
           <NButton block type="primary" @click="handleSave()">
             {{ $t('common.save') }}
           </NButton>
