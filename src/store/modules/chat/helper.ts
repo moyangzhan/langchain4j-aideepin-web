@@ -4,6 +4,7 @@ const LOCAL_NAME = 'chatStorage'
 const defaultConversation = {
   uuid: 'default',
   title: 'New Chat',
+  remark: '',
   aiSystemMessage: '',
   understandContextEnable: false,
   loadedAll: false,
