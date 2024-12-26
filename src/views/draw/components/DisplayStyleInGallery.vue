@@ -43,11 +43,11 @@ onMounted(() => {
 })
 
 function gotoTop() {
-  commonDrawsRef.value.scrollToTop()
+  commonDrawsRef.value.gotoTop()
 }
 
 function gotoBottom() {
-  commonDrawsRef.value.scrollToBottom()
+  commonDrawsRef.value.gotoBottom()
 }
 defineExpose({ gotoTop, gotoBottom })
 </script>

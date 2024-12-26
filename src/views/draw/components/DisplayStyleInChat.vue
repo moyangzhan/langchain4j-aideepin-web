@@ -1,21 +1,26 @@
 <script setup lang='ts'>
 import { nextTick, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { NIcon, NModal } from 'naive-ui'
+import { NIcon, NModal, useDialog, useMessage } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { useScroll } from '../../chat/hooks/useScroll'
 import Message from './Message/index.vue'
 import DrawDetail from './DrawDetail.vue'
 import LoginTip from '@/views/user/LoginTip.vue'
-import { useAuthStore, useDrawStore } from '@/store'
+import { useAuthStore, useDrawStore, useGalleryStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { emptyDraw } from '@/utils/functions'
+import { calcImageUrls, emptyDraw } from '@/utils/functions'
+import { t } from '@/locales'
+import api from '@/api'
 
 const emit = defineEmits<Emit>()
 const { scrollRef, scrollToBottom, scrollTo } = useScroll()
 const { isMobile } = useBasicLayout()
+const galleryStore = useGalleryStore()
 const drawStore = useDrawStore()
 const authStore = useAuthStore()
+const dialog = useDialog()
+const ms = useMessage()
 const { myDraws } = storeToRefs<any>(drawStore)
 const showDetailModal = ref<boolean>(false)
 const selectedDraw = ref<Chat.Draw>(emptyDraw())
@@ -56,8 +61,30 @@ function openDraw(item: Chat.Draw) {
   showDetailModal.value = true
   selectedDraw.value = item
 }
-function handleDelDraw() {
+function handleDeleted() {
   showDetailModal.value = false
+}
+function handleDelDraw(item: Chat.Draw) {
+  dialog.warning({
+    title: `删除绘图【${item.prompt.substring(0, 11)}】?`,
+    content: '删除内容: 1: 提示词; 2: 该提示词生成的所有图片',
+    positiveText: t('common.yes'),
+    negativeText: t('common.no'),
+    onPositiveClick: async () => {
+      showDetailModal.value = false
+      await api.drawDel<boolean>(item.uuid)
+      drawStore.deleteDraw(item.uuid)
+    },
+  })
+}
+async function handleSetPublic(uuid: string, isPublic: boolean) {
+  const ret = await api.drawSetPublic<Chat.Draw>(uuid, isPublic)
+  if (ret) {
+    calcImageUrls(ret.data)
+    drawStore.setPublic(uuid, isPublic)
+    galleryStore.setPublic(ret.data)
+    ms.warning(`该绘图任务已经${isPublic ? '可以公开访问' : '关闭外部访问权限'}`)
+  }
 }
 function handleDelOneImage(uuid: string, fileUrl: string) {
   emit('delOneImage', uuid, fileUrl)
@@ -86,17 +113,17 @@ defineExpose({ gotoBottom })
             <!-- 增加显示绘图统计数据，如starCount,isPublic -->
             <Message
               v-if="draw.interactingMethod === 1" :draw="draw" :inversion="true" type="text"
-              @delete="handleDelDraw"
+              @set-public="handleSetPublic" @delete="handleDelDraw(draw)"
             />
             <Message
               v-if="draw.interactingMethod === 2" :draw="draw"
               :image-urls="[`/my-image/${draw.originalImageUuid}`, `/my-image/${draw.maskImageUuid}`]" :inversion="true"
-              type="text-image" @delete="handleDelDraw" @open-detail="openDraw(draw)"
+              type="text-image" @delete="handleDelDraw(draw)" @set-public="handleSetPublic" @open-detail="openDraw(draw)"
             />
             <Message
               v-if="draw.interactingMethod === 3" :draw="draw"
               :image-urls="[`/my-image/${draw.originalImageUuid}`]" :inversion="true" type="image"
-              @delete="handleDelDraw" @open-detail="openDraw(draw)"
+              @delete="handleDelDraw(draw)" @set-public="handleSetPublic" @open-detail="openDraw(draw)"
             />
             <Message
               :draw="draw" :loading="draw.uuid === drawStore.loadingUuid" :inversion="false" type="image"
@@ -108,7 +135,7 @@ defineExpose({ gotoBottom })
       </template>
     </div>
     <NModal v-model:show="showDetailModal" preset="card" style="width: 95%" :bordered="true">
-      <DrawDetail from-page-type="mineInChat" :draw-uuid="selectedDraw.uuid" @draw-deleted="handleDelDraw" />
+      <DrawDetail from-page-type="mineInChat" :draw-uuid="selectedDraw.uuid" @draw-deleted="handleDeleted" />
     </NModal>
   </div>
 </template>

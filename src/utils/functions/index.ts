@@ -128,3 +128,12 @@ export function emptyConv(): Chat.Conversation {
     minMsgUuid: '',
   }
 }
+
+export function calcImageUrls(draw: Chat.Draw) {
+  draw.imageUrls = draw.imageUuids.map((item) => {
+    if (draw.isPublic)
+      return `/draw/public/image/${draw.uuid}/${item}`
+    else
+      return `/image/${item}`
+  })
+}

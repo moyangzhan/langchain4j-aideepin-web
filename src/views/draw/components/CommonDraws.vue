@@ -97,9 +97,9 @@ defineExpose({ gotoTop, gotoBottom })
               <template v-else-if="draw.imageUrls && draw.imageUrls.length > 0">
                 <template v-for="imageUrl in draw.imageUrls" :key="imageUrl">
                   <NImage
-                    v-if="imageUrl && draw.uuid !== drawStore.loadingUuid"
-                    :src="`/api${imageUrl}?token=${authStore.token}`" :fallback-src="NoPic" object-fit="scale-down"
-                    preview-disabled @click="openDraw(draw)"
+                    v-if="imageUrl && draw.uuid !== drawStore.loadingUuid" width="100%"
+                    :src="`/api${imageUrl}?token=${authStore.token}`" :fallback-src="NoPic" preview-disabled
+                    @click="openDraw(draw)"
                   />
                 </template>
               </template>
@@ -110,3 +110,9 @@ defineExpose({ gotoTop, gotoBottom })
     </div>
   </div>
 </template>
+
+<style lang="less" scoped>
+:deep(.n-image) {
+  width: 100%;
+}
+</style>

@@ -6,7 +6,7 @@ import DrawDetailFuncBar from './DrawDetailFuncBar.vue'
 import { useAuthStore, useDrawStore, useGalleryStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import NoPic from '@/assets/no_pic.png'
-import { emptyDraw } from '@/utils/functions'
+import { calcImageUrls, emptyDraw } from '@/utils/functions'
 import api from '@/api'
 import { t } from '@/locales'
 
@@ -148,15 +148,6 @@ function assignNewToCurrentDraw(newDraw: Chat.Draw) {
   currentDrawUuid.value = currentDraw.value.uuid
   calcImageUrls(currentDraw.value)
   fetchComments()
-}
-
-function calcImageUrls(draw: Chat.Draw) {
-  draw.imageUrls = draw.imageUuids.map((item) => {
-    if (draw.isPublic)
-      return `/draw/public/image/${draw.uuid}/${item}`
-    else
-      return `/image/${item}`
-  })
 }
 
 async function handleSubmit() {

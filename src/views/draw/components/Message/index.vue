@@ -36,7 +36,7 @@ interface Emit {
   (ev: 'openDetail', uuid: string): void
   (ev: 'delete'): void
   (ev: 'delOneImage', fileUrl: string): void
-  (ev: 'setPublic', publicOrPrivate: boolean): void
+  (ev: 'setPublic', uuid: string, publicOrPrivate: boolean): void
 }
 
 const { iconRender } = useIconRender()
@@ -83,10 +83,10 @@ function handleSelect(key: 'copyText' | 'setPublic' | 'setPrivate' | 'delete') {
       copyText({ text: props.draw.prompt ?? '' })
       return
     case 'setPublic':
-      emit('setPublic', true)
+      emit('setPublic', props.draw.uuid, true)
       return
     case 'setPrivate':
-      emit('setPublic', false)
+      emit('setPublic', props.draw.uuid, false)
       return
     case 'delete':
       emit('delete')
