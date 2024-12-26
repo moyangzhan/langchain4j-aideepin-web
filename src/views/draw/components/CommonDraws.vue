@@ -115,4 +115,8 @@ defineExpose({ gotoTop, gotoBottom })
 :deep(.n-image) {
   width: 100%;
 }
+
+:deep(.n-image img) {
+  width: 100%;
+}
 </style>
