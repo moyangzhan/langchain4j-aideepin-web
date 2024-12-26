@@ -1,16 +1,14 @@
 <script setup lang='ts'>
 import { onActivated, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { NAvatar, NButton, NDivider, NFlex, NIcon, NModal, NPopconfirm, NTag, NTooltip } from 'naive-ui'
-import { AppsListDetail24Regular, Cloud32Regular, LockClosed32Regular, Star24Filled, Star24Regular } from '@vicons/fluent'
-import { Bookmarks, VectorBeizer2 } from '@vicons/tabler'
-import defaultAvatar from '@/assets/avatar.jpg'
+import { NButton, NIcon } from 'naive-ui'
+import { AppsListDetail24Regular, Cloud32Regular, LockClosed32Regular } from '@vicons/fluent'
 import { useKbStore } from '@/store'
 import { SvgIcon } from '@/components/common'
 import { useScroll } from '@/views/chat/hooks/useScroll'
 import { knowledgeBaseEmptyInfo } from '@/utils/functions'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import api from '@/api'
+import KbInfo from '@/views/knowledge-base/Header/KbInfo.vue'
 const props = defineProps<Props>()
 const router = useRouter()
 const kbStore = useKbStore()
@@ -43,16 +41,6 @@ function handleMouseLeave() {
 function showKb(item: KnowledgeBase.Info) {
   showModal.value = true
   tmpKb.value = item
-}
-async function clearHistory(kbInfo: KnowledgeBase.Info) {
-  await api.knowledgeBaseQaRecordClear<boolean>()
-  kbStore.clearRecords(kbInfo.uuid)
-}
-async function handleClickStar(kbInfo: KnowledgeBase.Info) {
-  const starOrUnstarResp = await api.knowledgeBaseStar<boolean>(kbInfo.uuid)
-  const starOrUnstar = starOrUnstarResp.data
-  kbStore.insertOrUpdateStarInfo({ kbUuid: kbInfo.uuid, kbTitle: kbInfo.title, star: starOrUnstar })
-  kbInfo.starCount = starOrUnstar ? kbInfo.starCount + 1 : kbInfo.starCount - 1
 }
 onActivated(async () => {
   const savedPosition = localStorage.getItem('subListScrollPosition')
@@ -101,68 +89,5 @@ onUnmounted(() => {
     </template>
   </div>
 
-  <NModal v-model:show="showModal" :title="tmpKb.title" style="width: 90%; max-width: 640px" preset="card">
-    <NFlex vertical>
-      <NFlex justify="space-between">
-        <NTag size="large" :bordered="false" :color="{ color: '#ff000000' }">
-          {{ tmpKb.ownerName }}
-          <template #avatar>
-            <NAvatar
-              :src="`/api/user/avatar/${tmpKb.ownerUuid}`" size="large" :fallback-src="defaultAvatar"
-              color="#ff0000000"
-            />
-          </template>
-        </NTag>
-        <NFlex>
-          <NTooltip trigger="hover">
-            <template #trigger>
-              <NTag size="medium" :bordered="false" round :color="{ color: '#ff000000' }">
-                {{ tmpKb.itemCount }}
-                <template #icon>
-                  <NIcon :component="Bookmarks" depth="2" />
-                </template>
-              </NTag>
-            </template>
-            知识点
-          </NTooltip>
-          <NTooltip trigger="hover">
-            <template #trigger>
-              <NTag size="medium" :bordered="false" round :color="{ color: '#ff000000' }">
-                {{ tmpKb.embeddingCount }}
-                <template #icon>
-                  <NIcon :component="VectorBeizer2" depth="2" />
-                </template>
-              </NTag>
-            </template>
-            向量
-          </NTooltip>
-          <NTag
-            size="medium" :bordered="false" round :color="{ color: '#ff000000' }" checkable
-            @click="handleClickStar(tmpKb)"
-          >
-            {{ tmpKb.starCount }}
-            <template #icon>
-              <NIcon v-show="!kbStore.kbUuidToStarInfo.get(tmpKb.uuid)?.star" :component="Star24Regular" />
-              <NIcon
-                v-show="kbStore.kbUuidToStarInfo.get(tmpKb.uuid)?.star" :component="Star24Filled"
-                color="#eac54f"
-              />
-            </template>
-          </NTag>
-        </NFlex>
-      </NFlex>
-      <NDivider />
-      <div>{{ tmpKb.remark }}</div>
-    </NFlex>
-    <template #footer>
-      <NPopconfirm placement="top" @positive-click="clearHistory(tmpKb)">
-        <template #trigger>
-          <NButton size="small" text type="primary">
-            清除历史记录
-          </NButton>
-        </template>
-        删除后不可恢复，请谨慎操作
-      </NPopconfirm>
-    </template>
-  </NModal>
+  <KbInfo :show-modal="showModal" :knowledge-base="tmpKb" @show-modal="showModal = $event" />
 </template>

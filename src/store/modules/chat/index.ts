@@ -9,6 +9,7 @@ export const useChatStore = defineStore('chat-store', {
     allConvsCount(state: Chat.ChatState) {
       return state.conversations.length
     },
+
     getCurConv(state: Chat.ChatState) {
       const index = state.conversations.findIndex(item => item.uuid === state.active)
       if (index !== -1)
@@ -51,7 +52,6 @@ export const useChatStore = defineStore('chat-store', {
   actions: {
     setUsingContext(context: boolean) {
       this.usingContext = context
-      this.recordState()
     },
 
     clearDefault() {
@@ -84,10 +84,8 @@ export const useChatStore = defineStore('chat-store', {
 
     updateConv(convUuid: string, edit: Partial<Chat.Conversation>) {
       const index = this.conversations.findIndex(item => item.uuid === convUuid)
-      if (index !== -1) {
+      if (index !== -1)
         this.conversations[index] = { ...this.conversations[index], ...edit }
-        this.recordState()
-      }
     },
 
     async deleteConv(uuid: string) {
@@ -168,8 +166,6 @@ export const useChatStore = defineStore('chat-store', {
 
       if (this.conversations.find(item => item.uuid === uuid)?.title === 'New Chat')
         this.conversations[chatIndex].title = message.remark
-
-      this.recordState()
     },
 
     unshiftMessages(uuid: string, messages: Chat.ChatMessage[]) {
@@ -185,15 +181,12 @@ export const useChatStore = defineStore('chat-store', {
     updateMessage(uuid: string, index: number, chat: Chat.ChatMessage) {
       if (!uuid && this.chats.length) {
         this.chats[0].data[index] = chat
-        this.recordState()
         return
       }
 
       const chatIndex = this.chats.findIndex(item => item.uuid === uuid)
-      if (chatIndex !== -1) {
+      if (chatIndex !== -1)
         this.chats[chatIndex].data[index] = chat
-        this.recordState()
-      }
     },
 
     unshiftChild(convUuid: string, userMessageUuid: string, childMessage: Chat.ChatMessage) {
@@ -204,10 +197,8 @@ export const useChatStore = defineStore('chat-store', {
 
     appendChild(convUuid: string, userMessageUuid: string, childMessage: Chat.ChatMessage) {
       const chatIndex = this.chats.findIndex(item => item.uuid === convUuid)
-      if (chatIndex !== -1) {
+      if (chatIndex !== -1)
         this.chats[chatIndex].data.find(item => item.uuid === userMessageUuid)?.children.push(childMessage)
-        this.recordState()
-      }
     },
 
     appendChunk(convUuid: string, answerUuid: string, chunk: string) {
@@ -216,8 +207,6 @@ export const useChatStore = defineStore('chat-store', {
         const oldChat = findMessageFromConv(this.chats[chatIndex], answerUuid)
         if (oldChat)
           oldChat.remark = oldChat.remark + chunk
-
-        this.recordState()
       }
     },
 
@@ -229,8 +218,6 @@ export const useChatStore = defineStore('chat-store', {
         console.log('hitMessage', hitMessage)
         if (hitMessage)
           Object.assign(hitMessage, chat)
-
-        this.recordState()
       }
     },
 
@@ -258,7 +245,6 @@ export const useChatStore = defineStore('chat-store', {
     },
 
     async reloadRoute(uuid?: string) {
-      this.recordState()
       await router.push({ name: 'ChatDetail', params: { uuid } })
     },
 
@@ -287,9 +273,6 @@ export const useChatStore = defineStore('chat-store', {
         const hit = rels.some(rel => rel.presetConvId === item.id)
         item.used = hit
       })
-    },
-    recordState() {
-
     },
   },
 })

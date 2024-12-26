@@ -11,6 +11,7 @@ import { useScroll } from './hooks/useScroll'
 import { useChat } from './hooks/useChat'
 import { useCopyCode } from './hooks/useCopyCode'
 import HeaderComponent from './components/Header/index.vue'
+import PcHeader from './components/Header/pc.vue'
 import InputToolbar from './InputToolbar.vue'
 import LoginTip from '@/views/user/LoginTip.vue'
 import { SvgIcon } from '@/components/common'
@@ -486,6 +487,7 @@ onDeactivated(() => {
       v-if="isMobile" :using-context="currConv.understandContextEnable"
       @toggle-using-context="toggleUsingContext"
     />
+    <PcHeader v-if="!isMobile" :conversation="currConv" />
     <main class="flex-1 overflow-hidden">
       <div id="scrollRef" ref="scrollRef" class="h-full overflow-hidden overflow-y-auto" @scroll="handleScroll">
         <div

@@ -115,3 +115,16 @@ export function emptyDraw() {
     userName: '',
   }
 }
+
+export function emptyConv(): Chat.Conversation {
+  return {
+    uuid: '',
+    title: '',
+    remark: '',
+    aiSystemMessage: '',
+    understandContextEnable: false,
+    loadedAll: false,
+    loadedFirstPageMsg: false,
+    minMsgUuid: '',
+  }
+}

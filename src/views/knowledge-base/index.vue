@@ -8,6 +8,7 @@ import { Message } from '../chat/components'
 import { useScroll } from '../chat/hooks/useScroll'
 import { useCopyCode } from '../chat/hooks/useCopyCode'
 import HeaderComponent from './Header/index.vue'
+import PCHeader from './Header/pc.vue'
 import RefGraph from './RefGraph.vue'
 import LoginTip from '@/views/user/LoginTip.vue'
 import { LLMSelector, SvgIcon } from '@/components/common'
@@ -49,6 +50,10 @@ useCopyCode()
 
 if (currKbUuid === 'default' && !!kbStore.activeKbUuid)
   router.replace({ name: 'QADetail', params: { kbUuid: kbStore.activeKbUuid } })
+
+// F5 reload
+else if (currKbUuid !== 'default' && kbStore.activeKbUuid === 'default')
+  kbStore.setActive(currKbUuid)
 
 async function handleSubmit() {
   if (!authStore.checkLoginOrShow())
@@ -311,6 +316,7 @@ onActivated(async () => {
 <template>
   <div class="chat-box flex flex-col w-full h-full">
     <HeaderComponent v-if="isMobile" :using-context="false" />
+    <PCHeader v-else :knowledge-base="kbStore.getSelectedKb as KnowledgeBase.Info" />
     <main class="flex-1 overflow-hidden">
       <div id="scrollRef" ref="scrollRef" class="h-full overflow-hidden overflow-y-auto" @scroll="handleScroll">
         <div

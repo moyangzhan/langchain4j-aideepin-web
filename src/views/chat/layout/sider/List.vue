@@ -1,11 +1,11 @@
 <script setup lang='ts'>
 import { computed, onMounted, ref, watch } from 'vue'
-import { NButton, NFlex, NInput, NModal, NPopconfirm, NScrollbar, NSpace } from 'naive-ui'
+import { NScrollbar } from 'naive-ui'
 import { useRoute } from 'vue-router'
 import { SvgIcon } from '@/components/common'
 import { useAppStore, useAuthStore, useChatStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { debounce } from '@/utils/functions/debounce'
+import EditConv from '@/views/chat/components/Header/EditConv.vue'
 import api from '@/api'
 
 const { isMobile } = useBasicLayout()
@@ -14,12 +14,9 @@ const appStore = useAppStore()
 const chatStore = useChatStore()
 const authStore = useAuthStore()
 const authStoreRef = ref<AuthState>(authStore)
-const showModal = ref<boolean>(false)
-const tmpUuid = ref<string>('')
-const tmpTitle = ref<string>('')
-const tmpRemark = ref<string>('')
-const tmpSystemMessage = ref<string>('')
 const mouseEnterKbUuid = ref<string>('')
+const showEditModal = ref<boolean>(false)
+const editConv = ref<Chat.Conversation>({} as Chat.Conversation)
 
 async function handleSelect({ uuid }: Chat.Conversation) {
   console.log('click chat', uuid)
@@ -43,32 +40,9 @@ function handleMouseLeave() {
   mouseEnterKbUuid.value = ''
 }
 function openEditView(item: Chat.Conversation, event?: KeyboardEvent) {
-  showModal.value = true
-  tmpUuid.value = item.uuid
-  tmpTitle.value = item.title
-  tmpRemark.value = item.remark
-  tmpSystemMessage.value = item.aiSystemMessage
+  showEditModal.value = true
+  editConv.value = item
 }
-
-function handleEdit(event?: KeyboardEvent) {
-  event?.stopPropagation()
-  const conv = { uuid: tmpUuid.value, title: tmpTitle.value, remark: tmpRemark.value, aiSystemMessage: tmpSystemMessage.value }
-  api.convEdit(conv)
-  chatStore.updateConv(conv.uuid, conv)
-  showModal.value = false
-}
-
-function handleDelete(uuid: string, event?: MouseEvent | TouchEvent) {
-  event?.stopPropagation()
-  api.convDel(uuid)
-  chatStore.deleteConv(uuid)
-  if (isMobile.value)
-    appStore.setSiderCollapsed(true)
-
-  showModal.value = false
-}
-
-const handleDeleteDebounce = debounce(handleDelete, 600)
 
 function isActive(uuid: string) {
   return chatStore.active === uuid
@@ -134,35 +108,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <NModal v-model:show="showModal" style="width: 90%; max-width: 640px" preset="card">
-    <NSpace vertical justify="space-between">
-      <div class="text-neutral-500">
-        名称
-      </div>
-      <NInput v-model:value="tmpTitle" type="text" size="large" placeholder="如：李白" />
-      <div class="text-neutral-500">
-        备注
-      </div>
-      <NInput v-model:value="tmpRemark" type="textarea" placeholder="如：多年写诗经验" />
-      <div class="text-neutral-500">
-        角色设定
-      </div>
-      <NInput v-model:value="tmpSystemMessage" type="textarea" placeholder="如：你是唐朝的李白，诗才出众，被誉为诗仙" />
-      <NFlex justify="space-between">
-        <NButton type="primary" @click="handleEdit()">
-          {{ $t('common.save') }}
-        </NButton>
-        <NPopconfirm placement="top" @positive-click.stop="handleDeleteDebounce(tmpUuid, $event)">
-          <template #trigger>
-            <NButton type="error" ghost>
-              {{ $t('common.delete') }}
-            </NButton>
-          </template>
-          {{ $t('chat.deleteConversationConfirm') }}
-        </NPopconfirm>
-      </NFlex>
-    </NSpace>
-  </NModal>
+  <EditConv v-model:showModal="showEditModal" :conversation="editConv" @showModal="(show) => showEditModal = show" />
   <NScrollbar class="px-4">
     <div class="flex flex-col gap-2 text-sm">
       <template v-if="!convList.length">

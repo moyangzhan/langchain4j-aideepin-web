@@ -1,4 +1,5 @@
 import { ss } from '@/utils/storage'
+
 const LOCAL_NAME = 'chatStorage'
 
 const defaultConversation = {
