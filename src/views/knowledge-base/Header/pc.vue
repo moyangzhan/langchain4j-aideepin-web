@@ -9,13 +9,9 @@ import KbInfo from '@/views/knowledge-base/Header/KbInfo.vue'
 interface Props {
   knowledgeBase: KnowledgeBase.Info
 }
-interface Emit {
-  (ev: 'openEditView'): void
-}
 withDefaults(defineProps<Props>(), {
   knowledgeBase: () => knowledgeBaseEmptyInfo(),
 })
-const emit = defineEmits<Emit>()
 const showEditModal = ref(false)
 
 function openEditView() {

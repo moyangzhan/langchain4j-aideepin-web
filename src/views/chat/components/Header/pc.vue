@@ -7,13 +7,9 @@ import { emptyConv } from '@/utils/functions'
 interface Props {
   conversation: Chat.Conversation
 }
-interface Emit {
-  (ev: 'openEditView'): void
-}
 withDefaults(defineProps<Props>(), {
   conversation: () => emptyConv(),
 })
-const emit = defineEmits<Emit>()
 const showEditModal = ref(false)
 
 function openEditView() {
