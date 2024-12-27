@@ -2,7 +2,7 @@
 import { onActivated, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { NButton, NIcon } from 'naive-ui'
-import { AppsListDetail24Regular, Cloud32Regular, LockClosed32Regular } from '@vicons/fluent'
+import { Cloud32Regular, LockClosed32Regular } from '@vicons/fluent'
 import { useKbStore } from '@/store'
 import { SvgIcon } from '@/components/common'
 import { useScroll } from '@/views/chat/hooks/useScroll'
@@ -81,7 +81,7 @@ onUnmounted(() => {
               v-show="mouseEnterKbUuid === item.uuid || isMobile" secondary size="tiny"
               @click.stop="showKb(item)"
             >
-              <NIcon :component="AppsListDetail24Regular" />
+              <SvgIcon icon="si:align-left-detailed-line" />
             </NButton>
           </div>
         </a>

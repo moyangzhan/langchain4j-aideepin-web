@@ -1,8 +1,6 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { NIcon } from 'naive-ui'
-import { AppsListDetail24Regular } from '@vicons/fluent'
-import { HoverButton } from '@/components/common'
+import { HoverButton, SvgIcon } from '@/components/common'
 import { knowledgeBaseEmptyInfo } from '@/utils/functions'
 import KbInfo from '@/views/knowledge-base/Header/KbInfo.vue'
 
@@ -15,6 +13,7 @@ withDefaults(defineProps<Props>(), {
 const showEditModal = ref(false)
 
 function openEditView() {
+  console.log('openEditView', showEditModal.value)
   showEditModal.value = true
 }
 function showOrCloseModal(show: boolean) {
@@ -35,11 +34,11 @@ function showOrCloseModal(show: boolean) {
       <div class="flex items-center space-x-2">
         <HoverButton @click="openEditView()">
           <span class="text-xl">
-            <NIcon :component="AppsListDetail24Regular" />
+            <SvgIcon icon="si:align-left-detailed-line" />
           </span>
         </HoverButton>
       </div>
     </div>
-    <KbInfo v-if="knowledgeBase" :show-modal="showEditModal" :knowledge-base="knowledgeBase" @showModal="showOrCloseModal" />
+    <KbInfo v-if="knowledgeBase && knowledgeBase.uuid" :show-modal="showEditModal" :knowledge-base="knowledgeBase" @showModal="showOrCloseModal" />
   </header>
 </template>

@@ -10,6 +10,7 @@ import { Message } from '../chat/components'
 import { useScroll } from '../chat/hooks/useScroll'
 import { useCopyCode } from '../chat/hooks/useCopyCode'
 import HeaderComponent from '../chat/components/Header/index.vue'
+import LoginTip from '@/views/user/LoginTip.vue'
 import { HoverButton, LLMSelector, SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAiSearchStore, useAppStore, useAuthStore } from '@/store'
@@ -279,7 +280,8 @@ onActivated(async () => {
           id="image-wrapper" class="w-full max-w-screen-xl m-auto dark:bg-[#101014]"
           :class="[isMobile ? 'p-2' : 'p-4']"
         >
-          <template v-if="!records.length">
+          <LoginTip v-if="!authStore.token" />
+          <template v-else-if="!records.length">
             <div class="flex items-center justify-center mt-4 text-center text-neutral-400">
               <NIcon :component="Cat" size="32" />
               <span class="pl-1">Roar~</span>

@@ -40,6 +40,8 @@ function handleMouseLeave() {
   mouseEnterKbUuid.value = ''
 }
 function openEditView(item: Chat.Conversation, event?: KeyboardEvent) {
+  if (!authStore.checkLoginOrShow())
+    return
   showEditModal.value = true
   editConv.value = item
 }
