@@ -137,3 +137,42 @@ export function calcImageUrls(draw: Chat.Draw) {
       return `/image/${item}`
   })
 }
+
+export function emptyQuota(): User.Config {
+  return {
+    userQuota: {
+      requestTimesByDay: 0,
+      requestTimesByMonth: 0,
+      tokenByDay: 0,
+      tokenByMonth: 0,
+      drawByDay: 0,
+      drawByMonth: 0,
+    },
+    quotaCost: {
+      paidRequestTimes: {
+        todayRequestTimes: 0,
+        monthRequestTimes: 0,
+      },
+      paidTokenCost: {
+        todayTokenCost: 0,
+        monthTokenCost: 0,
+      },
+      paidDrawTimes: {
+        todayDrawTimes: 0,
+        monthDrawTimes: 0,
+      },
+      freeTokenCost: {
+        todayTokenCost: 0,
+        monthTokenCost: 0,
+      },
+      freeRequestTimes: {
+        todayRequestTimes: 0,
+        monthRequestTimes: 0,
+      },
+      freeDrawTimes: {
+        todayDrawTimes: 0,
+        monthDrawTimes: 0,
+      },
+    },
+  }
+}

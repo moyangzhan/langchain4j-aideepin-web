@@ -6,21 +6,47 @@ declare namespace User {
         uuid: string
       }
 
+    interface UserQuota {
+        tokenByDay: number
+        tokenByMonth: number
+        requestTimesByDay: number
+        requestTimesByMonth: number
+        drawByDay: number
+        drawByMonth: number
+    }
+
+    interface QuotaCost {
+        freeTokenCost: {
+            todayTokenCost: number
+            monthTokenCost: number
+        },
+        freeRequestTimes: {
+            todayRequestTimes: number
+            monthRequestTimes: number
+        },
+        freeDrawTimes: {
+            todayDrawTimes: number
+            monthDrawTimes: number
+        },
+        paidTokenCost: {
+            todayTokenCost: number
+            monthTokenCost: number
+        },
+        paidRequestTimes: {
+            todayRequestTimes: number
+            monthRequestTimes: number
+        },
+        paidDrawTimes: {
+            todayDrawTimes: number
+            monthDrawTimes: number
+        }
+    }
+
     interface Config{
         secretKey?: string
         contextEnable?: boolean
         contextMsgPairNum?: number
-        quotaByTokenDaily?: number
-        quotaByTokenMonthly?: number
-        quotaByRequestDaily?: number
-        quotaByRequestMonthly?: number
-        quotaByImageDaily?: number
-        quotaByImageMonthly?: number
-        todayTokenCost?: number
-        todayRequestTimes?: number
-        todayGeneratedImageNumber?: number
-        currMonthTokenCost?: number
-        currMonthRequestTimes?: number
-        currMonthGeneratedImageNumber?: number
+        userQuota: UserQuota
+        quotaCost: QuotaCost
     }
 }

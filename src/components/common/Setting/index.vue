@@ -7,6 +7,7 @@ import Quota from './Quota.vue'
 import ModifyPassword from './ModifyPassword.vue'
 import api from '@/api'
 import { SvgIcon } from '@/components/common'
+import { emptyQuota } from '@/utils/functions'
 
 interface Props {
   visible: boolean
@@ -20,7 +21,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 const active = ref('General')
 const loading = ref(false)
-const userConfig = ref<User.Config>({})
+const userConfig = ref<User.Config>(emptyQuota())
 
 const show = computed({
   get() {
