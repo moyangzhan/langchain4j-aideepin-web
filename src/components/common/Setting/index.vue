@@ -2,7 +2,6 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { NModal, NTabPane, NTabs } from 'naive-ui'
 import General from './General.vue'
-// import Advanced from './Advanced.vue'
 import Quota from './Quota.vue'
 import ModifyPassword from './ModifyPassword.vue'
 import api from '@/api'
@@ -75,15 +74,6 @@ onMounted(() => {
           </template>
           <Quota :user-config="userConfig" @reloadConfig="fetchConfig" />
         </NTabPane>
-        <!-- <NTabPane name="Advanced" tab="Advanced">
-          <template #tab>
-            <SvgIcon class="text-lg" icon="ri:equalizer-line" />
-            <span class="ml-2">{{ $t('setting.advanced') }}</span>
-          </template>
-          <div class="min-h-[100px]">
-            <Advanced :user-config="userConfig" @reloadConfig="fetchConfig" />
-          </div>
-        </NTabPane> -->
         <NTabPane name="ModifyPassword" tab="ModifyPassword">
           <template #tab>
             <SvgIcon class="text-lg" icon="carbon:password" />
