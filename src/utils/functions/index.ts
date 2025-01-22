@@ -43,6 +43,7 @@ export function knowledgeBaseEmptyItem() {
     embeddingStatusChangeTime: '',
     graphicalStatusChangeTime: '',
     sourceFileName: '',
+    sourceFileUrl: '',
     sourceFileUuid: '',
   }
 }
@@ -104,7 +105,9 @@ export function emptyDraw() {
     processStatus: 1,
     processStatusRemark: '',
     originalImageUuid: '',
+    originalImageUrl: '',
     maskImageUuid: '',
+    maskImageUrl: '',
     imageUuids: [],
     imageUrls: [],
     isPublic: false,
@@ -130,12 +133,21 @@ export function emptyConv(): Chat.Conversation {
 }
 
 export function calcImageUrls(draw: Chat.Draw) {
-  draw.imageUrls = draw.imageUuids.map((item) => {
-    if (draw.isPublic)
-      return `/draw/public/image/${draw.uuid}/${item}`
-    else
-      return `/image/${item}`
-  })
+  // draw.imageUrls = draw.imageUuids.map((item) => {
+  //   if (draw.isPublic)
+  //     return `/draw/public/image/${draw.uuid}/${item}`
+  //   else
+  //     return `/image/${item}`
+  // })
+  for (let i = 0; i < draw.imageUrls.length; i++) {
+    const url = draw.imageUrls[i]
+    if (!url.includes('http')) {
+      if (draw.isPublic)
+        draw.imageUrls[i] = `/api/draw/public/image/${draw.uuid}/${changeFileUrlToUuid(url)}`
+      else
+        draw.imageUrls[i] = `/api${url}`
+    }
+  }
 }
 
 export function emptyQuota(): User.Config {
@@ -175,4 +187,16 @@ export function emptyQuota(): User.Config {
       },
     },
   }
+}
+
+export function changeFileUrlToUuid(fileUrl: string) {
+  if (!fileUrl.includes('/'))
+    return fileUrl
+  return fileUrl.substring(fileUrl.lastIndexOf('/') + 1)
+}
+
+export function fillCompleteUrl(fileUrl: string) {
+  if (!fileUrl.includes('/') || fileUrl.indexOf('/api') === 0)
+    return fileUrl
+  return `/api${fileUrl}`
 }

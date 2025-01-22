@@ -215,7 +215,7 @@ watch(
               <template v-for="imageUrl in currentDraw.imageUrls" :key="imageUrl">
                 <NImage
                   v-if="imageUrl && currentDraw.uuid !== drawStore.loadingUuid"
-                  :style="`height:${defaultImageHeight}px`" :src="`/api${imageUrl}?token=${authStore.token}`"
+                  :style="`height:${defaultImageHeight}px`" :src="`${imageUrl}?token=${authStore.token}`"
                   :fallback-src="NoPic" object-fit="scale-down"
                 />
               </template>

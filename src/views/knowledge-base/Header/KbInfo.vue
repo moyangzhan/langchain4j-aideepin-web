@@ -94,6 +94,42 @@ watch(() => innerShow.value, (val) => {
           </NTag>
         </NFlex>
       </NFlex>
+      <NFlex>
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <NTag size="small" :bordered="false">
+              {{ knowledgeBase.isPublic ? '公开' : '私有' }}
+            </NTag>
+          </template>
+          公开：所有人可见并使用；<br>
+          私有：仅创建者可见并使用。
+        </NTooltip>
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <NTag size="small" :bordered="false">
+              {{ knowledgeBase.isStrict ? '严格模式' : '宽松模式' }}
+            </NTag>
+          </template>
+          严格模式：严格匹配知识库，知识库中如无搜索结果，直接返回无答案；<br>
+          宽松模式：知识库中如无搜索结果，则将用户提问传给LLM继续请求答案。
+        </NTooltip>
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <NTag size="small" :bordered="false">
+              {{ `最大招回数量：${knowledgeBase.retrieveMaxResults}` }}
+            </NTag>
+          </template>
+          向量搜索时，召回的文档数量不能超过该值<br>
+        </NTooltip>
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <NTag size="small" :bordered="false">
+              {{ `最小招回分数：${knowledgeBase.retrieveMinScore}` }}
+            </NTag>
+          </template>
+          向量搜索时，召回的向量分数需大于该值
+        </NTooltip>
+      </NFlex>
       <NDivider />
       <div>{{ knowledgeBase.remark }}</div>
     </NFlex>

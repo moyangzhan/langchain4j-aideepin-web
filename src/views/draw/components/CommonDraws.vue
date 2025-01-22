@@ -98,7 +98,7 @@ defineExpose({ gotoTop, gotoBottom })
                 <template v-for="imageUrl in draw.imageUrls" :key="imageUrl">
                   <NImage
                     v-if="imageUrl && draw.uuid !== drawStore.loadingUuid" width="100%"
-                    :src="`/api${imageUrl}?token=${authStore.token}`" :fallback-src="NoPic" preview-disabled
+                    :src="`${imageUrl}?token=${authStore.token}`" :fallback-src="NoPic" preview-disabled
                     @click="openDraw(draw)"
                   />
                 </template>

@@ -185,12 +185,8 @@ function openDetail(uuid: string) {
               <NSpace>
                 <template v-for="imageUrl in draw.imageUrls" :key="imageUrl">
                   <NImage
-                    v-if="imageUrl && imageUrl.indexOf('http') === 0" width="100" :src="imageUrl"
-                    :fallback-src="NoPic" preview-disabled :render-toolbar="renderToolbarOut2(imageUrl)"
-                  />
-                  <NImage
-                    v-if="imageUrl && imageUrl.indexOf('http') === -1" width="100"
-                    :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic"
+                    v-if="imageUrl" width="100"
+                    :src="`${imageUrl}?token=${token}`" :fallback-src="NoPic"
                     :render-toolbar="renderToolbarOut2(imageUrl)" preview-disabled @click="openDetail(draw.uuid)"
                   />
                 </template>

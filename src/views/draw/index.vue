@@ -1,14 +1,16 @@
 <script setup lang='ts'>
 import { computed, ref, watch } from 'vue'
-import { NFlex, NRadio, NRadioGroup, useLoadingBar, useMessage } from 'naive-ui'
+import { useLoadingBar, useMessage } from 'naive-ui'
 import DisplayStyleInChat from './components/DisplayStyleInChat.vue'
 import DisplayStyleInGallery from './components/DisplayStyleInGallery.vue'
 import Dalle2Editor from './components/dalle2/Dalle2Editor.vue'
 import Dalle3Editor from './components/dalle3/Dalle3Editor.vue'
+import Header from './components/Header.vue'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAppStore, useAuthStore, useDrawStore } from '@/store'
 import api from '@/api'
 import { debounce } from '@/utils/functions/debounce'
+import { changeFileUrlToUuid } from '@/utils/functions'
 
 const appStore = useAppStore()
 const ms = useMessage()
@@ -62,7 +64,7 @@ const handleLoadMoreDraws = debounce(loadNextPage, 300)
 async function handleDelOneImage(uuid: string, fileUrl: string) {
   if (loading.value)
     return
-  const fileUuid = fileUrl.replace('/image/', '')
+  const fileUuid = changeFileUrlToUuid(fileUrl)
   const ret = await api.drawFileDel<boolean>(uuid, fileUuid)
   if (ret)
     drawStore.deleteOneFile(uuid, fileUuid)
@@ -80,11 +82,7 @@ function submitted() {
   galleryStyleViewRef.value.gotoTop()
 }
 
-function handleChangeModel(value: string) {
-  appStore.setSelectedImageModel(value)
-}
-
-function handleDisplayChange(value: string) {
+function onDisplayStyleChange(value: string) {
   selectedDisplayStyle.value = value
 }
 
@@ -106,29 +104,7 @@ watch(
 
 <template>
   <div class="flex flex-col w-full h-full">
-    <header>
-      <NFlex justify="space-between" class="w-full max-w-screen-xl m-auto" :class="[isMobile ? 'p-2' : 'px-4 pb-4']">
-        <NRadioGroup
-          :value="appStore.selectedImageModel.modelId" name="imageModelRadioGroup" size="small"
-          @update:value="handleChangeModel"
-        >
-          <NRadio v-for="imageModel in appStore.imageModels" :key="imageModel.modelId" :value="imageModel.modelId">
-            {{ imageModel.modelName }}
-          </NRadio>
-        </NRadioGroup>
-        <NRadioGroup
-          :value="selectedDisplayStyle" name="displayStyleRadioGroup" size="small"
-          @update:value="handleDisplayChange"
-        >
-          <NRadio value="chatStyle">
-            聊天风格
-          </NRadio>
-          <NRadio value="galleryStyle">
-            画廊风格
-          </NRadio>
-        </NRadioGroup>
-      </NFlex>
-    </header>
+    <Header @display-style-change="onDisplayStyleChange" />
     <main class="flex-1 overflow-hidden">
       <DisplayStyleInChat
         v-show="selectedDisplayStyle === 'chatStyle'" ref="chatStyleViewRef"

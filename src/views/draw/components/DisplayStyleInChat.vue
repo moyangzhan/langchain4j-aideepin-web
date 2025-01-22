@@ -49,7 +49,7 @@ async function handleScroll(event: any) {
 }
 
 watch(
-  () => drawStore.myDraws,
+  () => myDraws.value,
   (newVal, oldVal) => {
     if ((!oldVal || oldVal.length === 0) && newVal.length > 0) {
       console.log('displayStyleInChat scrollToBottom')
@@ -117,12 +117,12 @@ defineExpose({ gotoBottom })
             />
             <Message
               v-if="draw.interactingMethod === 2" :draw="draw"
-              :image-urls="[`/my-image/${draw.originalImageUuid}`, `/my-image/${draw.maskImageUuid}`]" :inversion="true"
+              :image-urls="[`/api${draw.originalImageUrl}`, `/api${draw.maskImageUrl}`]" :inversion="true"
               type="text-image" @delete="handleDelDraw(draw)" @set-public="handleSetPublic" @open-detail="openDraw(draw)"
             />
             <Message
               v-if="draw.interactingMethod === 3" :draw="draw"
-              :image-urls="[`/my-image/${draw.originalImageUuid}`]" :inversion="true" type="image"
+              :image-urls="[`/api${draw.originalImageUrl}`]" :inversion="true" type="image"
               @delete="handleDelDraw(draw)" @set-public="handleSetPublic" @open-detail="openDraw(draw)"
             />
             <Message

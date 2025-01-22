@@ -1,15 +1,14 @@
 <script setup lang='ts'>
 import { onMounted, ref } from 'vue'
-import { NFlex, NRadio, NRadioGroup, useLoadingBar, useMessage } from 'naive-ui'
+import { useLoadingBar, useMessage } from 'naive-ui'
 import DrawList from './DrawList.vue'
-import { useBasicLayout } from '@/hooks/useBasicLayout'
+import Header from './Header.vue'
 import { useGalleryStore } from '@/store'
 import api from '@/api'
 import { debounce } from '@/utils/functions/debounce'
 
 const ms = useMessage()
 const loaddingBar = useLoadingBar()
-const { isMobile } = useBasicLayout()
 const publicViewRef = ref()
 const favViewRef = ref()
 const galleryStore = useGalleryStore()
@@ -100,20 +99,8 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col w-full h-full">
+    <Header @display-change="handleDisplayChange" />
     <main class="flex-1 overflow-hidden">
-      <NFlex justify="space-between" class="w-full max-w-screen-xl m-auto" :class="[isMobile ? 'p-2' : 'px-4 pb-4']">
-        <NRadioGroup
-          :value="publicOrFavor" name="displayStyleRadioGroup" size="small"
-          @update:value="handleDisplayChange"
-        >
-          <NRadio value="publicView">
-            公开图片
-          </NRadio>
-          <NRadio value="favView">
-            我的点赞
-          </NRadio>
-        </NRadioGroup>
-      </NFlex>
       <DrawList
         v-show="publicOrFavor === 'publicView'" ref="publicViewRef" from-page-type="public"
         :draws="galleryStore.publicDraws" @load-more="handleLoadMorePublicDraws"

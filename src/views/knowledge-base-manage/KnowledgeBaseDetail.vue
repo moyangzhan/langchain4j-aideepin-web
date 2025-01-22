@@ -52,8 +52,67 @@ const token = ref<string>(authStore.token)
 const checkedItemRowKeys = ref<string[]>([])
 const curKnowledgeBase: KnowledgeBase.Info = reactive<KnowledgeBase.Info>(knowledgeBaseEmptyInfo())
 
+// 文件预览
+const showFileContentModal = ref<boolean>(false)
+const previewFileUrl = ref<string>('')
+const previewMimeType = ref<string>('')
+const previewFileContent = ref<string>('')
+const previewFileName = ref<string>('')
+
+const openFileInNewTab = function (url: string) {
+  const x = new window.XMLHttpRequest()
+  x.open('GET', url, true)
+  x.responseType = 'blob'
+  x.onload = () => {
+    const url = window.URL.createObjectURL(x.response)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = previewFileName.value
+    a.click()
+  }
+  x.send()
+}
+
 const showFileContent = (selected: KnowledgeBase.Item = knowledgeBaseEmptyItem()) => {
-  window.open(`/api/file/${selected.sourceFileUuid}?token=${token.value}`, '_blank')
+  // window.open(`/api${selected.sourceFileUrl}?token=${token.value}`, '_blank')
+  previewFileContent.value = ''
+  previewFileName.value = ''
+  previewFileUrl.value = `${selected.sourceFileUrl}?token=${token.value}`
+  previewFileName.value = selected.sourceFileName
+  console.log('previewFileUrl', previewFileUrl.value)
+  const ext = selected.sourceFileName.substring(selected.sourceFileName.lastIndexOf('.') + 1)
+  switch (ext) {
+    case 'pdf':
+      previewMimeType.value = 'application/pdf'
+      break
+    case 'doc':
+    case 'docx':
+      previewMimeType.value = 'application/msword'
+      break
+    case 'ppt':
+    case 'pptx':
+      previewMimeType.value = 'application/vnd.ms-powerpoint'
+      break
+    case 'xls':
+    case 'xlsx':
+      previewMimeType.value = 'application/vnd.ms-excel'
+      break
+    case 'html':
+      previewMimeType.value = 'text/html'
+      break
+    case 'txt':
+      previewMimeType.value = 'text/plain'
+      api.loadFileContent(previewFileUrl.value).then((resp) => {
+        console.log('loadFileContent', resp)
+        previewFileContent.value = resp.data
+      }).catch((err) => {
+        console.error('loadFileContent error', err)
+      })
+      break
+    default:
+      previewMimeType.value = 'text/plain'
+  }
+  showFileContentModal.value = true
 }
 
 const showEmbeddingList = (selected: KnowledgeBase.Item = knowledgeBaseEmptyItem()) => {
@@ -173,8 +232,11 @@ function onUploadFinish({
   file: UploadFileInfo
   event?: ProgressEvent
 }) {
-  console.log(event)
-  ms.success((event?.target as XMLHttpRequest).response)
+  if ((event?.target as XMLHttpRequest).response.success)
+    ms.success('上传成功')
+  else
+    ms.error((event?.target as XMLHttpRequest).response.message)
+
   return file
 }
 
@@ -367,5 +429,23 @@ watch(
         确定
       </NButton>
     </NFlex>
+  </NModal>
+  <NModal v-model:show="showFileContentModal" style="width: 90%; " preset="card" :title="`文件预览: ${previewFileName}`">
+    <div style="text-align: center;max-height:600px;overflow-y: auto">
+      <div v-if="previewFileUrl && previewMimeType === 'text/plain'">
+        {{ previewFileContent }}
+      </div>
+      <object
+        v-if="previewFileUrl && previewMimeType !== 'text/plain' && previewMimeType !== 'application/pdf'"
+        :data="previewFileUrl" width="100%" height="90%" :type="previewMimeType"
+      >
+        <p>您的浏览器不支持嵌入该文档，请点击下载查看</p>
+      </object>
+    </div>
+    <template #footer>
+      <NButton type="primary" text tag="a" size="small" @click="openFileInNewTab(previewFileUrl)">
+        点击下载：{{ previewFileName }}
+      </NButton>
+    </template>
   </NModal>
 </template>

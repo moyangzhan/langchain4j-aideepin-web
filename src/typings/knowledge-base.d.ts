@@ -36,6 +36,7 @@ declare namespace KnowledgeBase {
     graphicalStatusChangeTime: string
     sourceFileName: string
     sourceFileUuid: string
+    sourceFileUrl: string
   }
   interface KbItemEditReq {
     id?: string

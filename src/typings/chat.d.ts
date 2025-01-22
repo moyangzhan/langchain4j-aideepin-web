@@ -10,7 +10,7 @@ declare namespace Chat {
 		error?: boolean
 		loading?: boolean
 		aiModelPlatform?: string
-		attachments: string[]
+		attachmentUrls: string[]
 	}
 
 	interface ConversationPreset {
@@ -107,12 +107,14 @@ declare namespace Chat {
 		prompt: string
 		aiModelName: string
 		originalImageUuid?: string
+		originalImageUrl: string
 		maskImageUuid?: string
+		maskImageUrl: string
 		interactingMethod: number
 		processStatus: number   //1:processing,2:fail,3:success
 		processStatusRemark: string
 		imageUuids: string[]
-		imageUrls: string[] //由imageUuids转换得到
+		imageUrls: string[]
 		createTime: string
 		isPublic: boolean
 		isStar: boolean

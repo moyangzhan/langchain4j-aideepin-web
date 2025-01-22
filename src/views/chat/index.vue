@@ -179,16 +179,14 @@ async function createChatTask() {
         inversion: false,
         error: false,
         aiModelPlatform: appStore.selectedLLM.modelPlatform,
-        attachments: [],
+        attachmentUrls: [],
       }],
       inversion: true,
       error: false,
-      attachments: [],
+      attachmentUrls: [],
     },
     true,
   )
-  scrollToBottom()
-
   loading.value = true
   prompt.value = ''
 
@@ -230,7 +228,7 @@ async function onRegenerate(questionUuid: string) {
       inversion: false,
       error: false,
       loading: true,
-      attachments: [],
+      attachmentUrls: [],
     },
   )
 
@@ -507,15 +505,15 @@ onDeactivated(() => {
           <template v-else>
             <div v-for="(question, index) of messages" :key="index">
               <!-- 多模态的请求消息，携带有附件 -->
-              <template v-if="question.attachments.length > 0">
+              <template v-if="question.attachmentUrls.length > 0">
                 <Message
-                  :date-time="question.createTime" :text="question.remark" :image-urls="question.attachments"
+                  :date-time="question.createTime" :text="question.remark" :image-urls="question.attachmentUrls"
                   type="text-image" :inversion="true" :error="question.error" :loading="false"
                   @regenerate="onRegenerate(question.uuid)" @delete="handleDelete(question.uuid, '', true)"
                 />
               </template>
               <!-- 非多模态的请求消息，没有附件 -->
-              <template v-if="question.attachments.length === 0">
+              <template v-if="question.attachmentUrls.length === 0">
                 <Message
                   :date-time="question.createTime" :text="question.remark" type="text" :inversion="true"
                   :error="question.error" :loading="false" @regenerate="onRegenerate(question.uuid)"

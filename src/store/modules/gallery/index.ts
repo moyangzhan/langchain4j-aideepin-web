@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { changeFileUrlToUuid } from '@/utils/functions'
 
 export const useGalleryStore = defineStore('gallery-store', {
   state: (): Chat.GalleryState => {
@@ -21,7 +22,12 @@ export const useGalleryStore = defineStore('gallery-store', {
         return
       draws.forEach((item) => {
         if (this.publicDraws.findIndex(pd => pd.uuid === item.uuid) === -1) {
-          item.imageUrls = item.imageUuids.map(uuid => `/draw/public/thumbnail/${item.uuid}/${uuid}`)
+          // item.imageUrls = item.imageUuids.map(uuid => `/draw/public/thumbnail/${item.uuid}/${uuid}`)
+          for (let i = 0; i < item.imageUrls.length; i++) {
+            const url = item.imageUrls[i]
+            if (!url.includes('http'))
+              item.imageUrls[i] = `/api/draw/public/thumbnail/${item.uuid}/${changeFileUrlToUuid(url)}`
+          }
           this.publicDraws.push(item)
         }
       })
@@ -41,7 +47,12 @@ export const useGalleryStore = defineStore('gallery-store', {
 
       const needAdd: Chat.Draw[] = []
       draws.forEach((item) => {
-        item.imageUrls = item.imageUuids.map(uuid => `/draw/public/thumbnail/${item.uuid}/${uuid}`)
+        // item.imageUrls = item.imageUuids.map(uuid => `/draw/public/thumbnail/${item.uuid}/${uuid}`)
+        for (let i = 0; i < item.imageUrls.length; i++) {
+          const url = item.imageUrls[i]
+          if (!url.includes('http'))
+            item.imageUrls[i] = `/api/draw/public/thumbnail/${item.uuid}/${changeFileUrlToUuid(url)}`
+        }
         item.isStar = true
 
         const hit = this.publicDraws.find(pd => pd.uuid === item.uuid)
@@ -74,7 +85,12 @@ export const useGalleryStore = defineStore('gallery-store', {
     },
 
     starDraw(draw: Chat.Draw) {
-      draw.imageUrls = draw.imageUuids.map(uuid => `/draw/public/thumbnail/${draw.uuid}/${uuid}`)
+      // draw.imageUrls = draw.imageUuids.map(uuid => `/draw/public/thumbnail/${draw.uuid}/${uuid}`)
+      for (let i = 0; i < draw.imageUrls.length; i++) {
+        const url = draw.imageUrls[i]
+        if (!url.includes('http'))
+          draw.imageUrls[i] = `/api/draw/public/thumbnail/${draw.uuid}/${changeFileUrlToUuid(url)}`
+      }
       const hit = this.myStarDraws.find(pd => pd.uuid === draw.uuid)
       if (hit)
         Object.assign(hit, draw)

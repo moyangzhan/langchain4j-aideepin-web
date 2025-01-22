@@ -1,5 +1,5 @@
 import { EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event-source'
-import { get, post } from '@/utils/request'
+import { get, getRawAxios, post } from '@/utils/request'
 import { useAuthStore, useUserStore } from '@/store'
 
 class FatalError extends Error { }
@@ -563,6 +563,12 @@ function aiSearchRecordDel<T = any>(uuid: string) {
   })
 }
 
+function loadFileContent(fileUrl: string) {
+  return getRawAxios().get(fileUrl, {
+    responseType: 'text',
+  })
+}
+
 export default {
   login,
   register,
@@ -637,4 +643,5 @@ export default {
   aiSearchProcess,
   aiSearchRecords,
   aiSearchRecordDel,
+  loadFileContent,
 }

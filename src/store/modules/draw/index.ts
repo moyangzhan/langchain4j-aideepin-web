@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { changeFileUrlToUuid } from '@/utils/functions'
 
 export const useDrawStore = defineStore('draw-store', {
   state: (): Chat.DrawState => {
@@ -25,13 +26,24 @@ export const useDrawStore = defineStore('draw-store', {
     },
 
     unshiftImages(draws: Chat.Draw[]) {
-      draws.forEach(item => item.imageUrls = item.imageUuids.map(uuid => `/my-thumbnail/${uuid}`))
+      draws.forEach((item) => {
+        // item.imageUuids.map(uuid => `/my-thumbnail/${uuid}`)
+        for (let i = 0; i < item.imageUrls.length; i++) {
+          const url = item.imageUrls[i]
+          if (!url.includes('http'))
+            item.imageUrls[i] = `/api/my-thumbnail/${changeFileUrlToUuid(url)}`
+        }
+      })
       this.myDraws.unshift(...draws)
     },
 
-    unshift(image: Chat.Draw) {
-      image.imageUrls = image.imageUuids.map(uuid => `/my-thumbnail/${uuid}`)
-      this.myDraws.unshift(image)
+    unshift(item: Chat.Draw) {
+      for (let i = 0; i < item.imageUrls.length; i++) {
+        const url = item.imageUrls[i]
+        if (!url.includes('http'))
+          item.imageUrls[i] = `/api/my-thumbnail/${changeFileUrlToUuid(url)}`
+      }
+      this.myDraws.unshift(item)
     },
 
     setLoading(loading: boolean) {
@@ -45,7 +57,11 @@ export const useDrawStore = defineStore('draw-store', {
     updateDraw(edit: Chat.Draw) {
       const index = this.myDraws.findIndex(item => item.uuid === edit.uuid)
       if (index !== -1) {
-        edit.imageUrls = edit.imageUuids.map(uuid => `/my-thumbnail/${uuid}`)
+        for (let i = 0; i < edit.imageUrls.length; i++) {
+          const url = edit.imageUrls[i]
+          if (!url.includes('http'))
+            edit.imageUrls[i] = `/api/my-thumbnail/${changeFileUrlToUuid(url)}`
+        }
         this.myDraws[index] = { ...this.myDraws[index], ...edit }
       }
     },
