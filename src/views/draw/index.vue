@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { computed, ref, watch } from 'vue'
+import { computed, onActivated, ref, watch } from 'vue'
 import { useLoadingBar, useMessage } from 'naive-ui'
 import DisplayStyleInChat from './components/DisplayStyleInChat.vue'
 import DisplayStyleInGallery from './components/DisplayStyleInGallery.vue'
@@ -100,6 +100,11 @@ watch(
   },
   { immediate: true },
 )
+
+onActivated(async () => {
+  chatStyleViewRef.value.gotoBottom()
+  galleryStyleViewRef.value.gotoTop()
+})
 </script>
 
 <template>
