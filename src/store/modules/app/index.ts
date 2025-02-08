@@ -58,12 +58,14 @@ export const useAppStore = defineStore('app-store', {
         if (name)
           this.selectedSearchEngine = name
       }
+      this.recordState()
     },
     setLLMs(llms: AiModelInfo[]) {
       llms.forEach((item) => {
         item.disabled = !item.enable
         item.label = item.modelName
         item.key = item.modelId
+        item.value = item.modelId
       })
       this.llms = llms
       if (this.selectedLLM.modelId === 'default') {
@@ -71,6 +73,7 @@ export const useAppStore = defineStore('app-store', {
         if (selectedModel)
           this.selectedLLM = selectedModel
       }
+      this.recordState()
     },
     setImageModels(imageModels: AiModelInfo[]) {
       imageModels.forEach((item) => {
@@ -84,6 +87,7 @@ export const useAppStore = defineStore('app-store', {
         if (selectedModel)
           this.selectedImageModel = selectedModel
       }
+      this.recordState()
     },
   },
 })

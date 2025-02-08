@@ -2,7 +2,6 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { NModal, NTabPane, NTabs } from 'naive-ui'
 import General from './General.vue'
-// import Advanced from './Advanced.vue'
 import Quota from './Quota.vue'
 import ModifyPassword from './ModifyPassword.vue'
 import api from '@/api'
