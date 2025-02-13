@@ -83,6 +83,7 @@ export function emptyAiModel() {
     // from api
     modelId: 'default',
     modelName: '',
+    modelTitle: '',
     modelPlatform: '',
     enable: false,
     isFree: false,
@@ -117,6 +118,7 @@ export function emptyDraw() {
     starCount: 0,
     userUuid: '',
     userName: '',
+    dynamicParams: {} as any,
   }
 }
 

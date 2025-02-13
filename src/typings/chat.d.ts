@@ -113,15 +113,16 @@ declare namespace Chat {
 		interactingMethod: number
 		processStatus: number   //1:processing,2:fail,3:success
 		processStatusRemark: string
+		//绘图成功后生成的图片
 		imageUuids: string[]
 		imageUrls: string[]
 		createTime: string
 		isPublic: boolean
 		isStar: boolean
 		starCount: number
-		
 		userUuid: string
 		userName: string
+		dynamicParams: any
 	}
 
 	interface DrawListResp {
@@ -138,7 +139,7 @@ declare namespace Chat {
 		createTime: string
 	}
 
-	interface DrawCommentsResp{
+	interface DrawCommentsResp {
 		records: Chat.DrawComment[]
 		total: number
 		current: number

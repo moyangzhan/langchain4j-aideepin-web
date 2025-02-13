@@ -12,7 +12,18 @@ interface PageResponse {
   records: []
 }
 
-interface CreateImageResult{
+interface ImageGenerationParams {
+  interactingMethod: number
+  modelName: string
+  prompt: string
+  size: string
+  number: number
+  seed?: number
+  quality?: string
+  dynamicParams?: any
+}
+
+interface CreateImageResult {
   uuid: string
 }
 
@@ -21,11 +32,12 @@ interface AuthState {
   showLoginModal: boolean
 }
 
-interface AiModelInfo{
+interface AiModelInfo {
 
   //from api
   modelId: string
   modelName: string
+  modelTitle: string
   modelPlatform: string
   enable: boolean
   isFree: boolean
@@ -38,7 +50,7 @@ interface AiModelInfo{
   disabled: boolean
 }
 
-interface SearchEngineInfo{
+interface SearchEngineInfo {
 
   //from api
   name: string,

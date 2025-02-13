@@ -187,6 +187,7 @@ async function createChatTask() {
     },
     true,
   )
+
   loading.value = true
   prompt.value = ''
 

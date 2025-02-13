@@ -19,7 +19,7 @@ export async function checkProcess(uuid: string) {
     if (imageResp.data.processStatus === 1) {
       setTimeout(() => {
         checkProcess(uuid)
-      }, 5000)
+      }, 3000)
     } else {
       drawStore.setLoading(false)
       drawStore.setLoadingUuid('')

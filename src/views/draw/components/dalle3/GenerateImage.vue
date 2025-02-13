@@ -21,7 +21,7 @@ const imageQulities = ['standard', 'hq']
 async function handleSubmit(prompt: string) {
   console.log(`GenerateImage submit:${prompt}`)
   try {
-    const resp = await api.imageGenerate<CreateImageResult>('dall-e-3', prompt, selectedImageSize.value, 1, selectedImageQuality.value)
+    const resp = await api.imageGenerate<CreateImageResult>({ interactingMethod: 1, modelName: 'dall-e-3', prompt, size: selectedImageSize.value, number: 1, quality: selectedImageQuality.value })
     const uuid = resp.data.uuid
     drawStore.setLoadingUuid(uuid)
 

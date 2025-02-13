@@ -21,11 +21,23 @@ export const useDrawStore = defineStore('draw-store', {
 
   actions: {
 
+    initDynamicParamsJson(draw: Chat.Draw) {
+      if (draw.dynamicParams) {
+        try {
+          if (draw.dynamicParams.ref_prompt)
+            draw.prompt = draw.dynamicParams.ref_prompt
+        } catch (e) {
+          console.log('resetDynamicParams error:', e)
+        }
+      }
+    },
+
     pushOne(draw: Chat.Draw) {
+      this.initDynamicParamsJson(draw)
       this.myDraws.push(draw)
     },
 
-    unshiftImages(draws: Chat.Draw[]) {
+    unshiftDraws(draws: Chat.Draw[]) {
       draws.forEach((item) => {
         // item.imageUuids.map(uuid => `/my-thumbnail/${uuid}`)
         for (let i = 0; i < item.imageUrls.length; i++) {
@@ -33,17 +45,9 @@ export const useDrawStore = defineStore('draw-store', {
           if (!url.includes('http'))
             item.imageUrls[i] = `/api/my-thumbnail/${changeFileUrlToUuid(url)}`
         }
+        this.initDynamicParamsJson(item)
       })
       this.myDraws.unshift(...draws)
-    },
-
-    unshift(item: Chat.Draw) {
-      for (let i = 0; i < item.imageUrls.length; i++) {
-        const url = item.imageUrls[i]
-        if (!url.includes('http'))
-          item.imageUrls[i] = `/api/my-thumbnail/${changeFileUrlToUuid(url)}`
-      }
-      this.myDraws.unshift(item)
     },
 
     setLoading(loading: boolean) {

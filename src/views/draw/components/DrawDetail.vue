@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import { computed, onMounted, ref, watch } from 'vue'
-import { NAvatar, NButton, NCard, NEmpty, NFlex, NFloatButton, NIcon, NImage, NImageGroup, NInput, NList, NListItem, NPagination, NSpin, NTag, NThing, NTooltip, useDialog, useLoadingBar, useMessage } from 'naive-ui'
-import { ArrowDownCircleOutline, ArrowUpCircleOutline, Reload } from '@vicons/ionicons5'
+import { NAvatar, NButton, NCard, NCarousel, NEmpty, NFlex, NFloatButton, NIcon, NImage, NImageGroup, NInput, NList, NListItem, NPagination, NSpin, NTag, NThing, NTooltip, useDialog, useLoadingBar, useMessage } from 'naive-ui'
+import { ArrowDown, ArrowUp, Reload } from '@vicons/ionicons5'
 import DrawDetailFuncBar from './DrawDetailFuncBar.vue'
 import { useAuthStore, useDrawStore, useGalleryStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
@@ -178,7 +178,6 @@ onMounted(() => {
 watch(
   () => props.drawUuid,
   (newVal) => {
-    console.log('drawDetail uuid:', newVal)
     if (newVal) {
       currentDrawUuid.value = newVal
       fetchDrawInfo()
@@ -192,36 +191,70 @@ watch(
   <div>
     <div class="flex flex-wrap">
       <NFlex justify="center" class="grow">
-        <NImageGroup>
-          <template v-if="loading">
-            <NSpin size="medium">
-              <template #icon>
-                <NIcon>
-                  <Reload />
-                </NIcon>
-              </template>
-            </NSpin>
+        <template v-if="loading">
+          <NSpin size="medium">
+            <template #icon>
+              <NIcon>
+                <Reload />
+              </NIcon>
+            </template>
+          </NSpin>
+        </template>
+        <template v-else>
+          <template v-if="currentDraw.uuid === drawStore.loadingUuid && currentDraw.processStatus === 2">
+            <NEmpty :description="`异常：${currentDraw.processStatusRemark}`" />
           </template>
-          <template v-else>
-            <template v-if="currentDraw.uuid === drawStore.loadingUuid && currentDraw.processStatus === 2">
-              <NEmpty :description="`异常：${currentDraw.processStatusRemark}`" />
-            </template>
-            <template
-              v-else-if="currentDraw.uuid !== drawStore.loadingUuid && (!currentDraw.imageUrls || currentDraw.imageUrls.length === 0)"
-            >
-              <NEmpty description="找不到图片" />
-            </template>
-            <template v-else-if="currentDraw.imageUuids && currentDraw.imageUuids.length > 0">
-              <template v-for="imageUrl in currentDraw.imageUrls" :key="imageUrl">
-                <NImage
-                  v-if="imageUrl && currentDraw.uuid !== drawStore.loadingUuid"
-                  :style="`height:${defaultImageHeight}px`" :src="`${imageUrl}?token=${authStore.token}`"
-                  :fallback-src="NoPic" object-fit="scale-down"
-                />
-              </template>
-            </template>
+          <template
+            v-else-if="currentDraw.uuid !== drawStore.loadingUuid && (!currentDraw.imageUrls || currentDraw.imageUrls.length === 0)"
+          >
+            <NEmpty description="找不到图片" />
           </template>
-        </NImageGroup>
+          <template v-else-if="currentDraw.imageUuids && currentDraw.imageUuids.length > 0">
+            <NImageGroup>
+              <NFlex justify="center">
+                <NCarousel dot-placement="bottom" :style="`height:${defaultImageHeight}px;max-width:1000px;`">
+                  <!-- Background generation -->
+                  <template v-if="currentDraw.interactingMethod === 4 && currentDraw.uuid !== drawStore.loadingUuid">
+                    <template v-for="imageUrl in currentDraw.imageUrls" :key="imageUrl">
+                      <NImage
+                        v-if="imageUrl && currentDraw.uuid !== drawStore.loadingUuid"
+                        :style="`height:${defaultImageHeight}px`" :src="`${imageUrl}?token=${authStore.token}`"
+                        :fallback-src="NoPic" object-fit="cover" title="AI生成的图片"
+                      />
+                    </template>
+                    <NImage
+                      :src="`${currentDraw.dynamicParams.base_image_url}?token=${authStore.token}`"
+                      :fallback-src="NoPic" object-fit="cover" title="原图"
+                    />
+                    <NImage
+                      v-if="currentDraw.dynamicParams.ref_image_url"
+                      :src="`${currentDraw.dynamicParams.ref_image_url}?token=${authStore.token}`" :fallback-src="NoPic"
+                      object-fit="cover" title="引导图"
+                    />
+                  </template>
+                  <!-- Text to image -->
+                  <template v-else>
+                    <template v-for="imageUrl in currentDraw.imageUrls" :key="imageUrl">
+                      <NImage
+                        v-if="imageUrl && currentDraw.uuid !== drawStore.loadingUuid"
+                        :style="`height:${defaultImageHeight}px`" :src="`${imageUrl}?token=${authStore.token}`"
+                        :fallback-src="NoPic" object-fit="cover"
+                      />
+                    </template>
+                  </template>
+                  <template #dots="{ total, currentIndex, to }">
+                    <ul class="custom-dots">
+                      <li
+                        v-for="index of total" :key="index" :class="{ ['is-active']: currentIndex === index - 1 }"
+                        @click="to(index - 1)"
+                      />
+                    </ul>
+                  </template>
+                </NCarousel>
+              </NFlex>
+            </NImageGroup>
+          </template>
+        </template>
       </NFlex>
       <div class="flex flex-col w-[400px]">
         <div>
@@ -275,27 +308,61 @@ watch(
       <template #trigger>
         <NFloatButton
           :right="isMobile ? 15 : 490" :top="defaultImageHeight / 2" position="fixed"
-          style="--n-box-shadow: 0 0px 1px 0px black;" @click="fetchPrev"
+          style="border:1px solid lightgray; --n-box-shadow: 0 0px 1px 0px black;" @click="fetchPrev"
         >
           <NIcon>
-            <ArrowUpCircleOutline />
+            <ArrowUp style="color:gray" />
           </NIcon>
         </NFloatButton>
       </template>
-      上一张
+      上一个绘图记录
     </NTooltip>
     <NTooltip trigger="hover" placement="left">
       <template #trigger>
         <NFloatButton
           :right="isMobile ? 15 : 490" :top="defaultImageHeight / 2 + 50" position="fixed"
-          style="--n-box-shadow: 0 0px 1px 0px black;" @click="fetchNext"
+          style="border:1px solid lightgray; --n-box-shadow: 0 0px 1px 0px black;" @click="fetchNext"
         >
           <NIcon>
-            <ArrowDownCircleOutline />
+            <ArrowDown style="color:gray" />
           </NIcon>
         </NFloatButton>
       </template>
-      下一张
+      下一个绘图记录
     </NTooltip>
   </div>
 </template>
+
+<style scoped>
+.custom-dots {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  bottom: 5px;
+  left: 20px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.custom-dots li {
+  display: inline-block;
+  width: 12px;
+  height: 8px;
+  margin: 0 3px;
+  border-width: 1px;
+  border-radius: 4px;
+  border-color: lightgrey;
+  background-color: #fff;
+  transition:
+    width 0.3s,
+    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.custom-dots li.is-active {
+  width: 40px;
+  border-color: lightgrey;
+  background: #fff;
+}
+</style>

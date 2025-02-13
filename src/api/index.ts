@@ -319,10 +319,10 @@ function fileDel<T = any>(uuid: string) {
   })
 }
 
-function imageGenerate<T = any>(modelName: string, prompt: string, size: string, number: number, quality?: string) {
+function imageGenerate<T = any>(params: ImageGenerationParams) {
   return post<T>({
     url: '/draw/generation',
-    data: { modelName, prompt, size, number, quality },
+    data: params,
   })
 }
 

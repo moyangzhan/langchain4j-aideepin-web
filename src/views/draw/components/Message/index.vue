@@ -28,7 +28,7 @@ interface Props {
   error?: boolean
   loading?: boolean
   type: string // text,text-image,image
-
+  imageUrls?: string[]
   aiModelPlatform?: string // openai,dashscope,qianfan,ollama
 }
 
@@ -178,12 +178,12 @@ function openDetail(uuid: string) {
             </NSpin>
           </template>
           <template v-else>
-            <template v-if="!draw.imageUrls || draw.imageUrls.length === 0">
+            <template v-if="!imageUrls || imageUrls.length === 0">
               <NEmpty description="找不到图片" />
             </template>
-            <template v-if="draw.imageUrls && draw.imageUrls.length > 0">
+            <template v-if="imageUrls && imageUrls.length > 0">
               <NSpace>
-                <template v-for="imageUrl in draw.imageUrls" :key="imageUrl">
+                <template v-for="imageUrl in imageUrls" :key="imageUrl">
                   <NImage
                     v-if="imageUrl" width="100"
                     :src="`${imageUrl}?token=${token}`" :fallback-src="NoPic"

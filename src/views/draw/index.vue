@@ -5,6 +5,7 @@ import DisplayStyleInChat from './components/DisplayStyleInChat.vue'
 import DisplayStyleInGallery from './components/DisplayStyleInGallery.vue'
 import Dalle2Editor from './components/dalle2/Dalle2Editor.vue'
 import Dalle3Editor from './components/dalle3/Dalle3Editor.vue'
+import Wanx from './components/wanx/index.vue'
 import Header from './components/Header.vue'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAppStore, useAuthStore, useDrawStore } from '@/store'
@@ -38,7 +39,7 @@ async function loadNextPage(callback: Function) {
     const { data } = await api.fetchDraws<Chat.DrawListResp>(nextPageMaxImageId.value, 20)
     if (data.draws.length > 0) {
       nextPageMaxImageId.value = data.minId
-      drawStore.unshiftImages(data.draws)
+      drawStore.unshiftDraws(data.draws)
     } else {
       loadedAll.value = true
       ms.warning('没有更多了', {
@@ -124,6 +125,7 @@ onActivated(async () => {
       <div class="w-full max-w-screen-xl m-auto">
         <Dalle2Editor v-show="appStore.selectedImageModel.modelName === 'dall-e-2'" @submitted="submitted" />
         <Dalle3Editor v-show="appStore.selectedImageModel.modelName === 'dall-e-3'" @submitted="submitted" />
+        <Wanx v-show="appStore.selectedImageModel.modelName.indexOf('wanx') > -1" @submitted="submitted" />
       </div>
     </footer>
   </div>

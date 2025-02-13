@@ -8,6 +8,11 @@ export const useAppStore = defineStore('app-store', {
   state: (): AppState => getLocalSetting(),
 
   getters: {
+    imageModelByPrefix(state: AppState) {
+      return (prefix: string) => {
+        return state.imageModels.find(item => item.modelName.indexOf(prefix) === 0)
+      }
+    },
   },
 
   actions: {
@@ -78,8 +83,9 @@ export const useAppStore = defineStore('app-store', {
     setImageModels(imageModels: AiModelInfo[]) {
       imageModels.forEach((item) => {
         item.disabled = !item.enable
-        item.label = item.modelName
-        item.key = item.modelName
+        item.label = item.modelTitle || item.modelName
+        item.key = item.modelId
+        item.value = item.modelId
       })
       this.imageModels = imageModels
       if (this.selectedImageModel.modelId === 'default') {

@@ -117,16 +117,24 @@ defineExpose({ gotoBottom })
             />
             <Message
               v-if="draw.interactingMethod === 2" :draw="draw"
-              :image-urls="[`/api${draw.originalImageUrl}`, `/api${draw.maskImageUrl}`]" :inversion="true"
-              type="text-image" @delete="handleDelDraw(draw)" @set-public="handleSetPublic" @open-detail="openDraw(draw)"
+              :image-urls="[draw.originalImageUrl, draw.maskImageUrl]" :inversion="true"
+              type="text-image" @delete="handleDelDraw(draw)" @set-public="handleSetPublic"
+              @open-detail="openDraw(draw)"
             />
             <Message
-              v-if="draw.interactingMethod === 3" :draw="draw"
-              :image-urls="[`/api${draw.originalImageUrl}`]" :inversion="true" type="image"
-              @delete="handleDelDraw(draw)" @set-public="handleSetPublic" @open-detail="openDraw(draw)"
+              v-if="draw.interactingMethod === 3" :draw="draw" :image-urls="[draw.originalImageUrl]"
+              :inversion="true" type="image" @delete="handleDelDraw(draw)" @set-public="handleSetPublic"
+              @open-detail="openDraw(draw)"
             />
             <Message
-              :draw="draw" :loading="draw.uuid === drawStore.loadingUuid" :inversion="false" type="image"
+              v-if="draw.interactingMethod === 4" :draw="draw"
+              :image-urls="[draw.dynamicParams.base_image_url, draw.dynamicParams.ref_image_url]" :inversion="true"
+              type="text-image" @delete="handleDelDraw(draw)" @set-public="handleSetPublic"
+              @open-detail="openDraw(draw)"
+            />
+            <Message
+              :draw="draw" :loading="draw.uuid === drawStore.loadingUuid" :image-urls="draw.imageUrls"
+              :inversion="false" type="image"
               @del-one-image="(fileUrl: string) => handleDelOneImage(draw.uuid, fileUrl)"
               @open-detail="openDraw(draw)"
             />

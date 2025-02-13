@@ -24,7 +24,7 @@ function commonSettingChange(imageSize: string, imageNumber: number) {
 async function handleSubmit(prompt: string) {
   console.log(`GenerateImage submit:${prompt}`)
   try {
-    const resp = await api.imageGenerate<CreateImageResult>('dall-e-2', prompt, selectedImageSize.value, generateImageNumber.value)
+    const resp = await api.imageGenerate<CreateImageResult>({ interactingMethod: 1, modelName: 'dall-e-2', prompt, size: selectedImageSize.value, number: generateImageNumber.value })
     const uuid = resp.data.uuid
     drawStore.setLoadingUuid(uuid)
 

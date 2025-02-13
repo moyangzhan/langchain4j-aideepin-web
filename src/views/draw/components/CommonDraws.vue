@@ -87,7 +87,7 @@ defineExpose({ gotoTop, gotoBottom })
             </template>
             <template v-else>
               <template v-if="draw.uuid !== drawStore.loadingUuid && draw.processStatus === 2">
-                <NEmpty :description="`异常：${draw.processStatusRemark}`" />
+                <NEmpty description="绘图失败" />
               </template>
               <template
                 v-else-if="draw.uuid !== drawStore.loadingUuid && (!draw.imageUrls || draw.imageUrls.length === 0)"
