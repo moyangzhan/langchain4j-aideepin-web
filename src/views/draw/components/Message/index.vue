@@ -29,7 +29,6 @@ interface Props {
   loading?: boolean
   type: string // text,text-image,image
   imageUrls?: string[]
-  aiModelPlatform?: string // openai,dashscope,qianfan,ollama
 }
 
 interface Emit {
@@ -138,7 +137,7 @@ function openDetail(uuid: string) {
       class="flex items-center justify-center flex-shrink-0 h-8 overflow-hidden rounded-full basis-8"
       :class="[inversion ? 'ml-2' : 'mr-2']"
     >
-      <AvatarComponent :name="inversion ? 'user' : aiModelPlatform" />
+      <AvatarComponent :name="inversion ? 'user' : draw.aiModelPlatform" />
     </div>
     <div class="overflow-hidden text-sm " :class="[inversion ? 'items-end' : 'items-start']">
       <p class="text-xs text-[#b4bbc4]" :class="[inversion ? 'text-right' : 'text-left']">

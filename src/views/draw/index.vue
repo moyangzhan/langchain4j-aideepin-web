@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { computed, onActivated, ref, watch } from 'vue'
+import { computed, nextTick, onActivated, ref, watch } from 'vue'
 import { useLoadingBar, useMessage } from 'naive-ui'
 import DisplayStyleInChat from './components/DisplayStyleInChat.vue'
 import DisplayStyleInGallery from './components/DisplayStyleInGallery.vue'
@@ -79,8 +79,10 @@ const footerClass = computed(() => {
 })
 
 function submitted() {
-  chatStyleViewRef.value.gotoBottom()
-  galleryStyleViewRef.value.gotoTop()
+  nextTick(() => {
+    chatStyleViewRef.value.gotoBottom()
+    galleryStyleViewRef.value.gotoTop()
+  })
 }
 
 function onDisplayStyleChange(value: string) {
@@ -93,7 +95,6 @@ watch(
     if (authStore.token) {
       console.log('draw first load', authStore.token)
       handleLoadMoreDraws(() => {
-        console.log('draw loaded first page')
         chatStyleViewRef.value.gotoBottom()
         galleryStyleViewRef.value.gotoTop()
       })

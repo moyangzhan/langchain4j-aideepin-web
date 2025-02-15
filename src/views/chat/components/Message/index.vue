@@ -33,7 +33,7 @@ interface Props {
   loading?: boolean
   type: string // text,text-image,image
 
-  aiModelPlatform?: string // openai,dashscope,qianfan,ollama
+  aiModelPlatform?: string // openai,dashscope,qianfan,ollama,deepseek
 }
 
 interface Emit {

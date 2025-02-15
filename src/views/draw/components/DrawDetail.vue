@@ -213,34 +213,12 @@ watch(
             <NImageGroup>
               <NFlex justify="center">
                 <NCarousel dot-placement="bottom" :style="`height:${defaultImageHeight}px;max-width:1000px;`">
-                  <!-- Background generation -->
-                  <template v-if="currentDraw.interactingMethod === 4 && currentDraw.uuid !== drawStore.loadingUuid">
-                    <template v-for="imageUrl in currentDraw.imageUrls" :key="imageUrl">
-                      <NImage
-                        v-if="imageUrl && currentDraw.uuid !== drawStore.loadingUuid"
-                        :style="`height:${defaultImageHeight}px`" :src="`${imageUrl}?token=${authStore.token}`"
-                        :fallback-src="NoPic" object-fit="cover" title="AI生成的图片"
-                      />
-                    </template>
+                  <template v-for="imageUrl in currentDraw.imageUrls" :key="imageUrl">
                     <NImage
-                      :src="`${currentDraw.dynamicParams.base_image_url}?token=${authStore.token}`"
-                      :fallback-src="NoPic" object-fit="cover" title="原图"
+                      v-if="imageUrl && currentDraw.uuid !== drawStore.loadingUuid"
+                      :style="`height:${defaultImageHeight}px`" :src="`${imageUrl}?token=${authStore.token}`"
+                      :fallback-src="NoPic" object-fit="cover"
                     />
-                    <NImage
-                      v-if="currentDraw.dynamicParams.ref_image_url"
-                      :src="`${currentDraw.dynamicParams.ref_image_url}?token=${authStore.token}`" :fallback-src="NoPic"
-                      object-fit="cover" title="引导图"
-                    />
-                  </template>
-                  <!-- Text to image -->
-                  <template v-else>
-                    <template v-for="imageUrl in currentDraw.imageUrls" :key="imageUrl">
-                      <NImage
-                        v-if="imageUrl && currentDraw.uuid !== drawStore.loadingUuid"
-                        :style="`height:${defaultImageHeight}px`" :src="`${imageUrl}?token=${authStore.token}`"
-                        :fallback-src="NoPic" object-fit="cover"
-                      />
-                    </template>
                   </template>
                   <template #dots="{ total, currentIndex, to }">
                     <ul class="custom-dots">

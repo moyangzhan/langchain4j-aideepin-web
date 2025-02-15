@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { NAvatar, NButton, NFlex, NIcon, NTag, useMessage } from 'naive-ui'
+import { NAvatar, NButton, NFlex, NIcon, NImage, NImageGroup, NTag, useMessage } from 'naive-ui'
 import { LockClosed24Regular, LockOpen24Regular, Star24Filled, Star24Regular } from '@vicons/fluent'
 import { ModelAlt } from '@vicons/carbon'
 import { useAuthStore, useDrawStore, useGalleryStore, useUserStore } from '@/store'
 import defaultAvatar from '@/assets/avatar.jpg'
+import NoPic from '@/assets/no_pic.png'
 import api from '@/api'
 import { emptyDraw } from '@/utils/functions'
 
@@ -94,6 +95,22 @@ async function handleStar(uuid: string) {
       </NFlex>
     </NFlex>
     <NFlex>提示词：{{ draw.prompt }}</NFlex>
+    <template v-if="draw.interactingMethod === 4">
+      <NFlex>引用图片:</NFlex>
+      <NFlex>
+        <NImageGroup>
+          <NImage
+            :src="`${draw.dynamicParams.base_image_url}?token=${authStore.token}`" :fallback-src="NoPic"
+            object-fit="cover" title="原图" width="100"
+          />
+          <NImage
+            v-if="draw.dynamicParams.ref_image_url"
+            :src="`${draw.dynamicParams.ref_image_url}?token=${authStore.token}`" :fallback-src="NoPic"
+            object-fit="cover" title="引导图" width="100"
+          />
+        </NImageGroup>
+      </NFlex>
+    </template>
     <NFlex justify="end">
       <NButton
         v-show="userStore.userInfo.uuid === draw.userUuid" quaternary type="error"

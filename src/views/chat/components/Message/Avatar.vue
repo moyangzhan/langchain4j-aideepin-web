@@ -5,6 +5,7 @@ import { useUserStore } from '@/store'
 import { isString } from '@/utils/is'
 import defaultAvatar from '@/assets/avatar.jpg'
 import ollamaAvatar from '@/assets/ollama.png'
+import deepseekAvatar from '@/assets/deepseek.svg'
 
 interface Props {
   name?: string
@@ -23,6 +24,7 @@ const avatar = computed(() => userStore.userInfo.avatar)
     <NAvatar v-else round :src="defaultAvatar" />
   </template>
   <!-- Model platform's avatar -->
+  <NAvatar v-else-if="name === 'deepseek'" object-fit="contain" round :src="deepseekAvatar" color="#fff" />
   <span v-else-if="name === 'dashscope'">
     <svg t="1714878417759" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="11596" width="32" height="32"><path d="M512 0a512 512 0 1 0 512 512A512 512 0 0 0 512 0zM272.896 688.128a102.4 102.4 0 0 1-112.64-88.576V424.96a102.4 102.4 0 0 1 112.64-89.088H430.08l-31.232 40.448-112.64 27.648c-17.92 4.096-34.304 12.288-34.304 27.648v159.232c0 14.848 15.872 23.552 34.304 27.648l107.52 22.016 36.864 47.616z m107.52-132.096V467.968h263.168v88.064z m483.84 43.52a102.4 102.4 0 0 1-113.152 88.576h-158.72l36.864-47.616 107.52-22.016c18.432-4.096 34.304-12.8 34.304-27.648V431.616c0-15.36-16.384-23.552-34.304-27.648l-112.64-27.648-31.232-40.448h157.184a102.4 102.4 0 0 1 114.176 89.088z" fill="#4D4D4D" p-id="11597" /></svg>
   </span>

@@ -116,7 +116,7 @@ watch(() => innerShow.value, (val) => {
         <NTooltip trigger="hover">
           <template #trigger>
             <NTag size="small" :bordered="false">
-              {{ `最大招回数量：${knowledgeBase.retrieveMaxResults}` }}
+              {{ `最大招回数量：${knowledgeBase.retrieveMaxResults === 0 ? '-' : knowledgeBase.retrieveMaxResults}` }}
             </NTag>
           </template>
           向量搜索时，召回的文档数量不能超过该值<br>
@@ -124,7 +124,7 @@ watch(() => innerShow.value, (val) => {
         <NTooltip trigger="hover">
           <template #trigger>
             <NTag size="small" :bordered="false">
-              {{ `最小招回分数：${knowledgeBase.retrieveMinScore}` }}
+              {{ `最小招回分数：${knowledgeBase.retrieveMinScore === 0 ? '-' : knowledgeBase.retrieveMinScore}` }}
             </NTag>
           </template>
           向量搜索时，召回的向量分数需大于该值

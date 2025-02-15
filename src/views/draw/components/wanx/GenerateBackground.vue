@@ -32,11 +32,17 @@ interface UploadResult {
 
 async function beforeUpload(data: { file: UploadFileInfo; fileList: UploadFileInfo[] }) {
   if (!authStore.checkLoginOrShow())
-    return
+    return false
   if (data.file.file?.type !== 'image/png') {
     ms.error('只能上传png格式的图片文件，请重新上传')
     return false
   }
+  return true
+}
+
+async function beforeUpload2(data: { file: UploadFileInfo; fileList: UploadFileInfo[] }) {
+  if (!authStore.checkLoginOrShow())
+    return false
   return true
 }
 
@@ -73,14 +79,14 @@ function handleRefImageFinish({ file, event }: { file: UploadFileInfo; event?: P
 
 // Delete original image
 function removeBaseImage({ file }: { file: UploadFileInfo }) {
-  if (baseImage.value)
+  if (baseImage.value.uuid)
     api.fileDel(baseImage.value.uuid)
   baseImage.value.url = ''
   baseImage.value.uuid = ''
 }
 
 function removeRefImage({ file }: { file: UploadFileInfo }) {
-  if (refImage.value)
+  if (refImage.value.uuid)
     api.fileDel(refImage.value.uuid)
   refImage.value.uuid = ''
   refImage.value.url = ''
@@ -189,8 +195,8 @@ async function handleSubmit(prompt: string) {
       <NCol :span="12">
         <NUpload
           :action="`/api/image/upload?token=${authStore.token}`" :max="1" response-type="text"
-          list-type="image-card" :default-file-list="refImageList" @finish="handleRefImageFinish"
-          @remove="removeRefImage"
+          list-type="image-card" :default-file-list="refImageList" @before-upload="beforeUpload2"
+          @finish="handleRefImageFinish" @remove="removeRefImage"
         >
           jpg、png、webp等常见格式
         </NUpload>

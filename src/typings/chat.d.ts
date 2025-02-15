@@ -113,6 +113,8 @@ declare namespace Chat {
 		interactingMethod: number
 		processStatus: number   //1:processing,2:fail,3:success
 		processStatusRemark: string
+
+		aiModelPlatform: string
 		//绘图成功后生成的图片
 		imageUuids: string[]
 		imageUrls: string[]

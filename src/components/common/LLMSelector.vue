@@ -7,7 +7,7 @@ import { useAppStore } from '@/store'
 const appStore = useAppStore()
 function renderOption({ node, option }: { node: VNode; option: DropdownOption | DropdownGroupOption }) {
   if (option.enable && option.isFree) {
-    return h(NTooltip, null, {
+    return h(NTooltip, { placement: 'left' }, {
       trigger: () => node,
       default: () => 'Token额度无限',
     })
@@ -40,7 +40,7 @@ function handleSelect(key: string | number) {
     :render-option="renderOption" :options="appStore.llms" @select="handleSelect"
   >
     <NButton icon-placement="right">
-      {{ appStore.selectedLLM.modelName }}
+      {{ appStore.selectedLLM.modelTitle || appStore.selectedLLM.modelName }}
     </NButton>
   </NDropdown>
 </template>
