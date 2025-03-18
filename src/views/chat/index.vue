@@ -57,7 +57,7 @@ let prevScrollTop: number
 useCopyCode()
 
 // 未知原因刷新页面，loading 状态不会重置，手动重置
-messages.value.forEach((item) => {
+messages.value.forEach((item: { loading?: boolean; uuid: string }) => {
   if (item.loading)
     updateMessageSomeFields(curConvUuid, item.uuid, { loading: false })
 })
@@ -68,7 +68,7 @@ function handleSubmit() {
 
 const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string) => {
   console.log('begin sseProcess')
-  await api.sseProcess({
+  api.sseProcess({
     options: {
       prompt: message,
       conversationUuid: curConvUuid,
@@ -78,15 +78,11 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
     },
     signal: controller.signal,
     startCallback(chunk) {
-
     },
     messageRecived: (chunk) => {
-      if (chunk)
-        chunk = chunk.replace('-_-_wrap_-_-', '\r\n')
-
       let question = null
       if (regenerateQuestionUuid) {
-        question = messages.value.find(q => q.uuid === regenerateQuestionUuid)
+        question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
         if (!question) {
           ms.error('找不到提问')
           return
@@ -113,7 +109,7 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
         const metaData: Chat.MetaData = JSON.parse(meta)
         let question = null
         if (regenerateQuestionUuid) {
-          question = messages.value.find(q => q.uuid === regenerateQuestionUuid)
+          question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
           if (!question) {
             ms.error('找不到提问')
             return
@@ -132,7 +128,7 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
       loading.value = false
       let question = null
       if (regenerateQuestionUuid) {
-        question = messages.value.find(q => q.uuid === regenerateQuestionUuid)
+        question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
         if (!question) {
           ms.error('找不到提问')
           return
@@ -247,7 +243,7 @@ async function onRegenerate(questionUuid: string) {
 function selectedLatestAnswer(questionUuid: string) {
   nextTick(() => {
     console.log('fetchChatAPIOnce nextTick')
-    const index = messages.value.findIndex(msg => msg.uuid === questionUuid)
+    const index = messages.value.findIndex((msg: { uuid: string }) => msg.uuid === questionUuid)
     if (index !== -1 && messages.value[index].children[0])
       tabsActiveTab.value[index] = `tab_${messages.value[index].children[0].uuid}`
   })
@@ -488,7 +484,7 @@ onDeactivated(() => {
     />
     <PcHeader v-if="!isMobile" :conversation="currConv" />
     <main class="flex-1 overflow-hidden">
-      <div id="scrollRef" ref="scrollRef" class="h-full overflow-hidden overflow-y-auto" @scroll="handleScroll">
+      <div ref="scrollRef" class="h-full overflow-hidden overflow-y-auto" @scroll="handleScroll">
         <div
           id="image-wrapper" class="w-full max-w-screen-xl m-auto dark:bg-[#101014]"
           :class="[isMobile ? 'p-2' : 'p-4']"
@@ -562,7 +558,7 @@ onDeactivated(() => {
           <template #icon>
             <SvgIcon icon="ri:stop-circle-line" />
           </template>
-          Stop Responding
+          停止请求
         </NButton>
       </div>
     </main>

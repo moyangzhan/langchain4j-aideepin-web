@@ -1,12 +1,13 @@
 <script setup lang='ts'>
 import { nextTick, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { NTabPane, NTabs } from 'naive-ui'
 import SubList from './SubList.vue'
 import { useAuthStore, useKbStore } from '@/store'
 import api from '@/api'
 
+const route = useRoute()
 const router = useRouter()
 const currentPage = ref<number>(1)
 const pageSize = 20
@@ -14,6 +15,11 @@ const kbStore = useKbStore()
 const { activeKbUuid, myKbInfos, publicKbInfos, selectedKbType } = storeToRefs<any>(kbStore)
 const authStore = useAuthStore()
 const authStoreRef = ref<AuthState>(authStore)
+const { kbUuid: currKbUuid } = route.params as { kbUuid: string }
+
+// F5 reload
+if (currKbUuid !== 'default' && kbStore.activeKbUuid === 'default')
+  kbStore.setActive(currKbUuid)
 
 async function initList() {
   if (kbStore.loaddingKbList || kbStore.myKbInfos.length > 0)
@@ -25,7 +31,7 @@ async function initList() {
     if (data.records) {
       kbStore.setMyKbInfos(data.records)
       nextTick(() => {
-        if (!activeKbUuid.value) {
+        if (activeKbUuid.value === 'default') {
           kbStore.setActive(myKbInfos.value[0].uuid)
           router.replace({ name: 'QADetail', params: { kbUuid: activeKbUuid.value } })
         }

@@ -4,6 +4,7 @@ import { useAppStore } from '@/store'
 const appStore = useAppStore()
 
 function handleSelect(key: string | number) {
+  console.log('image model selected', key)
   appStore.setSelectedImageModel(`${key}`)
 }
 </script>

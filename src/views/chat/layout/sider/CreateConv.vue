@@ -59,9 +59,8 @@ async function handleSave(event?: KeyboardEvent) {
   const params = { title: tmpTitle.value, remark: tmpRemark.value, aiSystemMessage: tmpAiSystemMessage.value }
   try {
     const { data: newConv } = await api.convAdd<Chat.Conversation>(params)
-    chatStore.addConv(newConv)
+    chatStore.addConvAndActive(newConv)
 
-    showModal.value = false
     tmpTitle.value = ''
     tmpAiSystemMessage.value = ''
   } catch (error: any) {
@@ -73,6 +72,7 @@ async function handleSave(event?: KeyboardEvent) {
     }
   } finally {
     convSaving.value = false
+    showModal.value = false
   }
 }
 
@@ -83,7 +83,7 @@ async function handleUsePresetConv(presetConvUuid: string) {
   convSaving.value = true
   try {
     const { data: newConv } = await api.convAddByPreset<Chat.Conversation>({ presetConvUuid })
-    chatStore.addConv(newConv)
+    chatStore.addConvAndActive(newConv)
 
     showModal.value = false
   } catch (error: any) {

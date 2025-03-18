@@ -13,6 +13,26 @@ export const useAppStore = defineStore('app-store', {
         return state.imageModels.find(item => item.modelName.indexOf(prefix) === 0)
       }
     },
+    getLLM(state: AppState) {
+      return (modelId: string) => {
+        return state.llms.find(item => item.modelId === modelId)
+      }
+    },
+    getLLMByName(state: AppState) {
+      return (name: string) => {
+        return state.llms.find(item => item.modelName === name)
+      }
+    },
+    getFirstLLM(state: AppState) {
+      return () => {
+        const enableList = state.llms.filter(item => item.enable)
+        const freeLLM = enableList.find(item => item.isFree)
+        if (freeLLM)
+          return freeLLM
+        else
+          return enableList[0]
+      }
+    },
   },
 
   actions: {
@@ -39,14 +59,14 @@ export const useAppStore = defineStore('app-store', {
       this.selectedSearchEngine = selected
     },
     setSelectedLLM(selected: string) {
-      const selectedModel = this.llms.find(item => item.modelId === selected)
+      const selectedModel = this.llms.find(item => item.modelName === selected)
       if (selectedModel)
         this.selectedLLM = selectedModel
 
       this.recordState()
     },
     setSelectedImageModel(selected: string) {
-      const selectedModel = this.imageModels.find(item => item.modelId === selected)
+      const selectedModel = this.imageModels.find(item => item.modelName === selected)
       if (selectedModel)
         this.selectedImageModel = selectedModel
       this.recordState()
@@ -69,8 +89,8 @@ export const useAppStore = defineStore('app-store', {
       llms.forEach((item) => {
         item.disabled = !item.enable
         item.label = item.modelTitle || item.modelName
-        item.key = item.modelId
-        item.value = item.modelId
+        item.key = item.modelName
+        item.value = item.modelName
       })
       this.llms = llms
       if (this.selectedLLM.modelId === 'default') {
@@ -84,8 +104,8 @@ export const useAppStore = defineStore('app-store', {
       imageModels.forEach((item) => {
         item.disabled = !item.enable
         item.label = item.modelTitle || item.modelName
-        item.key = item.modelId
-        item.value = item.modelId
+        item.key = item.modelName
+        item.value = item.modelName
       })
       this.imageModels = imageModels
       if (this.selectedImageModel.modelId === 'default') {

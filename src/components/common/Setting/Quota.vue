@@ -36,7 +36,7 @@ const props = defineProps<Props>()
             <NRow>
               <NCol :span="8">
                 <NStatistic
-                  label="当月请求数"
+                  label="本月请求数"
                   :value="props.userConfig?.quotaCost.paidRequestTimes.monthRequestTimes ?? '-'"
                 >
                   <template #suffix>
@@ -45,7 +45,7 @@ const props = defineProps<Props>()
                 </NStatistic>
               </NCol>
               <NCol :span="12">
-                <NStatistic label="当月消耗token数" :value="props.userConfig?.quotaCost.paidTokenCost.monthTokenCost ?? '-'">
+                <NStatistic label="本月消耗token数" :value="props.userConfig?.quotaCost.paidTokenCost.monthTokenCost ?? '-'">
                   <template #suffix>
                     / {{ props.userConfig?.userQuota.tokenByMonth ?? "-" }}
                   </template>
@@ -66,7 +66,7 @@ const props = defineProps<Props>()
             </NRow>
             <NRow>
               <NCol :span="8">
-                <NStatistic label="当月绘图数量" :value="props.userConfig?.quotaCost.paidDrawTimes.monthDrawTimes ?? '-'">
+                <NStatistic label="本月绘图数量" :value="props.userConfig?.quotaCost.paidDrawTimes.monthDrawTimes ?? '-'">
                   <template #suffix>
                     / {{ props.userConfig?.userQuota.drawByMonth ?? "-" }}
                   </template>
@@ -93,12 +93,12 @@ const props = defineProps<Props>()
             <NRow>
               <NCol :span="8">
                 <NStatistic
-                  label="当月请求数"
+                  label="本月请求数"
                   :value="props.userConfig?.quotaCost.freeRequestTimes.monthRequestTimes ?? '-'"
                 />
               </NCol>
               <NCol :span="12">
-                <NStatistic label="当月消耗token数" :value="props.userConfig?.quotaCost.freeTokenCost.monthTokenCost ?? '-'" />
+                <NStatistic label="本月消耗token数" :value="props.userConfig?.quotaCost.freeTokenCost.monthTokenCost ?? '-'" />
               </NCol>
             </NRow>
           </NCard>
@@ -110,7 +110,7 @@ const props = defineProps<Props>()
             </NRow>
             <NRow>
               <NCol :span="8">
-                <NStatistic label="当月绘图数量" :value="props.userConfig?.quotaCost.freeDrawTimes.monthDrawTimes ?? '-'" />
+                <NStatistic label="本月绘图数量" :value="props.userConfig?.quotaCost.freeDrawTimes.monthDrawTimes ?? '-'" />
               </NCol>
             </NRow>
           </NCard>

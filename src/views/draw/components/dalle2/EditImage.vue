@@ -195,7 +195,7 @@ async function handleSubmit(prompt: string) {
         </NCard>
       </NCollapseTransition>
     </NSpace>
-    <CommonProperty @valChange="commonSettingChange" />
+    <CommonProperty @val-change="commonSettingChange" />
     <NRow>
       <NCol :span="2" class="min-w-fit">
         原&nbsp;&nbsp;&nbsp;&nbsp;图

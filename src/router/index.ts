@@ -4,20 +4,13 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import { setupPageGuard } from './permission'
 import { ChatLayout } from '@/views/chat/layout'
 import { KnowledgeBaseLayout } from '@/views/knowledge-base/layout'
+import { WorkflowBaseLayout } from '@/views/workflow/layout'
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Root',
-    component: ChatLayout,
     redirect: '/chat/default',
-    children: [
-      {
-        path: '/chat/:uuid',
-        name: 'ChatDetail',
-        component: () => import('@/views/chat/index.vue'),
-      },
-    ],
   },
   {
     path: '/chat',
@@ -72,6 +65,18 @@ const routes: RouteRecordRaw[] = [
     path: '/kb-manage/:kbUuid',
     name: 'KnowledgeBaseManageDetail',
     component: () => import('@/views/knowledge-base-manage/KnowledgeBaseDetail.vue'),
+  },
+  {
+    path: '/workflow',
+    component: WorkflowBaseLayout,
+    name: 'WfIndex',
+    children: [
+      {
+        path: ':uuid',
+        name: 'WfDetail',
+        component: () => import('@/views/workflow/index.vue'),
+      },
+    ],
   },
   {
     path: '/404',

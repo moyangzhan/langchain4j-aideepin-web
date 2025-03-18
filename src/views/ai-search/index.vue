@@ -8,7 +8,6 @@ import { Cat } from '@vicons/fa'
 import { v4 as uuidv4 } from 'uuid'
 import { Message } from '../chat/components'
 import { useScroll } from '../chat/hooks/useScroll'
-import { useCopyCode } from '../chat/hooks/useCopyCode'
 import HeaderComponent from '../chat/components/Header/index.vue'
 import LoginTip from '@/views/user/LoginTip.vue'
 import { HoverButton, LLMSelector, SvgIcon } from '@/components/common'
@@ -35,8 +34,6 @@ const isBrief = ref<boolean>(false)
 const inputRef = ref<Ref | null>(null)
 
 let prevScrollTop: number
-
-useCopyCode()
 
 function handleChangeEngine(value: string) {
   appStore.setSelectedSearchEngine(value)
@@ -82,8 +79,6 @@ async function handleSubmit() {
       },
       messageRecived: (chunk, eventName) => {
         console.log(chunk)
-        if (chunk)
-          chunk = chunk.replace('-_-_wrap_-_-', '\r\n')
 
         if (eventName === '[SOURCE_LINKS]') {
           aiSearchStore.setSourceSites(
@@ -323,7 +318,7 @@ onActivated(async () => {
           <template #icon>
             <SvgIcon icon="ri:stop-circle-line" />
           </template>
-          Stop Responding
+          停止请求
         </NButton>
       </div>
     </main>

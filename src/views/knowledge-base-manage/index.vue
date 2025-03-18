@@ -36,7 +36,7 @@ const changeShowModal = (selected: KnowledgeBase.Info = knowledgeBaseEmptyInfo()
   Object.assign(tmpKb, selected)
   showModal.value = !showModal.value
   if (tmpKb.ingestModelId === '0') {
-    const firstEnableModel = appStore.llms.find(item => item.enable)
+    const firstEnableModel = appStore.llms.find((item: { enable: any }) => item.enable)
     if (firstEnableModel)
       tmpKb.ingestModelId = firstEnableModel.modelId
   }

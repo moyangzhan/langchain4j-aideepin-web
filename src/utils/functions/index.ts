@@ -1,4 +1,5 @@
 import { format } from 'date-fns'
+import type { Edge, Node } from '@vue-flow/core'
 
 export function getCurrentDate() {
   const date = new Date()
@@ -120,6 +121,87 @@ export function emptyDraw() {
     userUuid: '',
     userName: '',
     dynamicParams: {} as any,
+  }
+}
+
+export function emptyWorkflowInfo() {
+  return {
+    id: '',
+    uuid: '',
+    title: '',
+    remark: '',
+    createTime: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+    input: {} as any,
+    output: {} as any,
+    isPublic: false,
+    userUuid: '',
+    userName: '',
+    nodes: [] as Workflow.WorkflowNode[],
+    edges: [] as Workflow.WorkflowEdge[],
+    deleteNodes: [],
+    deleteEdges: [],
+  }
+}
+
+export function emptyUiWorkflow() {
+  return {
+    nodes: [] as Node[],
+    edges: [] as Edge[],
+  }
+}
+
+export function emptyWorkflowNode() {
+  return {
+    id: '',
+    uuid: '',
+    workflowId: '',
+    workflowComponentId: '',
+    title: '',
+    remark: '',
+    inputConfig: { user_inputs: [], ref_inputs: [] } as any,
+    nodeConfig: {} as any,
+    outputConfig: {} as any,
+    positionX: 0,
+    positionY: 0,
+
+    workflowUuid: '',
+    wfComponent: {} as any,
+    sourceHandleIds: [],
+    targetHandleIds: [],
+  }
+}
+
+export function emptyWfRuntime() {
+  return {
+    id: '',
+    uuid: '',
+    workflowId: '',
+    createTime: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+    status: 1,
+    statusRemark: '',
+    input: {} as any,
+    output: {} as any,
+    nodes: [] as Workflow.WfRuntimeNode[],
+
+    workflowUuid: '',
+    error: false,
+    loading: false,
+  }
+}
+
+export function emptyWfNodeRuntime() {
+  return {
+    id: '',
+    uuid: '',
+    workflowRuntimeId: '',
+    input: {},
+    output: {},
+    status: 1,
+    statusRemark: '',
+    createTime: '',
+
+    wfRuntimeUuid: '',
+    error: false,
   }
 }
 

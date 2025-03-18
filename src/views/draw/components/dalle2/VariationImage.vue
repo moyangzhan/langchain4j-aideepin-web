@@ -87,7 +87,7 @@ async function handleSubmit() {
 
 <template>
   <div>
-    <CommonProperty ref="commonSettingRef" @valChange="commonSettingChange" />
+    <CommonProperty ref="commonSettingRef" @val-change="commonSettingChange" />
     <NRow>
       <NCol :span="2">
         原图

@@ -39,7 +39,7 @@ function handleMouseEnter({ uuid }: Chat.Conversation) {
 function handleMouseLeave() {
   mouseEnterKbUuid.value = ''
 }
-function openEditView(item: Chat.Conversation, event?: KeyboardEvent) {
+function openEditView(item: Chat.Conversation) {
   if (!authStore.checkLoginOrShow())
     return
   showEditModal.value = true
@@ -110,7 +110,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <EditConv v-model:showModal="showEditModal" :conversation="editConv" @showModal="(show) => showEditModal = show" />
+  <EditConv v-model:showModal="showEditModal" :conversation="editConv" @show-modal="(show) => showEditModal = show" />
   <NScrollbar class="px-4">
     <div class="flex flex-col gap-2 text-sm">
       <template v-if="!convList.length">
@@ -134,7 +134,7 @@ onMounted(() => {
             </div>
             <div v-if="mouseEnterKbUuid === item.uuid || isMobile" class="absolute z-10 flex visible right-1 pd-2">
               <button class="p-1">
-                <SvgIcon icon="ri:edit-line" @click.stop="openEditView(item)" />
+                <SvgIcon icon="carbon:edit" @click.stop="openEditView(item)" />
               </button>
             </div>
           </a>

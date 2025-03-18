@@ -1,12 +1,11 @@
 <script setup lang='ts'>
 import type { Ref } from 'vue'
 import { computed, nextTick, onActivated, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { NButton, NCollapse, NCollapseItem, NFlex, NIcon, NInput, NModal, useDialog, useLoadingBar, useMessage } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { Message } from '../chat/components'
 import { useScroll } from '../chat/hooks/useScroll'
-import { useCopyCode } from '../chat/hooks/useCopyCode'
 import HeaderComponent from './Header/index.vue'
 import PCHeader from './Header/pc.vue'
 import RefGraph from './RefGraph.vue'
@@ -21,7 +20,6 @@ import { debounce } from '@/utils/functions/debounce'
 let controller = new AbortController()
 
 const route = useRoute()
-const router = useRouter()
 const ms = useMessage()
 const dialog = useDialog()
 const appStore = useAppStore()
@@ -45,15 +43,6 @@ const sseRequesting = ref<boolean>(false)
 const pageSize = 20
 let currentPage = 1
 let prevScrollTop: number
-
-useCopyCode()
-
-if (currKbUuid === 'default' && !!kbStore.activeKbUuid)
-  router.replace({ name: 'QADetail', params: { kbUuid: kbStore.activeKbUuid } })
-
-// F5 reload
-else if (currKbUuid !== 'default' && kbStore.activeKbUuid === 'default')
-  kbStore.setActive(currKbUuid)
 
 async function handleSubmit() {
   if (!authStore.checkLoginOrShow())
@@ -89,15 +78,11 @@ async function handleSubmit() {
         qaRecordUuid: qaRecord.uuid,
       },
       signal: controller.signal,
-      startCallback: (chunk) => {
+      startCallback: () => {
         qaRecord.answer = ''
         kbStore.updateRecord(currKbUuid, qaRecord.uuid, qaRecord)
       },
       messageRecived: (chunk) => {
-        // Always process the final line
-        if (chunk)
-          chunk = chunk.replace('-_-_wrap_-_-', '\r\n')
-
         try {
           kbStore.appendChunk(
             currKbUuid,
@@ -367,7 +352,7 @@ onActivated(async () => {
           <template #icon>
             <SvgIcon icon="ri:stop-circle-line" />
           </template>
-          Stop Responding
+          停止请求
         </NButton>
       </div>
     </main>

@@ -4,14 +4,13 @@ import type { MenuOption } from 'naive-ui'
 import type { Component } from 'vue'
 import { defineAsyncComponent, h, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { ChatboxEllipsesOutline, ColorPaletteOutline, ImagesOutline, LibraryOutline, PersonCircleOutline, SearchOutline, SettingsOutline } from '@vicons/ionicons5'
-
+import { AppsOutline, ChatboxEllipsesOutline, ColorPaletteOutline, ImagesOutline, LibraryOutline, PersonCircleOutline, SearchOutline, SettingsOutline } from '@vicons/ionicons5'
 import { Prompt as PromptIcon } from '@vicons/tabler'
 import { NaiveProvider, PromptStore } from '@/components/common'
 import { useTheme } from '@/hooks/useTheme'
 import { useLanguage } from '@/hooks/useLanguage'
 import { t } from '@/locales'
-import { useAppStore, useAuthStore, useChatStore, useKbStore } from '@/store'
+import { useAppStore, useAuthStore, useChatStore, useKbStore, useWfStore } from '@/store'
 import Login from '@/views/user/Login.vue'
 import api from '@/api'
 
@@ -20,6 +19,7 @@ const Setting = defineAsyncComponent(() => import('@/components/common/Setting/i
 const appStore = useAppStore()
 const chatStore = useChatStore()
 const kbStore = useKbStore()
+const wfStore = useWfStore()
 const authStore = useAuthStore()
 const { theme, themeOverrides } = useTheme()
 const { language } = useLanguage()
@@ -36,6 +36,7 @@ const menuKeyToRouteNames = new Map<string, string[]>(
     ['draw', ['Draw']],
     ['gallery', ['Root', 'Gallery']],
     ['knowledge-base', ['QAIndex', 'QADetail', 'KnowledgeBaseManage', 'KnowledgeBaseManageDetail']],
+    ['workflow', ['WfDetail']],
     ['aisearch', ['AiSearch']],
   ])
 
@@ -105,6 +106,23 @@ const menuOptions: MenuOption[] = [
           },
         },
         { default: () => '知识库' },
+      ),
+  },
+  {
+    key: 'menu-workflow',
+    icon: renderIcon(AppsOutline),
+    label: () =>
+      h(
+        RouterLink,
+        {
+          to: {
+            name: 'WfDetail',
+            params: {
+              uuid: wfStore.activeUuid,
+            },
+          },
+        },
+        { default: () => '应用' },
       ),
   },
   {

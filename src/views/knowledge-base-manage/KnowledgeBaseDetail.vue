@@ -190,8 +190,10 @@ async function indexingCheck() {
   }
 }
 
-function onHandleCheckedRowKeys(rows: string[]) {
-  checkedItemRowKeys.value = rows
+function onHandleCheckedRowKeys(keys: Array<string | number>, rows: object[], meta: { row: object | undefined; action: 'check' | 'uncheck' | 'checkAll' | 'uncheckAll' }) {
+  checkedItemRowKeys.value = keys.map((key) => {
+    return key = `${key}`
+  })
 }
 
 async function onHandlePageChange(currentPage: number) {

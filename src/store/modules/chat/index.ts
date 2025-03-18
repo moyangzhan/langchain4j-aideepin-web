@@ -72,7 +72,7 @@ export const useChatStore = defineStore('chat-store', {
       })
     },
 
-    addConv(newConv: Chat.Conversation, chatData: Chat.ChatMessage[] = []) {
+    addConvAndActive(newConv: Chat.Conversation, chatData: Chat.ChatMessage[] = []) {
       if (this.conversations.findIndex(item => item.uuid === newConv.uuid) !== -1)
         return
 

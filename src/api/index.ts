@@ -83,7 +83,7 @@ function commonSseProcess(
     options: any
     signal?: AbortSignal
     startCallback: (chunk: string) => void
-    messageRecived: (chunk: string, eventName?: string) => void
+    messageRecived: (chunk: string, eventName: string) => void
     doneCallback: (chunk: string) => void
     errorCallback: (error: string) => void
   },
@@ -126,7 +126,7 @@ function commonSseProcess(
         return
       }
       // 会自动处理后端返回内容的首个空格，需在后端的返回内容前多加个空格，相关源码：https://github.com/Azure/fetch-event-source/blob/45ac3cfffd30b05b79fbf95c21e67d4ef59aa56a/src/parse.ts#L129-L133
-      params.messageRecived(eventMessage.data, eventMessage.event)
+      params.messageRecived(eventMessage.data, eventMessage.event ? eventMessage.event : '')
     },
     onerror(error) {
       console.log(`sse error:${error}`)
@@ -569,6 +569,82 @@ function loadFileContent(fileUrl: string) {
   })
 }
 
+function workflowAdd<T = any>(data: { title: string; remark: string }) {
+  return post<T>({
+    url: '/workflow/add',
+    data,
+  })
+}
+
+function workflowUpdate<T = any>(data: Workflow.WorkflowUpdateReq) {
+  return post<T>({
+    url: '/workflow/update',
+    data,
+  })
+}
+
+function workflowBaseInfoUpdate<T = any>(data: { uuid: string; title: string; remark: string }) {
+  return post<T>({
+    url: '/workflow/base-info/update',
+    data,
+  })
+}
+
+function workflowRun(params: {
+  options: { uuid: string; inputs: Workflow.UserInput[] }
+  signal?: AbortSignal
+  startCallback: (chunk: string) => void
+  messageRecived: (chunk: string, eventName: string) => void
+  doneCallback: (chunk: string) => void
+  errorCallback: (error: string) => void
+}) {
+  commonSseProcess(`/api/workflow/run/${params.options.uuid}`, params)
+}
+
+function workflowComponents<T = any>() {
+  return get<T>({
+    url: '/workflow/public/component/list',
+  })
+}
+
+function workflowSearchMine<T = any>(keyword: string, currentPage: number, pageSize: number) {
+  const search = keyword === undefined ? '' : `keyword=${keyword}&`
+  return get<T>({
+    url: `/workflow/mine/search?${search}currentPage=${currentPage}&pageSize=${pageSize}`,
+  })
+}
+
+function workflowSearchPublic<T = any>(keyword: string, currentPage: number, pageSize: number) {
+  const search = keyword === undefined ? '' : `keyword=${keyword}&`
+  return get<T>({
+    url: `/workflow/public/search?${search}currentPage=${currentPage}&pageSize=${pageSize}`,
+  })
+}
+
+function workflowRuntimes<T = any>(wfUuid: string, currentPage: number, pageSize: number) {
+  return get<T>({
+    url: `/workflow/runtime/page?wfUuid=${wfUuid}&currentPage=${currentPage}&pageSize=${pageSize}`,
+  })
+}
+
+function workflowRuntimesClear<T = any>() {
+  return post<T>({
+    url: '/workflow/runtime/clear',
+  })
+}
+
+function workflowOperators<T = any>() {
+  return get<T>({
+    url: '/workflow/public/operators',
+  })
+}
+
+function workflowRuntimeDelete<T = any>(wfRuntimeUuid: string) {
+  return get<T>({
+    url: `/workflow/runtime/del/${wfRuntimeUuid}`,
+  })
+}
+
 export default {
   login,
   register,
@@ -644,4 +720,15 @@ export default {
   aiSearchRecords,
   aiSearchRecordDel,
   loadFileContent,
+  workflowAdd,
+  workflowUpdate,
+  workflowBaseInfoUpdate,
+  workflowRun,
+  workflowComponents,
+  workflowSearchPublic,
+  workflowSearchMine,
+  workflowRuntimes,
+  workflowRuntimesClear,
+  workflowOperators,
+  workflowRuntimeDelete,
 }

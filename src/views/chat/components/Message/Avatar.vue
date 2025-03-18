@@ -5,10 +5,14 @@ import { useUserStore } from '@/store'
 import { isString } from '@/utils/is'
 import defaultAvatar from '@/assets/avatar.jpg'
 import ollamaAvatar from '@/assets/ollama.png'
-import deepseekAvatar from '@/assets/deepseek.svg'
+import baiduchatgpt from '@/assets/baiduchatgpt.png'
+import tongyiqianwen from '@/assets/tongyiqianwen.png'
+import deepseekAvatar from '@/assets/deepseek.png'
+import openai from '@/assets/openai.png'
 
 interface Props {
   name?: string
+  imageSize?: number
 }
 defineProps<Props>()
 
@@ -20,23 +24,17 @@ const avatar = computed(() => userStore.userInfo.avatar)
 <template>
   <!-- User's avatar -->
   <template v-if="name === 'user'">
-    <NAvatar v-if="isString(avatar) && avatar.length > 0" :src="avatar" :fallback-src="defaultAvatar" />
-    <NAvatar v-else round :src="defaultAvatar" />
+    <NAvatar v-if="isString(avatar) && avatar.length > 0" :size="imageSize ? imageSize : 32" :src="avatar" :fallback-src="defaultAvatar" :style="{ backgroundColor: 'transparent' }" />
+    <NAvatar v-else round :size="imageSize ? imageSize : 32" :src="defaultAvatar" style="backgroundColor:transparent" />
   </template>
   <!-- Model platform's avatar -->
-  <NAvatar v-else-if="name === 'deepseek'" object-fit="contain" round :src="deepseekAvatar" color="#fff" />
-  <span v-else-if="name === 'dashscope'">
-    <svg t="1714878417759" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="11596" width="32" height="32"><path d="M512 0a512 512 0 1 0 512 512A512 512 0 0 0 512 0zM272.896 688.128a102.4 102.4 0 0 1-112.64-88.576V424.96a102.4 102.4 0 0 1 112.64-89.088H430.08l-31.232 40.448-112.64 27.648c-17.92 4.096-34.304 12.288-34.304 27.648v159.232c0 14.848 15.872 23.552 34.304 27.648l107.52 22.016 36.864 47.616z m107.52-132.096V467.968h263.168v88.064z m483.84 43.52a102.4 102.4 0 0 1-113.152 88.576h-158.72l36.864-47.616 107.52-22.016c18.432-4.096 34.304-12.8 34.304-27.648V431.616c0-15.36-16.384-23.552-34.304-27.648l-112.64-27.648-31.232-40.448h157.184a102.4 102.4 0 0 1 114.176 89.088z" fill="#4D4D4D" p-id="11597" /></svg>
-  </span>
-  <span v-else-if="name === 'qianfan'">
-    <svg t="1714878323762" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10469" width="32" height="32"><path d="M442.368 525.312V583.68h-47.104s-47.104 4.096-63.488 57.344c-5.12 35.84 5.12 57.344 7.168 61.44 2.048 4.096 16.384 30.72 55.296 37.888h88.064V526.336l-39.936-1.024z m-1.024 179.2h-35.84s-25.6-1.024-32.768-29.696c-3.072-12.288 1.024-26.624 3.072-32.768 2.048-6.144 10.24-19.456 27.648-25.6h37.888v88.064zM604.16 587.776v113.664h-40.96s-14.336-2.048-16.384-13.312v-101.376l-41.984 1.024v112.64s2.048 28.672 41.984 38.912h101.376V587.776H604.16z" fill="#4D4D4D" p-id="10470" /><path d="M512 48.128C258.048 48.128 53.248 253.952 53.248 507.904s204.8 458.752 458.752 458.752 458.752-205.824 458.752-458.752c0-252.928-204.8-459.776-458.752-459.776z m23.552 223.232c4.096-37.888 49.152-95.232 84.992-87.04s67.584 55.296 61.44 96.256c-6.144 40.96-38.912 94.208-89.088 88.064-50.176-6.144-61.44-52.224-57.344-97.28zM430.08 167.936c37.888 0 68.608 44.032 68.608 97.28 0 54.272-30.72 97.28-68.608 97.28-36.864 0-67.584-44.032-68.608-97.28 0-54.272 30.72-97.28 68.608-97.28zM217.088 398.336s8.192-79.872 63.488-84.992c44.032-4.096 76.8 44.032 79.872 71.68 2.048 18.432 11.264 100.352-57.344 114.688-67.584 14.336-93.184-64.512-86.016-101.376z m521.216 345.088c-36.864 88.064-174.08 41.984-174.08 41.984s-50.176-16.384-108.544-3.072c-59.392 13.312-109.568 8.192-109.568 8.192s-68.608 2.048-88.064-84.992c-19.456-87.04 68.608-134.144 74.752-142.336s51.2-38.912 80.896-88.064c29.696-49.152 117.76-88.064 179.2 8.192C638.976 548.864 716.8 609.28 716.8 609.28s59.392 45.056 21.504 134.144z m-12.288-201.728c-74.752 2.048-77.824-50.176-77.824-88.064 0-39.936 8.192-95.232 68.608-95.232s76.8 59.392 76.8 78.848c0 19.456 8.192 103.424-67.584 104.448z" fill="#4D4D4D" p-id="10471" /></svg>
-  </span>
-  <NAvatar v-else-if="name === 'ollama'" object-fit="contain" round :src="ollamaAvatar" />
-  <span v-else class="text-[28px] dark:text-white">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true" width="1em" height="1em">
-      <path
-        d="M29.71,13.09A8.09,8.09,0,0,0,20.34,2.68a8.08,8.08,0,0,0-13.7,2.9A8.08,8.08,0,0,0,2.3,18.9,8,8,0,0,0,3,25.45a8.08,8.08,0,0,0,8.69,3.87,8,8,0,0,0,6,2.68,8.09,8.09,0,0,0,7.7-5.61,8,8,0,0,0,5.33-3.86A8.09,8.09,0,0,0,29.71,13.09Zm-12,16.82a6,6,0,0,1-3.84-1.39l.19-.11,6.37-3.68a1,1,0,0,0,.53-.91v-9l2.69,1.56a.08.08,0,0,1,.05.07v7.44A6,6,0,0,1,17.68,29.91ZM4.8,24.41a6,6,0,0,1-.71-4l.19.11,6.37,3.68a1,1,0,0,0,1,0l7.79-4.49V22.8a.09.09,0,0,1,0,.08L13,26.6A6,6,0,0,1,4.8,24.41ZM3.12,10.53A6,6,0,0,1,6.28,7.9v7.57a1,1,0,0,0,.51.9l7.75,4.47L11.85,22.4a.14.14,0,0,1-.09,0L5.32,18.68a6,6,0,0,1-2.2-8.18Zm22.13,5.14-7.78-4.52L20.16,9.6a.08.08,0,0,1,.09,0l6.44,3.72a6,6,0,0,1-.9,10.81V16.56A1.06,1.06,0,0,0,25.25,15.67Zm2.68-4-.19-.12-6.36-3.7a1,1,0,0,0-1.05,0l-7.78,4.49V9.2a.09.09,0,0,1,0-.09L19,5.4a6,6,0,0,1,8.91,6.21ZM11.08,17.15,8.38,15.6a.14.14,0,0,1-.05-.08V8.1a6,6,0,0,1,9.84-4.61L18,3.6,11.61,7.28a1,1,0,0,0-.53.91ZM12.54,14,16,12l3.47,2v4L16,20l-3.47-2Z"
-      />
-    </svg>
-  </span>
+  <NAvatar v-else-if="name === 'deepseek'" object-fit="contain" round :size="imageSize ? imageSize : 32" :src="deepseekAvatar" :style="{ backgroundColor: 'transparent' }" />
+  <NAvatar v-else-if="name === 'dashscope'" object-fit="contain" round :size="imageSize ? imageSize : 32" :src="tongyiqianwen" :style="{ backgroundColor: 'transparent' }" />
+  <NAvatar v-else-if="name === 'qianfan'" object-fit="contain" round :size="imageSize ? imageSize : 32" :src="baiduchatgpt" :style="{ backgroundColor: 'transparent' }" />
+  <NAvatar v-else-if="name === 'ollama'" object-fit="contain" round :size="imageSize ? imageSize : 32" :src="ollamaAvatar" :style="{ backgroundColor: 'transparent' }" />
+  <NAvatar v-else-if="name === 'openai'" object-fit="contain" round :size="imageSize ? imageSize : 32" :src="openai" :style="{ backgroundColor: 'transparent' }" />
+  <NAvatar v-else-if="name" round bordered :style="{ color: 'gray', border: 'solid 1px gray', backgroundColor: 'transparent' }">
+    {{ name.substring(0, 2) }}
+  </NAvatar>
+  <NAvatar v-else object-fit="contain" round :size="imageSize ? imageSize : 32" :src="openai" :style="{ backgroundColor: 'transparent' }" />
 </template>

@@ -47,7 +47,7 @@ onMounted(() => {
 
 <template>
   <div class="h-full overflow-y-auto">
-    <CommonDraws :draws="draws" :login-btn-enable="true" @clickDraw="openDraw" @loadMore="loadMore" />
+    <CommonDraws :draws="draws" :login-btn-enable="true" @click-draw="openDraw" @load-more="loadMore" />
     <NModal v-model:show="showDetailModal" preset="card" style="width:95%" :bordered="true">
       <DrawDetail :from-page-type="fromPageType" :draw-uuid="selectedDraw.uuid" @draw-deleted="handleDelDraw" />
     </NModal>

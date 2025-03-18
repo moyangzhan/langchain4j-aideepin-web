@@ -49,7 +49,7 @@ async function handleSubmit(prompt: string) {
 
 <template>
   <div>
-    <CommonProperty @valChange="commonSettingChange" />
+    <CommonProperty @val-change="commonSettingChange" />
     <SearchInput @submit="handleSubmit" />
   </div>
 </template>

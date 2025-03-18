@@ -102,7 +102,7 @@ export const useKbStore = defineStore('kb-store', {
       const existRecords = this.kbUuidToQaRecords.get(kbUuid)
       if (!existRecords)
         return
-      const hitRecord = existRecords.find(item => item.uuid === tmpRecordUuid)
+      const hitRecord = existRecords.find((item: { uuid: string }) => item.uuid === tmpRecordUuid)
       if (hitRecord)
         hitRecord.answer = hitRecord.answer + chunk
     },
@@ -110,7 +110,7 @@ export const useKbStore = defineStore('kb-store', {
       const existRecords = this.kbUuidToQaRecords.get(kbUuid)
       if (!existRecords)
         return
-      const hitRecord = existRecords.find(item => item.uuid === tmpRecordUuid)
+      const hitRecord = existRecords.find((item: { uuid: string }) => item.uuid === tmpRecordUuid)
       if (hitRecord)
         Object.assign(hitRecord, source)
     },
@@ -135,7 +135,7 @@ export const useKbStore = defineStore('kb-store', {
       if (!existRecords)
         return
 
-      const index = existRecords.findIndex(item => item.uuid === recordUuid)
+      const index = existRecords.findIndex((item: { uuid: string }) => item.uuid === recordUuid)
       existRecords.splice(index, 1)
     },
 
