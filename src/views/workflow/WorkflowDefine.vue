@@ -210,8 +210,9 @@ async function onSave() {
 
   submitting.value = true
   try {
-    await api.workflowUpdate(props.workflow)
+    const { data: updatedWorkflow } = await api.workflowUpdate(props.workflow)
     ms.success('保存成功')
+    wfStore.updateWorkflow(props.workflow.uuid, updatedWorkflow)
   } catch (e) {
     console.log(e)
   } finally {

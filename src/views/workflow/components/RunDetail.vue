@@ -202,7 +202,8 @@ onUnmounted(() => {
             </div>
             <div
               v-for="node in runtimeNodes" :key="node.uuid"
-              class="flex flex-col space-y-2 border border-gray-200 p-2 m-2 rounded-md" :title="node.nodeTitle" :name="node.uuid"
+              class="flex flex-col space-y-2 border border-gray-200 p-2 m-2 rounded-md" :title="node.nodeTitle"
+              :name="node.uuid"
             >
               <div class="text-lg mb-2">
                 节点：{{ node.nodeTitle }}
@@ -255,7 +256,10 @@ onUnmounted(() => {
         <div class="min-w-24">
           {{ userInput.content.title }}
         </div>
-        <NInput v-if="userInput.content.type === 1" v-model:value="userInput.content.value" @keypress="handleEnter" />
+        <NInput
+          v-if="userInput.content.type === 1" v-model:value="userInput.content.value" type="textarea"
+          :autosize="{ minRows: 1, maxRows: 5 }"
+        />
         <NInputNumber v-if="userInput.content.type === 2" v-model:value="userInput.content.value" />
         <NSwitch v-if="userInput.content.type === 5" v-model:value="userInput.content.value" />
       </div>

@@ -19,12 +19,14 @@ export function createNewNode(
   newWfNode.outputConfig = {}
   newWfNode.positionX = position.x
   newWfNode.positionY = position.y
-  if (component.name.toLowerCase() === 'classifier')
+  if (component.name === 'Classifier')
     createClassifierNode(newWfNode)
-  else if (component.name.toLowerCase() === 'answer')
+  else if (component.name === 'Answer')
     createAnswer(newWfNode)
-  else if (component.name.toLowerCase() === 'switcher')
+  else if (component.name === 'Switcher')
     createSwitcherNode(workflow, newWfNode)
+  else if (component.name === 'KeywordExtractor')
+    createKeywordExtractor(newWfNode)
 
   workflow.nodes.push(newWfNode)
   uiWorkflow.nodes.push(wfNodeToUiNode(newWfNode))
@@ -177,8 +179,9 @@ function createSwitcherNode(workflow: Workflow.WorkflowInfo, node: Workflow.Work
 }
 
 function createClassifierNode(node: Workflow.WorkflowNode) {
+  const appStore = useAppStore()
   node.nodeConfig = {
-    model_name: '',
+    model_name: appStore.getFirstLLM().modelName,
     categories: [
       {
         category_uuid: 'and',
@@ -198,6 +201,14 @@ function createAnswer(node: Workflow.WorkflowNode) {
   const appStore = useAppStore()
   node.nodeConfig = {
     prompt: '',
+    model_name: appStore.getFirstLLM().modelName,
+  }
+}
+
+function createKeywordExtractor(node: Workflow.WorkflowNode) {
+  const appStore = useAppStore()
+  node.nodeConfig = {
+    top_n: 5,
     model_name: appStore.getFirstLLM().modelName,
   }
 }

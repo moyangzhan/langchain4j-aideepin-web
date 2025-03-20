@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { NTag } from 'naive-ui'
+import { computed, h, ref } from 'vue'
+import { NDropdown, NTag, useMessage } from 'naive-ui'
 import { HoverButton, SvgIcon } from '@/components/common'
 import { emptyWorkflowInfo } from '@/utils/functions'
 import { useAuthStore, useUserStore, useWfStore } from '@/store'
+import api from '@/api'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -15,20 +16,75 @@ const props = withDefaults(defineProps<Props>(), {
   workflow: () => emptyWorkflowInfo(),
 })
 const emit = defineEmits<Emit>()
+const ms = useMessage()
 const wfStore = useWfStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const showViewType = ref<string>('instanceList')
+const submitting = ref<boolean>(false)
+const options = computed(() => {
+  const mine = props.workflow.userUuid === userStore.userInfo.uuid
+  const common = [
+    {
+      label: mine ? '编辑' : '查看',
+      key: 'edit',
+      icon: renderIcon(mine ? 'carbon:edit' : 'carbon:information'),
+    },
+  ]
+  if (authStore.token) {
+    common.push({
+      label: '复制',
+      key: 'copy',
+      icon: renderIcon('ri:file-copy-2-line'),
+    })
+  }
+  return common
+})
+
+function renderIcon(icon: string) {
+  return () => {
+    return h(
+      SvgIcon,
+      {
+        icon,
+        class: 'text-base cursor-pointer',
+      })
+  }
+}
+
 function toogleView() {
   if (!authStore.checkLoginOrShow())
     return
   showViewType.value = showViewType.value === 'instanceList' ? 'workflowDefine' : 'instanceList'
   emit('showView', showViewType.value)
 }
+
 function showEditView() {
   if (!authStore.checkLoginOrShow())
     return
   wfStore.setShowCreateView(true, props.workflow.uuid)
+}
+
+async function onCopy() {
+  const { data: newWorkflow } = await api.workflowCopy(props.workflow.uuid)
+  wfStore.appendWorkflows([newWorkflow], true)
+  ms.success('复制成功')
+}
+
+function handleSelect(key: string | number) {
+  if (submitting.value)
+    return
+  submitting.value = true
+  try {
+    if (key === 'edit')
+      showEditView()
+    else if (key === 'copy')
+      onCopy()
+  } catch (e: any) {
+    ms.error(e)
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 
@@ -38,34 +94,34 @@ function showEditView() {
   >
     <div class="relative flex items-center justify-between max-w-screen-xl px-4 m-auto h-10">
       <div class="flex items-center">
-        <HoverButton @click="showEditView()">
-          <span class="text-xl">
-            <SvgIcon class="text-xl" :icon="wfStore.activeWorkflowInfo.userUuid === userStore.userInfo.uuid ? 'carbon:edit' : 'carbon:information'" />
-          </span>
-        </HoverButton>
         <p class="text-sm">
           {{ workflow?.title ?? '' }}
         </p>
       </div>
-      <HoverButton
-        placement="left" class="w-[70px]" :tooltip="showViewType === 'instanceList' ? '切换到流程图' : '切换到请求列表'"
-        @click="toogleView()"
-      >
-        <div class="text-xl flex items-center space-x-2">
-          <NTag v-if="showViewType === 'instanceList'" round :bordered="false" :style="{ cursor: 'pointer' }">
-            工作流
-            <template #avatar>
-              <SvgIcon class="text-xl" icon="carbon:flow" />
-            </template>
-          </NTag>
-          <NTag v-if="showViewType !== 'instanceList'" round :bordered="false" :style="{ cursor: 'pointer' }">
-            请求列表
-            <template #avatar>
-              <SvgIcon class="text-xl" icon="si:align-left-detailed-line" />
-            </template>
-          </NTag>
-        </div>
-      </HoverButton>
+      <div class="flex items-center">
+        <HoverButton
+          placement="left" class="w-[70px] mr-2"
+          :tooltip="showViewType === 'instanceList' ? '切换到流程图' : '切换到请求列表'" @click="toogleView()"
+        >
+          <div class="text-xl flex items-center space-x-2">
+            <NTag v-if="showViewType === 'instanceList'" round :bordered="false" :style="{ cursor: 'pointer' }">
+              工作流
+              <template #avatar>
+                <SvgIcon class="text-xl" icon="carbon:flow" />
+              </template>
+            </NTag>
+            <NTag v-if="showViewType !== 'instanceList'" round :bordered="false" :style="{ cursor: 'pointer' }">
+              请求列表
+              <template #avatar>
+                <SvgIcon class="text-xl" icon="si:align-left-detailed-line" />
+              </template>
+            </NTag>
+          </div>
+        </HoverButton>
+        <NDropdown :options="options" class="mr-2" @select="handleSelect">
+          <SvgIcon class="w-6 ml-2 cursor-pointer" icon="ri:more-fill" />
+        </NDropdown>
+      </div>
     </div>
   </header>
 </template>

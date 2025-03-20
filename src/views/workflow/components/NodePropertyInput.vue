@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { generate } from 'random-words'
-import { NButton, NCollapse, NCollapseItem, NInput, NList, NListItem } from 'naive-ui'
+import { NButton, NCollapse, NCollapseItem, NInput, NList, NListItem, useMessage } from 'naive-ui'
 import { v4 as uuidv4 } from 'uuid'
 import WfVariableSelector from './WfVariableSelector.vue'
 import { SvgIcon } from '@/components/common'
@@ -9,9 +9,16 @@ import { useWfStore } from '@/store'
 interface Props {
   workflow: Workflow.WorkflowInfo
   wfNode: Workflow.WorkflowNode
+  limit?: number
+  showVarName?: boolean
 }
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  limit: 100,
+  showVarName: true,
+})
 const wfStore = useWfStore()
+const ms = useMessage()
+
 function onAdd() {
   const oneNode = wfStore.getOneNode(props.workflow.uuid)
   let nodeUuid = ''
@@ -19,6 +26,11 @@ function onAdd() {
   if (oneNode && oneNode.wfComponent.name === 'Start' && oneNode.inputConfig.user_inputs.length > 0) {
     nodeUuid = oneNode.uuid
     nodeParamaName = oneNode.inputConfig.user_inputs[0].name
+  }
+
+  if (props.wfNode.inputConfig.ref_inputs.length + props.wfNode.inputConfig.user_inputs.length >= props.limit) {
+    ms.warning(`最多只能添加${props.limit}个输入`)
+    return
   }
 
   wfStore.addRefInputToNode(props.workflow.uuid, props.wfNode.uuid, {
@@ -51,11 +63,10 @@ function onVariableSelected(wfInput: Workflow.NodeIORefDinition, nodeUuidParamNa
       <NList>
         <NListItem v-for="refInput in wfNode.inputConfig.ref_inputs" :key="refInput.uuid" class="h-12">
           <div class="flex items-center justify-start">
-            <NInput v-model:value="refInput.name" maxlength="50" show-count class="mr-2 max-w-8 h-full" />
+            <NInput v-show="showVarName" v-model:value="refInput.name" maxlength="50" show-count class="mr-2 max-w-8 h-full" style="max-width:200px" />
             <WfVariableSelector
               :workflow="workflow" :wf-node="wfNode" :wf-ref-var="refInput"
-              :exclude-nodes="[props.wfNode.uuid]" class="mr-2 h-full max-w-8"
-              style="max-width: 250px;" @variable-selected="onVariableSelected(refInput, $event)"
+              :exclude-nodes="[props.wfNode.uuid]" class="mr-2 h-full flex-1" @variable-selected="onVariableSelected(refInput, $event)"
             />
             <SvgIcon
               class="text-3xl min-w-5 mr-0.5 h-full cursor-pointer" icon="ep:remove" style="min-width:16px"

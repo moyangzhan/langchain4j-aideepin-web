@@ -49,6 +49,7 @@ declare namespace Workflow {
     isPublic: boolean
     nodes: WorkflowNode[]
     edges: WorkflowEdge[]
+    userId: string
     userUuid: string
     userName: string
     createTime: string
@@ -211,6 +212,11 @@ declare namespace Workflow {
     node_param_name: string
     operator: string
     value: string
+  }
+
+  interface NodeConfigKeywordExtractor implements NodeConfig {
+    model_name: string
+    top_n: number
   }
 
   interface NodeIOData {

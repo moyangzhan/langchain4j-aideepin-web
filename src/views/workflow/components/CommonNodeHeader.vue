@@ -50,8 +50,10 @@ function handleSelect(key: string | number) {
     <div class="flex-1 max-h-6 overflow-hidden text-nowrap">
       {{ wfNode.title }}
     </div>
-    <NDropdown v-if="wfNode.wfComponent.name !== 'Start'" :options="options" @select="handleSelect">
-      <SvgIcon class="w-6 ml-2 cursor-pointer" icon="ri:more-fill" />
-    </NDropdown>
+    <div class="w-6 ml-2">
+      <NDropdown v-if="wfNode.wfComponent.name !== 'Start'" :options="options" @select="handleSelect">
+        <SvgIcon class="cursor-pointer" icon="ri:more-fill" />
+      </NDropdown>
+    </div>
   </div>
 </template>

@@ -569,10 +569,16 @@ function loadFileContent(fileUrl: string) {
   })
 }
 
-function workflowAdd<T = any>(data: { title: string; remark: string }) {
+function workflowAdd<T = any>(data: { title: string; remark: string; isPublic: boolean }) {
   return post<T>({
     url: '/workflow/add',
     data,
+  })
+}
+
+function workflowCopy<T = any>(wfUuid: string) {
+  return post<T>({
+    url: `/workflow/copy/${wfUuid}`,
   })
 }
 
@@ -580,6 +586,18 @@ function workflowUpdate<T = any>(data: Workflow.WorkflowUpdateReq) {
   return post<T>({
     url: '/workflow/update',
     data,
+  })
+}
+
+function workflowDel<T = any>(uuid: string) {
+  return post<T>({
+    url: `/workflow/del/${uuid}`,
+  })
+}
+
+function workflowSetPublic<T = any>(uuid: string) {
+  return post<T>({
+    url: `/workflow/set-public/${uuid}`,
   })
 }
 
@@ -721,7 +739,10 @@ export default {
   aiSearchRecordDel,
   loadFileContent,
   workflowAdd,
+  workflowCopy,
   workflowUpdate,
+  workflowSetPublic,
+  workflowDel,
   workflowBaseInfoUpdate,
   workflowRun,
   workflowComponents,

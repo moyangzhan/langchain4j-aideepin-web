@@ -5,7 +5,7 @@ import { getIconByComponentName, getIconClassByComponentName } from '@/utils/wor
 const wfStore = useWfStore()
 
 // TODO
-const todoComponents = ['Google', 'Draw', 'DocumentExtractor', 'KeywordExtractor', 'KnowledgeRetrieval']
+const todoComponents = ['Google', 'Draw', 'DocumentExtractor', 'KnowledgeRetrieval']
 
 function onDragStart(event: DragEvent, nodeType: string) {
   if (event.dataTransfer) {

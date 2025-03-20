@@ -134,6 +134,7 @@ export function emptyWorkflowInfo() {
     input: {} as any,
     output: {} as any,
     isPublic: false,
+    userId: '',
     userUuid: '',
     userName: '',
     nodes: [] as Workflow.WorkflowNode[],

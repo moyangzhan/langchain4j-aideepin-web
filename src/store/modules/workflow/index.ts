@@ -150,7 +150,7 @@ export const useWfStore = defineStore('wf-store', {
       this.wfComponents = components
     },
     addWorkflowAndActive(info: Workflow.WorkflowInfo) {
-      this.myWorkflows.unshift(info)
+      this.appendWorkflows([info], true)
       this.setActiveAndGo(info.uuid, 'workflowDefine')
     },
     appendWorkflows(infos: Workflow.WorkflowInfo[], isMine: boolean) {
@@ -175,6 +175,26 @@ export const useWfStore = defineStore('wf-store', {
         workflow.deleteEdges = []
         workflow.deleteNodes = []
       })
+    },
+    updateWorkflow(uuid: string, info: Workflow.WorkflowInfo) {
+      this.myWorkflows.forEach((item) => {
+        if (item.uuid === uuid)
+          Object.assign(item, info)
+      })
+    },
+    setWorkflowPublic(uuid: string, publicOrNot: boolean) {
+      const idx = this.myWorkflows.findIndex((item: { uuid: string }) => item.uuid === uuid)
+      if (idx !== -1)
+        this.myWorkflows[idx].isPublic = publicOrNot
+      if (publicOrNot)
+        this.publicWorkflows.push(this.myWorkflows[idx])
+      else
+        this.publicWorkflows = this.publicWorkflows.filter((item: { uuid: string }) => item.uuid !== uuid)
+    },
+    deleteWorkflow(uuid: string) {
+      const idx = this.myWorkflows.findIndex((item: { uuid: string }) => item.uuid === uuid)
+      if (idx !== -1)
+        this.myWorkflows.splice(idx, 1)
     },
     updateWfNodeTitle(wfUuid: string, nodeUuid: string, newNodeTitle: string) {
       this.getWorkflowInfo(wfUuid)?.nodes.forEach((node) => {
@@ -318,39 +338,68 @@ export const useWfStore = defineStore('wf-store', {
     deleteNode(wfUuid: string, nodeUuid: string) {
       // Delete node
       const wf = this.getWorkflowInfo(wfUuid)
-      if (wf) {
-        const idx = wf.nodes.findIndex((node: { uuid: string }) => node.uuid === nodeUuid)
-        if (idx > -1)
-          wf.nodes.splice(idx, 1)
+      if (!wf) {
+        console.log('deleteNode wf not found')
+        return
+      }
 
-        wf.deleteNodes.push(nodeUuid)
-      }
-      // Delete ui node
-      const uiWorkflow = this.wfUuidToUIWorkflow.get(wfUuid)
-      if (uiWorkflow) {
-        const idx = uiWorkflow.nodes.findIndex((node: { id: string }) => node.id === nodeUuid)
-        if (idx > -1)
-          uiWorkflow.nodes.splice(idx, 1)
-      }
+      wf.deleteNodes.push(nodeUuid)
+
+      const idx = wf.nodes.findIndex((node: { uuid: string }) => node.uuid === nodeUuid)
+      if (idx > -1)
+        wf.nodes.splice(idx, 1)
+
+      this._deleteEdgesByNodeUuid(wf, nodeUuid)
+      this._deleteUiNode(wfUuid, nodeUuid)
+    },
+    // 删除节点时，删除与之相关的边
+    _deleteEdgesByNodeUuid(workflow: Workflow.WorkflowInfo, deletedNodeUuid: string) {
+      const edges = workflow.edges.filter((edge: { sourceNodeUuid: string; targetNodeUuid: string }) => edge.sourceNodeUuid === deletedNodeUuid || edge.targetNodeUuid === deletedNodeUuid)
+      edges.forEach((edge: { uuid: string }) => {
+        const edgeIdx = workflow.edges.findIndex(
+          (item: { uuid: string }) => item.uuid === edge.uuid,
+        )
+        if (edgeIdx > -1)
+          workflow.edges.splice(edgeIdx, 1)
+
+        workflow.deleteEdges.push(edge.uuid)
+
+        this._deleteUiEdge(workflow.uuid, edge.uuid)
+      })
     },
     deleteEdge(wfUuid: string, edgeUuid: string) {
       // Delete edge
       const wf = this.getWorkflowInfo(wfUuid)
-      if (wf) {
-        const idx = wf.edges.findIndex((edge: { uuid: string }) => edge.uuid === edgeUuid)
-        if (idx > -1)
-          wf.edges.splice(idx, 1)
-
-        wf.deleteEdges.push(edgeUuid)
+      if (!wf) {
+        console.log('deleteEdge wf not found')
+        return
       }
+      wf.deleteEdges.push(edgeUuid)
+      const idx = wf.edges.findIndex((edge: { uuid: string }) => edge.uuid === edgeUuid)
+      if (idx > -1)
+        wf.edges.splice(idx, 1)
 
-      // Delete ui edge
+      this._deleteUiEdge(wfUuid, edgeUuid)
+    },
+    _deleteUiNode(wfUuid: string, nodeUuid: string) {
       const uiWorkflow = this.wfUuidToUIWorkflow.get(wfUuid)
-      if (uiWorkflow) {
-        const idx = uiWorkflow.edges.findIndex((edge: { id: string }) => edge.id === edgeUuid)
-        if (idx > -1)
-          uiWorkflow.edges.splice(idx, 1)
+      if (!uiWorkflow) {
+        console.log('_deleteUiNode uiWorkflow not found')
+        return
       }
+      const idx = uiWorkflow.nodes.findIndex((node: { id: string }) => node.id === nodeUuid)
+      if (idx > -1)
+        uiWorkflow.nodes.splice(idx, 1)
+    },
+    _deleteUiEdge(wfUuid: string, edgeId: string) {
+      const uiWorkflow = this.wfUuidToUIWorkflow.get(wfUuid)
+      if (!uiWorkflow) {
+        console.log('_deleteUiEdge uiWorkflow not found')
+        return
+      }
+      const idx = uiWorkflow.edges.findIndex((edge: { id: string }) => edge.id === edgeId)
+      if (idx > -1)
+        uiWorkflow.edges.splice(idx, 1)
     },
     async reloadRoute(uuid?: string, defaultViewType?: string) {
       await router.replace({ name: 'WfDetail', params: { uuid, viewType: !defaultViewType ? 'instanceList' : defaultViewType } })
