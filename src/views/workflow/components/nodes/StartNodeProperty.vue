@@ -7,6 +7,7 @@ import {
   NDataTable,
   NFlex,
   NInput,
+  NInputNumber,
   NModal,
   NSelect,
   NSwitch,
@@ -29,6 +30,9 @@ const tmpItem = reactive<Workflow.NodeIODefinition>({
   name: '',
   title: '',
   required: false,
+
+  limit: 10,
+  multiple: false,
 })
 const options = [
   {
@@ -38,6 +42,10 @@ const options = [
   {
     label: '数字',
     value: 2,
+  },
+  {
+    label: '文件',
+    value: 4,
   },
   {
     label: '布尔值',
@@ -126,9 +134,9 @@ function submitForm() {
   showModal.value = false
   const idx = props.wfNode.inputConfig.user_inputs.findIndex(item => item.uuid === tmpItem.uuid)
   if (idx > -1) {
-    Object.assign(props.wfNode.inputConfig.user_inputs[idx], tmpItem)
+    Object.assign(props.wfNode.inputConfig.user_inputs[idx], { ...tmpItem })
   } else {
-    wfStore.addUserInputToNode(props.workflow.uuid, props.wfNode.uuid, tmpItem)
+    wfStore.addUserInputToNode(props.workflow.uuid, props.wfNode.uuid, { ...tmpItem })
     Object.assign(tmpItem, { uuid: '', type: 1, name: '', label: '', required: false })
   }
 }
@@ -153,21 +161,31 @@ function submitForm() {
     </NButton>
   </div>
   <NModal v-model:show="showModal" style="width: 90%; max-height: 700px; max-width: 600px" preset="card" title="变量设置">
-    <div class="flex flex-col w-full">
-      类型
-      <NSelect v-model:value="tmpItem.type" :options="options" />
-      <br>
-      名称
-      <NInput v-model:value="tmpItem.name" maxlength="50" show-count />
-      <br>
-      标题（显示名称）
-      <NInput v-model:value="tmpItem.title" maxlength="50" show-count />
-      <br>
+    <div class="flex flex-col w-full justify-between space-y-4">
+      <div>
+        类型
+        <NSelect v-model:value="tmpItem.type" :options="options" />
+      </div>
+      <div>
+        名称
+        <NInput v-model:value="tmpItem.name" maxlength="50" show-count />
+      </div>
+      <div>
+        标题（显示名称）
+        <NInput v-model:value="tmpItem.title" maxlength="50" show-count />
+      </div>
       <div>
         是否必须
-        <NSwitch v-model:value="tmpItem.required" />
+        <NSwitch v-model:value="tmpItem.required" size="small" />
       </div>
-      <br>
+      <div v-if="tmpItem.type === 3">
+        多选
+        <NSwitch v-model:value="tmpItem.multiple" />
+      </div>
+      <div v-if="tmpItem.type === 4">
+        最大文件数量
+        <NInputNumber v-model:value="tmpItem.limit" />
+      </div>
       <NFlex justify="end" style="margin-top: 20px">
         <NButton
           block type="primary" :disabled="!submitStatus" @click="

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, ref } from 'vue'
+import { h, nextTick, ref } from 'vue'
 import { NSelect } from 'naive-ui'
 import type { VNodeChild } from 'vue'
 import type { SelectGroupOption, SelectOption } from 'naive-ui'
@@ -12,9 +12,12 @@ interface Props {
   wfNode: Workflow.WorkflowNode
   wfRefVar: Workflow.NodeIORefDinition
   excludeNodes: string[]
+  whiteListComponents?: string[]
+  whiteListUserInputTypes?: number[]
 }
 const props = withDefaults(defineProps<Props>(), {
   workflow: () => emptyWorkflowInfo(),
+  whiteListComponents: () => [],
 })
 
 const emit = defineEmits<Emit>()
@@ -73,13 +76,17 @@ for (let i = 0; i < nodes.length; i++) {
   const node = nodes[i]
   if (props.excludeNodes.includes(node.uuid) || node.wfComponent.name === 'End')
     continue
-
+  if (props.whiteListComponents.length > 0 && !props.whiteListComponents.includes(node.wfComponent.name))
+    continue
   const inputConfig = node.inputConfig
   if (node.wfComponent.name === 'Start') {
     for (let j = 0; j < inputConfig.user_inputs.length; j++) {
+      const userInput = inputConfig.user_inputs[j]
+      if (props.whiteListUserInputTypes && props.whiteListUserInputTypes.length > 0 && !props.whiteListUserInputTypes.includes(userInput.type))
+        continue
       userInputGroup.children.push({
-        label: inputConfig.user_inputs[j].title,
-        value: `${node.uuid}::${inputConfig.user_inputs[j].name}`,
+        label: userInput.title,
+        value: `${node.uuid}::${userInput.name}`,
       })
     }
   } else {
@@ -90,8 +97,11 @@ for (let i = 0; i < nodes.length; i++) {
   }
 }
 console.log('options', options)
-selectedVar.value = `${props.wfRefVar.node_uuid}::${props.wfRefVar.node_param_name}`
-console.log('selectedVar.value', selectedVar.value)
+nextTick(() => {
+  console.log('selectedVar', selectedVar)
+  selectedVar.value = `${props.wfRefVar.node_uuid}::${props.wfRefVar.node_param_name}`
+  console.log('selectedVar2', selectedVar)
+})
 
 function handleSelect(value: string) {
   const vs = value.split('::')
@@ -102,6 +112,7 @@ function handleSelect(value: string) {
 <template>
   <NSelect
     v-model:value="selectedVar" placement="top-start" trigger="click" :show-arrow="true"
-    :render-label="renderDropdownLabel" :options="options" :consistent-menu-width="false" @update:value="handleSelect"
+    :render-label="renderDropdownLabel" :options="options" :consistent-menu-width="false"
+    @update:value="handleSelect"
   />
 </template>

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { nextTick, onUnmounted, reactive, ref } from 'vue'
-import { NButton, NInput, NInputNumber, NSwitch, NTab, NTabPane, NTabs, useMessage } from 'naive-ui'
+import { nextTick, onUnmounted, reactive, ref, watch } from 'vue'
+import { NButton, NInput, NInputNumber, NP, NSwitch, NTab, NTabPane, NTabs, NText, NUpload, NUploadDragger, useMessage } from 'naive-ui'
+import type { UploadFileInfo, UploadInst } from 'naive-ui'
 import { useAuthStore, useWfStore } from '@/store'
 import { SvgIcon } from '@/components/common'
 import api from '@/api'
@@ -20,8 +21,10 @@ interface Emit {
 }
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
+const headers = { Authorization: '' }
 const wfStore = useWfStore()
 const authStore = useAuthStore()
+const token = ref<string>(authStore.token)
 const ms = useMessage()
 const submitting = ref<boolean>(wfStore.submitting)
 const startNode = wfStore.getStartNode(props.workflow.uuid)
@@ -29,6 +32,7 @@ const wfRuntimeUuid = ref<string>('')
 const runtimeNodes = reactive<Workflow.WfRuntimeNode[]>([])
 const userInputs = ref<Workflow.UserInput[]>(startNode?.inputConfig.user_inputs.map((input) => {
   return {
+    uuid: input.uuid,
     name: input.name,
     content: {
       title: input.title,
@@ -43,7 +47,33 @@ const currWfUuid = props.workflow.uuid
 console.log('instance list currWfUuid', currWfUuid)
 const showCurrentExecution = ref<boolean>(false)
 const tabObj = ref<TabObj>({ name: 'runtimes', defaultTab: '流程执行详情', tab: '流程执行详情 ↓' })
+const fileListLength = ref(0)
+const uploadRef = ref<UploadInst | null>(null)
+const uploadedFileUuids = ref<string[]>([])
 let controller = new AbortController()
+
+async function uploadBeforeRun() {
+  uploadedFileUuids.value = []
+  if (uploadRef.value && Array.isArray(uploadRef.value) && uploadRef.value.length > 0)
+    uploadRef.value[0]?.submit()
+  else if (uploadRef.value)
+    uploadRef.value?.submit()
+}
+
+async function resetInputs() {
+  if (uploadRef.value && Array.isArray(uploadRef.value) && uploadRef.value.length > 0) {
+    uploadRef.value.forEach((item) => {
+      item.clear()
+    })
+  } else if (uploadRef.value) {
+    uploadRef.value?.clear()
+  }
+  uploadedFileUuids.value = []
+
+  userInputs.value.forEach((input) => {
+    input.content.value = null
+  })
+}
 
 async function run() {
   if (!authStore.checkLoginOrShow())
@@ -52,8 +82,26 @@ async function run() {
   if (submitting.value)
     return
 
+  for (const input of userInputs.value) {
+    if (input.required && input.content.type === 4 && input.content.value === null && fileListLength.value === 0) {
+      ms.warning('请上传文件')
+      return
+    }
+  }
+
+  if (fileListLength.value > 0 && uploadedFileUuids.value.length !== fileListLength.value) {
+    console.log('先执行文件上传操作')
+    uploadBeforeRun()
+    return
+  } else {
+    const fileInput = userInputs.value.find(input => input.content.type === 4 && input.content.value === null)
+    if (fileInput)
+      fileInput.content.value = uploadedFileUuids.value
+  }
+
   if (userInputs.value.some(input => input.required && input.content.value === null)) {
     console.log('请输入所有必填参数')
+    ms.warning('请输入所有必填参数')
     return
   }
 
@@ -133,6 +181,7 @@ async function run() {
       doneCallback: (chunk) => {
         nextTick(() => {
           submitting.value = false
+          resetInputs()
           wfStore.updateSuccess(currWfUuid, wfRuntimeUuid.value, chunk)
           ms.success('执行成功')
           emit('runDone')
@@ -140,6 +189,7 @@ async function run() {
       },
       errorCallback: (error) => {
         submitting.value = false
+        resetInputs()
         ms.error(error)
         ms.error(`系统提示：${error}`)
         emit('runError', error)
@@ -150,6 +200,29 @@ async function run() {
     ms.error(errorMessage)
     submitting.value = false
   }
+}
+
+function onUploadChange(options: { fileList: UploadFileInfo[] }) {
+  console.log('onUploadChange', options)
+}
+
+function handleFileListChange(fileList: UploadFileInfo[]) {
+  console.log('handleFileListChange', fileList)
+  fileListLength.value = fileList.length
+  if (uploadedFileUuids.value.length === fileListLength.value)
+    run()
+}
+
+function onUploadFinish({ file, event }: { file: UploadFileInfo; event?: ProgressEvent }) {
+  console.log('onUploadFinish', file, event)
+  const res = JSON.parse((event?.target as XMLHttpRequest).response)
+  if (res.success) {
+    console.log('uploaded file data:', res.data)
+    uploadedFileUuids.value.push(res.data.uuid)
+  } else {
+    console.log(`onUploadFinish err:${res.data}`)
+  }
+  return file
 }
 
 function handleStop() {
@@ -163,6 +236,15 @@ function handleClick() {
   showCurrentExecution.value = !showCurrentExecution.value
   tabObj.value.tab = showCurrentExecution.value ? `${tabObj.value.defaultTab} ↓` : `${tabObj.value.defaultTab} ↑`
 }
+
+watch(
+  () => token,
+  () => {
+    if (token.value)
+      headers.Authorization = token.value
+  },
+  { immediate: true },
+)
 
 onUnmounted(() => {
   if (wfStore.wfUuidToWfRuntimeLoading.get(currWfUuid))
@@ -232,19 +314,37 @@ onUnmounted(() => {
     <div v-if="errorMsg">
       {{ errorMsg }}
     </div>
-    <div class="flex items-center justify-between space-x-2">
-      <div
-        v-for="(userInput, idx) in userInputs" :key="`${idx}_${userInput.name}`"
-        class="w-full flex flex-row items-center"
-      >
+    <div class="flex flex-col items-center justify-between space-y-2 max-h-[300px] overflow-y-auto">
+      <div v-for="(userInput, idx) in userInputs" :key="`${idx}_${userInput.name}`" class="w-full flex">
         <div class="min-w-24">
           {{ userInput.content.title }}
         </div>
+        <!-- 文本 -->
         <NInput
           v-if="userInput.content.type === 1" v-model:value="userInput.content.value" type="textarea"
           :autosize="{ minRows: 1, maxRows: 5 }"
         />
+        <!-- 数字 -->
         <NInputNumber v-if="userInput.content.type === 2" v-model:value="userInput.content.value" />
+        <!-- 下拉列表 -->
+        <div v-if="userInput.content.type === 3" />
+        <!-- 文件列表 -->
+        <NUpload
+          v-if="userInput.content.type === 4" ref="uploadRef" multiple directory-dnd action="/api/file/upload"
+          :default-upload="false" :max="startNode?.inputConfig.user_inputs.find(item => item.uuid === userInput.uuid)?.limit || 10"
+          :headers="headers"
+          @update:file-list="handleFileListChange" @finish="onUploadFinish" @change="onUploadChange"
+        >
+          <NUploadDragger>
+            <NText style="font-size: 16px">
+              点击或者拖动文件到该区域来上传
+            </NText>
+            <NP depth="2" style="margin: 4px 0 0 0">
+              文件格式: TXT、PDF、DOC、DOCX、XLS、XLXS、PPT、PPTX；文件大小：不超过10M
+            </NP>
+          </NUploadDragger>
+        </NUpload>
+        <!-- 布尔值 -->
         <NSwitch v-if="userInput.content.type === 5" v-model:value="userInput.content.value" />
       </div>
       <NButton type="primary" :disabled="submitting" :loading="submitting" @click="run">

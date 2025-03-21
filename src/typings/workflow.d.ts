@@ -136,6 +136,11 @@ declare namespace Workflow {
     name: string
     title: string
     required: boolean
+
+    //type === files
+    limit: number
+    //type === options
+    multiple: boolean
   }
 
   //引用类型的输入输出定义
@@ -147,6 +152,7 @@ declare namespace Workflow {
   }
 
   interface UserInput {
+    uuid: string
     name: string
     content: UserInputContent
 

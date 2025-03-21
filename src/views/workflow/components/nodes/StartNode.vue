@@ -16,7 +16,9 @@ defineProps<NodeProps>()
         <div class="flex-none w-4 content-center mr-1">
           <SvgIcon v-if="userInputDef.type === 1" icon="carbon:string-text" />
           <SvgIcon v-if="userInputDef.type === 2" icon="carbon:string-integer" />
-          <SvgIcon v-if="userInputDef.type === 3" icon="carbon:boolean" />
+          <SvgIcon v-if="userInputDef.type === 3" icon="carbon:list-boxes" />
+          <SvgIcon v-if="userInputDef.type === 4" icon="carbon:list-dropdown" />
+          <SvgIcon v-if="userInputDef.type === 5" icon="carbon:boolean" />
         </div>
         <div class="w-24 overflow-hidden mr-1">
           {{ userInputDef.name }}

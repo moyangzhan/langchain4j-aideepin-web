@@ -11,6 +11,7 @@ export function createNewNode(
   const newWfNode = emptyWorkflowNode()
   newWfNode.uuid = uuidv4().replace(/-/g, '')
   newWfNode.title = component.title
+  newWfNode.workflowId = workflow.id
   newWfNode.workflowUuid = workflow.uuid
   newWfNode.wfComponent = component
   newWfNode.workflowComponentId = component.id

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 import CommonNodeHeader from '../CommonNodeHeader.vue'
@@ -10,12 +9,9 @@ interface WfProps {
   workflow: Workflow.WorkflowInfo
 }
 interface CombinedProps extends NodeProps, WfProps { }
-const props = defineProps<CombinedProps>()
+defineProps<CombinedProps>()
 const wfStore = useWfStore()
-const x = computed(() => `${Math.round(props.position.x)}px`)
-const y = computed(() => `${Math.round(props.position.y)}px`)
-console.log('x,y', x, y)
-let yposition = 0
+const yposition = 0
 </script>
 
 <template>

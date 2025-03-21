@@ -33,7 +33,7 @@ export const useWfStore = defineStore('wf-store', {
         return []
       }
     },
-    getOneNode(state: Workflow.WorkflowState) {
+    getStartOrFirstNode(state: Workflow.WorkflowState) {
       return (wfUuid: string) => {
         const wf = this.getWorkflowInfo(wfUuid)
         if (!wf)
@@ -178,8 +178,18 @@ export const useWfStore = defineStore('wf-store', {
     },
     updateWorkflow(uuid: string, info: Workflow.WorkflowInfo) {
       this.myWorkflows.forEach((item) => {
-        if (item.uuid === uuid)
-          Object.assign(item, info)
+        if (item.uuid === uuid) {
+          item.nodes.forEach((node) => {
+            const nodeInfo = info.nodes.find(n => n.uuid === node.uuid)
+            if (nodeInfo)
+              Object.assign(node, nodeInfo)
+          })
+          item.edges.forEach((edge) => {
+            const edgeInfo = info.edges.find(e => e.uuid === edge.uuid)
+            if (edgeInfo)
+              Object.assign(edge, edgeInfo)
+          })
+        }
       })
     },
     setWorkflowPublic(uuid: string, publicOrNot: boolean) {

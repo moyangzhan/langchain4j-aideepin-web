@@ -17,6 +17,7 @@ import ClassifierNodeProperty from './ClassifierNodeProperty.vue'
 import SwticherNodeProperty from './SwitcherNodeProperty.vue'
 import TemplateNodeProperty from './TemplateNodeProperty.vue'
 import KeywordExtractorNodeProperty from './KeywordExtractorNodeProperty.vue'
+import DocumentExtractorNodeProperty from './DocumentExtractorNodeProperty.vue'
 import EndNodeProperty from './EndNodeProperty.vue'
 
-export { SpecialNode, StartNode, EndNode, AnswerNode, ClassifierNode, DocumentExtractorNode, KeywordExtractorNode, DrawNode, KnowledgeRetrievalNode, GoogleNode, SwitcherNode, TemplateNode, StartNodeProperty, AnswerNodeProperty, ClassifierNodeProperty, SwticherNodeProperty, TemplateNodeProperty, KeywordExtractorNodeProperty, EndNodeProperty }
+export { SpecialNode, StartNode, EndNode, AnswerNode, ClassifierNode, DocumentExtractorNode, KeywordExtractorNode, DrawNode, KnowledgeRetrievalNode, GoogleNode, SwitcherNode, TemplateNode, StartNodeProperty, AnswerNodeProperty, ClassifierNodeProperty, SwticherNodeProperty, TemplateNodeProperty, KeywordExtractorNodeProperty, DocumentExtractorNodeProperty, EndNodeProperty }

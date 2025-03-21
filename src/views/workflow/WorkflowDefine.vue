@@ -80,7 +80,6 @@ function renderGraph() {
 onNodesChange((changes: NodeChange[]) => {
   let nodeUnSelected = false
   for (const change of changes) {
-    console.log('change', change)
     if ('selected' in change) {
       if (!change.selected && selectedWfNode.value?.uuid === change.id) {
         nodeUnSelected = true

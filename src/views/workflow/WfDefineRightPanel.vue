@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from 'vue'
 import { NInput } from 'naive-ui'
-import { AnswerNodeProperty, ClassifierNodeProperty, EndNodeProperty, KeywordExtractorNodeProperty, StartNodeProperty, SwticherNodeProperty, TemplateNodeProperty } from './components/nodes'
+import { AnswerNodeProperty, ClassifierNodeProperty, DocumentExtractorNodeProperty, EndNodeProperty, KeywordExtractorNodeProperty, StartNodeProperty, SwticherNodeProperty, TemplateNodeProperty } from './components/nodes'
 import { useWfStore } from '@/store'
 import { SvgIcon } from '@/components/common'
 import { getIconByComponentName, getIconClassByComponentName } from '@/utils/workflow-util'
@@ -89,12 +89,16 @@ onMounted(() => {
           :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
         />
         <KeywordExtractorNodeProperty
-          v-else-if="wfNode.wfComponent.name === 'KeywordExtractor'" :key="`keyword_${wfNode.uuid}`"
-          :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
+          v-else-if="wfNode.wfComponent.name === 'KeywordExtractor'"
+          :key="`keyword_${wfNode.uuid}`" :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
+        />
+        <DocumentExtractorNodeProperty
+          v-else-if="wfNode.wfComponent.name === 'DocumentExtractor'"
+          :key="`document_${wfNode.uuid}`" :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
         />
         <EndNodeProperty
-          v-else-if="wfNode.wfComponent.name === 'End'" :key="`end_${wfNode.uuid}`"
-          :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
+          v-else-if="wfNode.wfComponent.name === 'End'" :key="`end_${wfNode.uuid}`" :workflow="workflow"
+          :ui-workflow="uiWorkflow" :wf-node="wfNode"
         />
       </div>
     </div>
