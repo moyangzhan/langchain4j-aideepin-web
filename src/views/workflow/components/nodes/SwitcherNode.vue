@@ -15,7 +15,7 @@ const wfStore = useWfStore()
 const x = computed(() => `${Math.round(props.position.x)}px`)
 const y = computed(() => `${Math.round(props.position.y)}px`)
 console.log('x,y', x, y)
-const yposition = 0
+let yposition = 0
 </script>
 
 <template>
