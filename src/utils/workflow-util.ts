@@ -213,35 +213,6 @@ function createKeywordExtractor(node: Workflow.WorkflowNode) {
   }
 }
 
-function getInputLables(workflow: Workflow.WorkflowInfo, excludeNodes: string[]) {
-  const result = {
-    userInput: [] as Workflow.InputLabel[],
-    componentOutput: [] as Workflow.InputLabel[],
-  }
-  const nodes = workflow.nodes
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i]
-    if (excludeNodes.includes(node.uuid) || node.wfComponent.name === 'End')
-      continue
-
-    const inputConfig = node.inputConfig
-    if (node.wfComponent.name === 'Start') {
-      for (let j = 0; j < inputConfig.user_inputs.length; j++) {
-        result.userInput.push({
-          label: inputConfig.user_inputs[j].title,
-          value: `${node.uuid}::${inputConfig.user_inputs[j].name}`,
-        })
-      }
-    } else {
-      result.componentOutput.push({
-        label: node.title,
-        value: `${node.uuid}::output`,
-      })
-    }
-  }
-  return result
-}
-
 export function getInputLabelFromParamName(workflow: Workflow.WorkflowInfo, nodeUuid: string, nodeParamName: string) {
   const node = workflow.nodes.find(node => node.uuid === nodeUuid)
   if (!node)

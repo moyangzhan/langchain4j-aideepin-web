@@ -3,7 +3,6 @@ import { nextTick, onUnmounted, reactive, ref } from 'vue'
 import { NButton, NInput, NInputNumber, NSwitch, NTab, NTabPane, NTabs, useMessage } from 'naive-ui'
 import { useAuthStore, useWfStore } from '@/store'
 import { SvgIcon } from '@/components/common'
-import { useBasicLayout } from '@/hooks/useBasicLayout'
 import api from '@/api'
 import { t } from '@/locales'
 
@@ -21,7 +20,6 @@ interface Emit {
 }
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
-const { isMobile } = useBasicLayout()
 const wfStore = useWfStore()
 const authStore = useAuthStore()
 const ms = useMessage()
@@ -164,20 +162,6 @@ function handleStop() {
 function handleClick() {
   showCurrentExecution.value = !showCurrentExecution.value
   tabObj.value.tab = showCurrentExecution.value ? `${tabObj.value.defaultTab} ↓` : `${tabObj.value.defaultTab} ↑`
-}
-
-function handleEnter(event: KeyboardEvent) {
-  if (!isMobile.value) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-      run()
-    }
-  } else {
-    if (event.key === 'Enter' && event.ctrlKey) {
-      event.preventDefault()
-      run()
-    }
-  }
 }
 
 onUnmounted(() => {
