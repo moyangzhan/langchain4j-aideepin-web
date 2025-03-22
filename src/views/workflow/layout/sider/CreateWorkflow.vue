@@ -32,7 +32,7 @@ async function handleSave(event?: KeyboardEvent) {
       wfStore.addWorkflowAndActive(wf)
     } else {
       const { data: wf } = await api.workflowBaseInfoUpdate<Workflow.WorkflowInfo>(params)
-      wfStore.updateWorkflow(tmpUuid.value, wf)
+      wfStore.updateBaseInfo(tmpUuid.value, wf)
     }
     tmpUuid.value = ''
     tmpTitle.value = ''

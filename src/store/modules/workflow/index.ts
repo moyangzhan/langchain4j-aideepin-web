@@ -176,7 +176,13 @@ export const useWfStore = defineStore('wf-store', {
         workflow.deleteNodes = []
       })
     },
-    updateWorkflow(uuid: string, info: Workflow.WorkflowInfo) {
+    updateBaseInfo(uuid: string, info: { title: string; remark: string; isPublic: boolean }) {
+      this.myWorkflows.forEach((item) => {
+        if (item.uuid === uuid)
+          Object.assign(item, { ...info })
+      })
+    },
+    updateNodesAndEdges(uuid: string, info: Workflow.WorkflowInfo) {
       this.myWorkflows.forEach((item) => {
         if (item.uuid === uuid) {
           item.nodes.forEach((node) => {
