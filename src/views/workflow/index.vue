@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import HeaderComponent from './Header/index.vue'
 import PCHeader from './Header/pc.vue'
-import InstanceList from './InstanceList.vue'
+import WfRuntimeList from './WfRuntimeList.vue'
 import WorkflowDefine from './WorkflowDefine.vue'
 import LoginTip from '@/views/user/LoginTip.vue'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
@@ -31,7 +31,10 @@ const currWorkflowInfo = computed(() => {
       <LoginTip />
     </template>
     <template v-if="authStore.token && currWorkflowInfo.uuid">
-      <InstanceList v-show="selectedViewType === 'instanceList'" :workflow="currWorkflowInfo" :show="selectedViewType === 'instanceList'" />
+      <WfRuntimeList
+        v-show="selectedViewType === 'instanceList'" :workflow="currWorkflowInfo"
+        :show="selectedViewType === 'instanceList'"
+      />
       <WorkflowDefine v-show="selectedViewType === 'workflowDefine'" :workflow="currWorkflowInfo" />
     </template>
   </div>

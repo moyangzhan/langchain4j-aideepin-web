@@ -28,6 +28,10 @@ export function createNewNode(
     createSwitcherNode(workflow, newWfNode)
   else if (component.name === 'KeywordExtractor')
     createKeywordExtractor(newWfNode)
+  else if (component.name === 'FaqExtractor')
+    createFaqExtractor(newWfNode)
+  else if (component.name === 'KnowledgeRetrieval')
+    createKnowledgeRetrieval(newWfNode)
 
   workflow.nodes.push(newWfNode)
   uiWorkflow.nodes.push(wfNodeToUiNode(newWfNode))
@@ -214,6 +218,25 @@ function createKeywordExtractor(node: Workflow.WorkflowNode) {
   }
 }
 
+function createFaqExtractor(node: Workflow.WorkflowNode) {
+  const appStore = useAppStore()
+  node.nodeConfig = {
+    top_n: 5,
+    model_name: appStore.getFirstLLM().modelName,
+  }
+}
+
+function createKnowledgeRetrieval(node: Workflow.WorkflowNode) {
+  node.nodeConfig = {
+    knowledge_base_uuid: '',
+    knowledge_base_name: '',
+    score: 0.6,
+    top_n: 3,
+    is_strict: true,
+    default_response: '',
+  }
+}
+
 export function getInputLabelFromParamName(workflow: Workflow.WorkflowInfo, nodeUuid: string, nodeParamName: string) {
   const node = workflow.nodes.find(node => node.uuid === nodeUuid)
   if (!node)
@@ -256,6 +279,8 @@ export function getIconByComponentName(name: string) {
       return 'carbon:ibm-knowledge-catalog-standard'
     case 'keywordextractor':
       return 'carbon:api-key'
+    case 'faqextractor':
+      return 'fluent-mdl2:book-answers'
     case 'switcher':
       return 'oui:logstash-if'
     case 'template':
@@ -267,7 +292,7 @@ export function getIconByComponentName(name: string) {
     case 'end':
       return 'carbon:closed-caption'
     case 'start':
-      return 'material-symbols:not-started-outline-rounded'
+      return 'carbon:play-outline'
     default:
       return ''
   }
@@ -285,6 +310,8 @@ export function getIconClassByComponentName(name: string) {
       return 'text-rose-900'
     case 'keywordextractor':
       return 'text-cyan-900'
+    case 'faqextractor':
+      return 'text-teal-600'
     case 'switcher':
       return 'text-yellow-900'
     case 'template':

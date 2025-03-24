@@ -387,10 +387,11 @@ function messageDel<T = any>(uuid: string) {
   })
 }
 
-function knowledgeBaseSearchMine<T>(keyword: string, currentPage: number, pageSize: number) {
+function knowledgeBaseSearchMine<T>(keyword: string, currentPage: number, pageSize: number, includeOthersPublic?: boolean) {
   const search = keyword === undefined ? '' : `keyword=${keyword}&`
+  const includePublic = includeOthersPublic ? '&includeOthersPublic=true' : ''
   return get<T>({
-    url: `/knowledge-base/mine/search?${search}currentPage=${currentPage}&pageSize=${pageSize}`,
+    url: `/knowledge-base/mine/search?${search}currentPage=${currentPage}&pageSize=${pageSize}${includePublic}`,
   })
 }
 
@@ -645,6 +646,12 @@ function workflowRuntimes<T = any>(wfUuid: string, currentPage: number, pageSize
   })
 }
 
+function workflowRuntimeNodes<T = any>(wfRuntimeUuid: string) {
+  return get<T>({
+    url: `/workflow/runtime/nodes/${wfRuntimeUuid}`,
+  })
+}
+
 function workflowRuntimesClear<T = any>() {
   return post<T>({
     url: '/workflow/runtime/clear',
@@ -749,6 +756,7 @@ export default {
   workflowSearchPublic,
   workflowSearchMine,
   workflowRuntimes,
+  workflowRuntimeNodes,
   workflowRuntimesClear,
   workflowOperators,
   workflowRuntimeDelete,

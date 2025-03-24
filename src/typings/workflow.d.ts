@@ -7,6 +7,7 @@ declare namespace Workflow {
     name: string
     title: string
     remark: string
+    displayOrder: number
     isEnable: boolean
   }
 
@@ -76,11 +77,12 @@ declare namespace Workflow {
     status: number
     statusRemark: string
     createTime: string
-    nodes: WfRuntimeNode[]
     error: boolean
     loading: boolean
 
     wfUuid: string
+    nodes: WfRuntimeNode[]
+    prologue: string
   }
 
   interface WfRuntimeNode {
@@ -96,6 +98,7 @@ declare namespace Workflow {
     statusRemark: string
     createTime: string
 
+    wfComponent: WorkflowComponent
     wfRuntimeUuid: string
     nodeUuid: string
     nodeTitle: string
@@ -174,6 +177,10 @@ declare namespace Workflow {
   interface NodeConfig {
   }
 
+  interface NodeConfigStart implements NodeConfig {
+    prologue: string
+  }
+
   interface NodeConfigAnswer implements NodeConfig {
     model_name: string
     prompt: string
@@ -205,6 +212,15 @@ declare namespace Workflow {
     result: string
   }
 
+  interface NodeConfigKnowledgeRetrieval implements NodeConfig {
+    knowledge_base_uuid: string
+    knowledge_base_name: string
+    score: number
+    top_n: number
+    is_strict: boolean
+    default_response: string
+  }
+
   interface NodeConfigSwitcherCase {
     uuid: string
     operator: string
@@ -221,6 +237,11 @@ declare namespace Workflow {
   }
 
   interface NodeConfigKeywordExtractor implements NodeConfig {
+    model_name: string
+    top_n: number
+  }
+
+  interface NodeConfigFaqExtractor implements NodeConfig {
     model_name: string
     top_n: number
   }

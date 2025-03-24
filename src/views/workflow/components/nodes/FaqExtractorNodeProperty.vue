@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NInput } from 'naive-ui'
+import { NInputNumber } from 'naive-ui'
 import NodePropertyInput from '../NodePropertyInput.vue'
 import WfLLMSelector from '../WfLLMSelector.vue'
 
@@ -9,17 +9,17 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigAnswer
+const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigFaqExtractor
 
 function llmSelected(modelName: string) {
-  console.log('nodeConfig.modelName', nodeConfig.model_name, modelName)
   nodeConfig.model_name = modelName
 }
 </script>
 
 <template>
   <div class="flex flex-col w-full">
-    <NodePropertyInput :workflow="workflow" :wf-node="wfNode" />
+    <!-- <div>welcome word</div> -->
+    <NodePropertyInput :workflow="workflow" :wf-node="wfNode" :show-var-name="false" />
     <div class="mt-6">
       <div class="text-xl mb-1">
         模型
@@ -30,10 +30,10 @@ function llmSelected(modelName: string) {
     </div>
     <div class="mt-6">
       <div class="text-xl mb-1">
-        提示词
+        提取问题数量
       </div>
       <div>
-        <NInput v-model:value="nodeConfig.prompt" type="textarea" :autosize="{ minRows: 3, maxRows: 10 }" />
+        <NInputNumber v-model:value="nodeConfig.top_n" :min="1" :max="30" />
       </div>
     </div>
   </div>

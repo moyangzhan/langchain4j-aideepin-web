@@ -1,10 +1,11 @@
 <script setup lang='ts'>
 import type { Ref } from 'vue'
 import { computed, nextTick, onActivated, ref, watch } from 'vue'
-import { NIcon, useDialog, useLoadingBar, useMessage } from 'naive-ui'
+import { NButton, NIcon, NModal, useDialog, useLoadingBar, useMessage } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { useScroll } from '../chat/hooks/useScroll'
 import Message from './components/Message/index.vue'
+import RuntimeNodes from './components/RuntimeNodes.vue'
 import RunDetail from './components/RunDetail.vue'
 import LoginTip from '@/views/user/LoginTip.vue'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
@@ -31,6 +32,8 @@ const { isMobile } = useBasicLayout()
 const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom, scrollTo } = useScroll()
 const currWfUuid = props.workflow.uuid
 console.log('instance list currWfUuid', currWfUuid)
+const showDetailModal = ref<boolean>(false)
+const detailNodes = ref<Workflow.WfRuntimeNode[]>([])
 const inputRef = ref<Ref | null>(null)
 const errorMsg = ref<string>('')
 const loadedAll = ref<boolean>(false)
@@ -140,6 +143,26 @@ function runDone() {
   scrollToBottomIfAtBottom()
 }
 
+async function onShowRuntimeDetail(instUuid: string) {
+  showDetailModal.value = true
+  detailNodes.value = []
+  const wfRuntime = wfStore.getWfRuntime(instUuid)
+  if (!wfRuntime)
+    return
+  if (wfRuntime.nodes.length > 0) {
+    detailNodes.value = wfRuntime.nodes
+    return
+  }
+  try {
+    const { data: nodes } = await api.workflowRuntimeNodes<Workflow.WfRuntimeNode[]>(instUuid)
+    wfStore.setWfRuntimeNodes(instUuid, nodes)
+  } catch (error) {
+    console.error('onShowRuntimeDetail error', error)
+  } finally {
+    detailNodes.value = wfStore.getWfRuntime(instUuid)?.nodes || []
+  }
+}
+
 function runError(errorMsg: string) {
 }
 
@@ -178,9 +201,13 @@ onActivated(async () => {
               {{ errorMsg }}
             </div>
             <Message
-              :workflow="workflow" :wf-runtime="wfRuntime" :io-object="wfRuntime.output" :inversion="false" :error="wfRuntime.error"
-              :loading="wfRuntime.loading"
-            />
+              :workflow="workflow" :wf-runtime="wfRuntime" :io-object="wfRuntime.output" :inversion="false"
+              :error="wfRuntime.error" :loading="wfRuntime.loading"
+            >
+              <NButton v-if="!wfRuntime.loading" size="tiny" text @click="onShowRuntimeDetail(wfRuntime.uuid)">
+                执行详情
+              </NButton>
+            </Message>
           </div>
         </template>
       </div>
@@ -189,4 +216,7 @@ onActivated(async () => {
   <footer v-show="show" :class="footerClass">
     <RunDetail :workflow="workflow" @run-done="runDone" @run-error="runError" />
   </footer>
+  <NModal v-model:show="showDetailModal" title="执行详情" style="width: 90%; max-width: 900px;" preset="card">
+    <RuntimeNodes :workflow="workflow" :nodes="detailNodes" class="max-h-[750px] overflow-y-auto" />
+  </NModal>
 </template>

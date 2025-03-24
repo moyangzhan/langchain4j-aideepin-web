@@ -248,12 +248,48 @@ export const useWfStore = defineStore('wf-store', {
 
       if (!wfRuntime.output)
         wfRuntime.output = {}
+
+      wfRuntime.nodes = []
     },
     setWfRuntimes(wfUuid: string, wfRuntimes: Workflow.WorkflowRuntime[]) {
       wfRuntimes.forEach((wfRuntime) => {
         this.initWfRuntime(wfRuntime)
       })
       this.wfUuidToWfRuntimes.set(wfUuid, wfRuntimes.reverse())
+    },
+    updateWfRuntimePrologue(wfRuntimeUuid: string, prologue: string) {
+      const wfRuntime = this.getWfRuntime(wfRuntimeUuid)
+      if (!wfRuntime)
+        return
+      if (prologue)
+        wfRuntime.prologue = prologue
+    },
+    setWfRuntimeNodes(wfRuntimeUuid: string, nodes: Workflow.WfRuntimeNode[]) {
+      const wfRuntime = this.getWfRuntime(wfRuntimeUuid)
+      if (!wfRuntime)
+        return
+
+      const wfNodes = this.getWorkflowInfoById(wfRuntime.workflowId)?.nodes
+      if (!wfNodes) {
+        console.error('setWfRuntimeNodes wfNodes not found')
+        return
+      }
+      nodes.forEach((node) => {
+        if (!node.input)
+          node.input = {}
+        if (!node.output)
+          node.output = {}
+        const wfNode = wfNodes.find(n => n.id === node.nodeId)
+        if (!wfNode) {
+          console.error('setWfRuntimeNodes wfNode not found')
+        } else {
+          node.nodeUuid = wfNode.uuid
+          node.nodeTitle = wfNode.title
+          node.wfComponent = wfNode.wfComponent
+        }
+        node.wfRuntimeUuid = wfRuntime.uuid
+        wfRuntime.nodes.push(node)
+      })
     },
     unshiftWfRuntimes(wfUuid: string, wfRuntimes: Workflow.WorkflowRuntime[]) {
       wfRuntimes.forEach((wfRuntime) => {
@@ -287,6 +323,7 @@ export const useWfStore = defineStore('wf-store', {
       if (wfNode) {
         runtimeNode.nodeUuid = wfNode.uuid
         runtimeNode.nodeTitle = wfNode.title
+        runtimeNode.wfComponent = wfNode.wfComponent
       } else {
         console.log(`wfNode not found: ${runtimeNode.nodeId}`)
       }
@@ -311,9 +348,7 @@ export const useWfStore = defineStore('wf-store', {
       const runtimeNode = this.getRuntimeNode(wfRuntimeUuid, runtimeNodeUuid)
       if (runtimeNode) {
         const obj = JSON.parse(outputJson)
-        console.log('runtimeNode.output', runtimeNode.output[obj.name])
         runtimeNode.output[obj.name] = obj.content
-        console.log('1111111111runtimeNode.output', runtimeNode.output[obj.name])
       }
     },
     appendChunkToRuntimeNode(wfRuntimeUuid: string, runtimeNodeUuid: string, chunk: string) {

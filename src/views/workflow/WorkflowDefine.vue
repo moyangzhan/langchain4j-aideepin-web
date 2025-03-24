@@ -4,7 +4,7 @@ import { NButton, NLayout, NLayoutContent, NLayoutSider, NModal, useMessage } fr
 import type { Edge, Node, NodeChange } from '@vue-flow/core'
 import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
-import { AnswerNode, ClassifierNode, DocumentExtractorNode, DrawNode, EndNode, GoogleNode, KeywordExtractorNode, KnowledgeRetrievalNode, SpecialNode, StartNode, SwitcherNode, TemplateNode } from './components/nodes'
+import { AnswerNode, ClassifierNode, DocumentExtractorNode, DrawNode, EndNode, FaqExtractorNode, GoogleNode, KeywordExtractorNode, KnowledgeRetrievalNode, SpecialNode, StartNode, SwitcherNode, TemplateNode } from './components/nodes'
 import SpecialEdge from './components/edges/SpecialEdge.vue'
 import CustomEdge from './components/edges/CustomEdge.vue'
 import CustomEdge2 from './components/edges/CustomEdge2.vue'
@@ -291,6 +291,9 @@ onUnmounted(() => {
                   </template>
                   <template #node-template="nodeProps">
                     <TemplateNode v-bind="nodeProps" :workflow="workflow" />
+                  </template>
+                  <template #node-faqextractor="nodeProps">
+                    <FaqExtractorNode v-bind="nodeProps" :workflow="workflow" />
                   </template>
                   <template #node-special="nodeProps">
                     <SpecialNode v-bind="nodeProps" :workflow="workflow" />

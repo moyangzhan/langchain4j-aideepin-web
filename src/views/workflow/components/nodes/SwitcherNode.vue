@@ -11,7 +11,7 @@ interface WfProps {
 interface CombinedProps extends NodeProps, WfProps { }
 defineProps<CombinedProps>()
 const wfStore = useWfStore()
-let yposition = 0
+const yposition = 0
 </script>
 
 <template>

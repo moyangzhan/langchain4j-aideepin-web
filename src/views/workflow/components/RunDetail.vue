@@ -2,6 +2,7 @@
 import { nextTick, onUnmounted, reactive, ref, watch } from 'vue'
 import { NButton, NInput, NInputNumber, NP, NSwitch, NTab, NTabPane, NTabs, NText, NUpload, NUploadDragger, useMessage } from 'naive-ui'
 import type { UploadFileInfo, UploadInst } from 'naive-ui'
+import RuntimeNodes from './RuntimeNodes.vue'
 import { useAuthStore, useWfStore } from '@/store'
 import { SvgIcon } from '@/components/common'
 import api from '@/api'
@@ -128,7 +129,7 @@ async function run() {
         const wfRuntime = JSON.parse(wfRuntimeJson) as Workflow.WorkflowRuntime
         wfRuntime.input = {}
         userInputs.value.forEach((item) => {
-          wfRuntime.input[item.name] = item.content
+          wfRuntime.input[item.name] = { ...item.content }
         })
         wfRuntimeUuid.value = wfRuntime.uuid
         wfStore.appendWfRuntimes(
@@ -263,42 +264,7 @@ onUnmounted(() => {
       <NTabPane name="runtimes" display-directive="show" :tab-props="{ style: 'display:none' }">
         <transition name="collapse">
           <div v-show="showCurrentExecution" class="max-h-[500px] overflow-y-auto mb-2">
-            <div v-show="runtimeNodes.length === 0" class="text-center py-2 text-neutral-400">
-              无内容
-            </div>
-            <div
-              v-for="node in runtimeNodes" :key="node.uuid"
-              class="flex flex-col space-y-2 border border-gray-200 p-2 m-2 rounded-md" :title="node.nodeTitle"
-              :name="node.uuid"
-            >
-              <div class="text-lg mb-2">
-                节点：{{ node.nodeTitle }}
-              </div>
-              <div class="flex flex-col space-y-2">
-                <div class="text-base border-b border-gray-200 py-1">
-                  输入
-                </div>
-                <div v-for="(content, name) in node.input" :key="`input_${name}`" class="flex">
-                  <div class="min-w-24">
-                    {{ name }}
-                  </div>
-                  <div>
-                    {{ content.value }}
-                  </div>
-                </div>
-                <div class="text-base border-b border-gray-200 py-1">
-                  输出
-                </div>
-                <div v-for="(content, name) in node.output" :key="`onput_${name}`" class="flex">
-                  <div class="min-w-24">
-                    {{ name }}
-                  </div>
-                  <div>
-                    {{ content.value }}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <RuntimeNodes :nodes="runtimeNodes" :workflow="workflow" />
             <div class="sticky bottom-0 left-0 flex justify-center">
               <NButton v-show="submitting" size="tiny" @click="handleStop">
                 <template #icon>
@@ -331,9 +297,9 @@ onUnmounted(() => {
         <!-- 文件列表 -->
         <NUpload
           v-if="userInput.content.type === 4" ref="uploadRef" multiple directory-dnd action="/api/file/upload"
-          :default-upload="false" :max="startNode?.inputConfig.user_inputs.find(item => item.uuid === userInput.uuid)?.limit || 10"
-          :headers="headers"
-          @update:file-list="handleFileListChange" @finish="onUploadFinish" @change="onUploadChange"
+          :default-upload="false"
+          :max="startNode?.inputConfig.user_inputs.find(item => item.uuid === userInput.uuid)?.limit || 10"
+          :headers="headers" @update:file-list="handleFileListChange" @finish="onUploadFinish" @change="onUploadChange"
         >
           <NUploadDragger>
             <NText style="font-size: 16px">
