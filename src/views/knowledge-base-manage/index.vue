@@ -35,10 +35,14 @@ const token = ref<string>(authStore.token)
 const changeShowModal = (selected: KnowledgeBase.Info = knowledgeBaseEmptyInfo()) => {
   Object.assign(tmpKb, selected)
   showModal.value = !showModal.value
-  if (tmpKb.ingestModelId === '0') {
+  if (!tmpKb.ingestModelName) {
     const firstEnableModel = appStore.llms.find((item: { enable: any }) => item.enable)
-    if (firstEnableModel)
+    if (firstEnableModel) {
+      tmpKb.ingestModelName = firstEnableModel.modelName
       tmpKb.ingestModelId = firstEnableModel.modelId
+    }
+  } else {
+    tmpKb.ingestModelName = appStore.llms.find(item => item.modelName === tmpKb.ingestModelName)?.modelName || ''
   }
 }
 // table相关
@@ -189,6 +193,11 @@ function deleteKb(row: KnowledgeBase.Info) {
   })
 }
 
+function onModelChange(modelName: string) {
+  tmpKb.ingestModelName = modelName
+  tmpKb.ingestModelId = appStore.llms.find(item => item.modelName === modelName)?.modelId || ''
+}
+
 async function initData() {
   search(1)
 }
@@ -276,7 +285,7 @@ watch(
           文档切割时重叠数量（改动后对新索引生效）
           <NInputNumber v-model:value="tmpKb.ingestMaxOverlap" />
           模型名称（抽取图数据时使用的模型，为空则使用第一个可用的模型）
-          <NSelect v-model:value="tmpKb.ingestModelId" :options="appStore.llms" />
+          <NSelect :value="tmpKb.ingestModelName" :options="appStore.llms" :on-update:value="onModelChange" />
         </NCollapseItem>
       </NCollapse>
       <NCollapse>
