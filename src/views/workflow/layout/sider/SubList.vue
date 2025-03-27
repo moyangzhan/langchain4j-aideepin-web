@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { onUnmounted, ref } from 'vue'
+import { onActivated, onUnmounted, ref, watch } from 'vue'
 import { NIcon } from 'naive-ui'
 import { Cloud32Regular, LockClosed32Regular } from '@vicons/fluent'
 import { useWfStore } from '@/store'
@@ -9,7 +9,7 @@ import { useBasicLayout } from '@/hooks/useBasicLayout'
 
 const props = defineProps<Props>()
 const wfStore = useWfStore()
-const { scrollRef } = useScroll()
+const { scrollRef, scrollTo, scrollToTop } = useScroll()
 const mouseEnterKbUuid = ref<string>('')
 const { isMobile } = useBasicLayout()
 
@@ -25,7 +25,7 @@ async function handleSelect({ uuid }: Workflow.WorkflowInfo) {
 
 async function handleScroll(event: any) {
   const scrollTop = event.target.scrollTop
-  localStorage.setItem('subListScrollPosition', scrollTop)
+  localStorage.setItem('wfubListScrollPosition', scrollTop)
 }
 
 function handleMouseEnter({ uuid }: Workflow.WorkflowInfo) {
@@ -36,9 +36,20 @@ function handleMouseLeave() {
   mouseEnterKbUuid.value = ''
 }
 
+watch(() => wfStore.myWorkflows, (newVal, oldVal) => {
+  if (newVal.length > oldVal.length)
+    scrollToTop()
+})
+
+onActivated(async () => {
+  const savedPosition = localStorage.getItem('wfubListScrollPosition')
+  if (savedPosition)
+    scrollTo(savedPosition as unknown as number)
+})
+
 onUnmounted(() => {
   // 组件卸载前，可以清除之前保存的滚动位置
-  localStorage.removeItem('subListScrollPosition')
+  localStorage.removeItem('wfubListScrollPosition')
 })
 </script>
 

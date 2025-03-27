@@ -4,7 +4,7 @@ import { NButton, NLayout, NLayoutContent, NLayoutSider, NModal, useMessage } fr
 import type { Edge, Node, NodeChange } from '@vue-flow/core'
 import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
-import { AnswerNode, ClassifierNode, DocumentExtractorNode, DrawNode, EndNode, FaqExtractorNode, GoogleNode, KeywordExtractorNode, KnowledgeRetrievalNode, SpecialNode, StartNode, SwitcherNode, TemplateNode } from './components/nodes'
+import { AnswerNode, ClassifierNode, Dalle3Node, DocumentExtractorNode, EndNode, FaqExtractorNode, GoogleNode, KeywordExtractorNode, KnowledgeRetrievalNode, SpecialNode, StartNode, SwitcherNode, TemplateNode, TongyiwanxNode } from './components/nodes'
 import SpecialEdge from './components/edges/SpecialEdge.vue'
 import CustomEdge from './components/edges/CustomEdge.vue'
 import CustomEdge2 from './components/edges/CustomEdge2.vue'
@@ -211,7 +211,8 @@ async function onSave() {
   try {
     const { data: updatedWorkflow } = await api.workflowUpdate(props.workflow)
     ms.success('保存成功')
-    wfStore.updateNodesAndEdges(props.workflow.uuid, updatedWorkflow)
+    // 只需要更新新增节点和边的id
+    wfStore.updateNodesAndEdgesId(props.workflow.uuid, updatedWorkflow)
   } catch (e) {
     console.log(e)
   } finally {
@@ -274,8 +275,11 @@ onUnmounted(() => {
                   <template #node-documentextractor="nodeProps">
                     <DocumentExtractorNode v-bind="nodeProps" :workflow="workflow" />
                   </template>
-                  <template #node-draw="nodeProps">
-                    <DrawNode v-bind="nodeProps" :workflow="workflow" />
+                  <template #node-dalle3="nodeProps">
+                    <Dalle3Node v-bind="nodeProps" :workflow="workflow" />
+                  </template>
+                  <template #node-tongyiwanx="nodeProps">
+                    <TongyiwanxNode v-bind="nodeProps" :workflow="workflow" />
                   </template>
                   <template #node-knowledgeretrieval="nodeProps">
                     <KnowledgeRetrievalNode v-bind="nodeProps" :workflow="workflow" />

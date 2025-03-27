@@ -125,6 +125,9 @@ function commonSseProcess(
         params.doneCallback(eventMessage.data)
         return
       }
+      if (eventMessage.data.indexOf('-_wrap_-') === 0)
+        eventMessage.data = eventMessage.data.replace('-_wrap_-', '\n')
+
       // 会自动处理后端返回内容的首个空格，需在后端的返回内容前多加个空格，相关源码：https://github.com/Azure/fetch-event-source/blob/45ac3cfffd30b05b79fbf95c21e67d4ef59aa56a/src/parse.ts#L129-L133
       params.messageRecived(eventMessage.data, eventMessage.event ? eventMessage.event : '')
     },

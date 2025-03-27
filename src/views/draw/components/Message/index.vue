@@ -12,6 +12,7 @@ import { useIconRender } from '@/hooks/useIconRender'
 import { t } from '@/locales'
 import { useAuthStore } from '@/store'
 import NoPic from '@/assets/no_pic.png'
+import { getRealFileUrl } from '@/utils/functions'
 
 const props = withDefaults(defineProps<Props>(), {
   showAvatar: true,
@@ -184,9 +185,9 @@ function openDetail(uuid: string) {
               <NSpace>
                 <template v-for="imageUrl in imageUrls" :key="imageUrl">
                   <NImage
-                    v-if="imageUrl" width="100"
-                    :src="`${imageUrl}?token=${token}`" :fallback-src="NoPic"
-                    :render-toolbar="renderToolbarOut2(imageUrl)" preview-disabled @click="openDetail(draw.uuid)"
+                    v-if="imageUrl" width="100" :src="`${getRealFileUrl(imageUrl)}?token=${token}`"
+                    :fallback-src="NoPic" :render-toolbar="renderToolbarOut2(imageUrl)" preview-disabled
+                    @click="openDetail(draw.uuid)"
                   />
                 </template>
               </NSpace>

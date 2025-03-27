@@ -9,6 +9,7 @@ const tmpUuid = ref<string>('')
 const tmpTitle = ref<string>('')
 const tmpRemark = ref<string>('')
 const tmpIsPublic = ref<boolean>(false)
+const tmpUserUuid = ref<string>('')
 const wfStore = useWfStore()
 const userStore = useUserStore()
 const ms = useMessage()
@@ -38,6 +39,7 @@ async function handleSave(event?: KeyboardEvent) {
     tmpTitle.value = ''
     tmpRemark.value = ''
     tmpIsPublic.value = false
+    tmpUserUuid.value = ''
   } catch (error: any) {
     console.log('Create workflow error', error)
     if (error.message) {
@@ -75,6 +77,7 @@ watch(() => wfStore.createOrEditWfUuid, (val) => {
       tmpTitle.value = wf.title
       tmpRemark.value = wf.remark
       tmpIsPublic.value = wf.isPublic
+      tmpUserUuid.value = wf.userUuid
     }
   } else {
     tmpUuid.value = ''
@@ -106,18 +109,17 @@ watch(() => wfStore.createOrEditWfUuid, (val) => {
       </NFormItem>
       <div class="flex justify-center space-x-4">
         <NButton
-          type="primary"
-          :disabled="tmpUuid !== '' && wfStore.activeWorkflowInfo.userUuid !== userStore.userInfo.uuid"
-          @click="handleSave()"
+          v-show="tmpUuid && tmpUserUuid === userStore.userInfo.uuid" type="primary" :loading="saving"
+          :disabled="saving" @click="handleSave()"
         >
-          {{ $t('common.save') }}
+          更新
+        </NButton>
+        <NButton v-show="!tmpUuid" type="primary" :loading="saving" :disabled="saving" @click="handleSave()">
+          新增
         </NButton>
         <NPopconfirm placement="top" @positive-click.stop="onDelete">
           <template #trigger>
-            <NButton
-              type="error" ghost
-              :disabled="tmpUuid !== '' && wfStore.activeWorkflowInfo.userUuid !== userStore.userInfo.uuid"
-            >
+            <NButton v-show="tmpUuid && tmpUserUuid === userStore.userInfo.uuid" type="error" ghost>
               删除
             </NButton>
           </template>

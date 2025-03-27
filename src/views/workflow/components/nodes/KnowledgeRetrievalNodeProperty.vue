@@ -29,7 +29,7 @@ function onKnowledgeSelected(uuid: string, name: string) {
 <template>
   <div class="flex flex-col w-full">
     <div class="mt-2">
-      <div class="text-base mb-1">
+      <div class="text-xl mb-1">
         知识库
       </div>
       <div>
@@ -37,8 +37,8 @@ function onKnowledgeSelected(uuid: string, name: string) {
       </div>
     </div>
     <div class="mt-6">
-      <div class="text-base mb-1">
-        召回数量
+      <div class="text-xl mb-1">
+        召回数量 ({{ nodeConfig.top_n }})
       </div>
       <div class="px-2">
         <NSlider :value="nodeConfig.top_n" :step="1" :min="1" :max="30" :on-update:value="onTopNChange">
@@ -51,8 +51,8 @@ function onKnowledgeSelected(uuid: string, name: string) {
       </div>
     </div>
     <div class="mt-6">
-      <div class="text-base mb-1">
-        命中最低分数
+      <div class="text-xl mb-1">
+        命中最低分数 ({{ nodeConfig.score }})
       </div>
       <div class="px-2">
         <NSlider :value="nodeConfig.score" :step="0.1" :min="0.1" :max="1" :on-update:value="onScoreChange">
@@ -65,7 +65,7 @@ function onKnowledgeSelected(uuid: string, name: string) {
       </div>
     </div>
     <div class="mt-6">
-      <div class="text-base mb-1">
+      <div class="text-xl mb-1">
         严格模式
         <NTooltip trigger="hover">
           <template #trigger>
@@ -89,8 +89,16 @@ function onKnowledgeSelected(uuid: string, name: string) {
       </div>
     </div>
     <div class="mt-6">
-      <div class="text-base mb-1">
+      <div class="text-xl mb-1">
         默认回复内容
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <NIcon style="padding-top: 0.1rem">
+              <QuestionCircle16Regular />
+            </NIcon>
+          </template>
+          <div> 如果没有答案，则采用本内容</div>
+        </NTooltip>
       </div>
       <div>
         <NInput v-model:value="nodeConfig.default_response" type="textarea" :autosize="{ minRows: 3, maxRows: 10 }" />

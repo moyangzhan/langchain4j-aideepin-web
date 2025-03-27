@@ -1,8 +1,11 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { NImage, NImageGroup } from 'naive-ui'
 import { SvgIcon } from '@/components/common'
 import { getIconByComponentName, getIconClassByComponentName } from '@/utils/workflow-util'
-import { useWfStore } from '@/store'
+import { useAuthStore, useWfStore } from '@/store'
+import { getRealFileUrl } from '@/utils/functions'
+import TextComponent from '@/views/chat/components/Message/Text.vue'
 
 interface Props {
   nodes: Workflow.WfRuntimeNode[]
@@ -10,6 +13,7 @@ interface Props {
 }
 const props = defineProps<Props>()
 const wfStore = useWfStore()
+const authStore = useAuthStore()
 const prologue = computed(() => {
   const startNode = wfStore.getStartNodeByWfId(props.workflow.id)
   return (startNode?.nodeConfig as Workflow.NodeConfigStart).prologue || ''
@@ -54,12 +58,22 @@ const prologue = computed(() => {
           输出
         </div>
         <div v-for="(content, name) in node.output" :key="`onput_${name}`" class="flex">
-          <div class="min-w-24">
-            {{ name }}
-          </div>
-          <div>
-            {{ content.value || '无内容' }}
-          </div>
+          <template v-if="content.type === 4">
+            <NImageGroup>
+              <NImage
+                v-for="url in content.value" :key="url" :src="`${getRealFileUrl(url)}?token=${authStore.token}`"
+                width="100"
+              />
+            </NImageGroup>
+          </template>
+          <template v-else>
+            <div class="min-w-24">
+              {{ name }}
+            </div>
+            <div>
+              <TextComponent :inversion="false" :text="content.value || '无内容'" :as-raw-text="false" />
+            </div>
+          </template>
         </div>
       </div>
     </div>

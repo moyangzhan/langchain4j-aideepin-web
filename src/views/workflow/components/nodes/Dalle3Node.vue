@@ -3,14 +3,14 @@ import { computed } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 import CommonNodeHeader from '../CommonNodeHeader.vue'
-import { googleCountryOptions, googleLanguageOptions } from '@/utils/constant'
+import { dalle3QualityOptions, dalle3SizeOptions } from '@/utils/constant'
 
 const props = defineProps<NodeProps>()
-const country = computed(() => {
-  return googleCountryOptions.find(item => item.value === props.data.nodeConfig.country)?.label || ''
+const sizeLabel = computed(() => {
+  return dalle3SizeOptions.find(item => item.value === props.data.nodeConfig.size)?.label || ''
 })
-const language = computed(() => {
-  return googleLanguageOptions.find(item => item.value === props.data.nodeConfig.language)?.label || ''
+const qualityLabel = computed(() => {
+  return dalle3QualityOptions.find(item => item.value === props.data.nodeConfig.quality)?.label || ''
 })
 </script>
 
@@ -21,13 +21,10 @@ const language = computed(() => {
     <CommonNodeHeader :wf-node="data" />
     <div clas="flex-1 flex-col">
       <div class="content_line flex items-center pl-2">
-        国家和地区：{{ country }}
+        图像大小：{{ sizeLabel }}
       </div>
       <div class="content_line flex items-center pl-2">
-        语言：{{ language }}
-      </div>
-      <div class="content_line flex items-center pl-2">
-        提取数量：{{ data.nodeConfig.top_n }}
+        图像质量：{{ qualityLabel }}
       </div>
     </div>
   </div>

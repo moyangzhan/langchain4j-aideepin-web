@@ -88,7 +88,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <NTabs v-model:value="selectedKbType" tab-class="h-10" pane-class="h-full" type="line" justify-content="space-evenly" animated>
+  <NTabs v-model:value="selectedKbType" tab-class="h-10" pane-class="h-full" type="line" justify-content="space-evenly">
     <NTabPane name="mine" tab="我的" size="small">
       <SubList :list="myKbInfos" :active-kb-uuid="activeKbUuid" />
     </NTabPane>

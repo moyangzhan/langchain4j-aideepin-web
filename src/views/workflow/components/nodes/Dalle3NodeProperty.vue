@@ -1,35 +1,21 @@
 <script setup lang="ts">
-import { NIcon, NInput, NTooltip } from 'naive-ui'
+import { NIcon, NInput, NSelect, NTooltip } from 'naive-ui'
 import { QuestionCircle16Regular } from '@vicons/fluent'
 import NodePropertyInput from '../NodePropertyInput.vue'
 import ReferComment from '../ReferComment.vue'
-import WfLLMSelector from '../WfLLMSelector.vue'
+import { dalle3QualityOptions, dalle3SizeOptions } from '@/utils/constant'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
   wfNode: Workflow.WorkflowNode
 }
-
 const props = defineProps<Props>()
-const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigAnswer
-
-function llmSelected(modelName: string) {
-  console.log('nodeConfig.modelName', nodeConfig.model_name, modelName)
-  nodeConfig.model_name = modelName
-}
+const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigDalle3
 </script>
 
 <template>
   <div class="flex flex-col w-full">
     <NodePropertyInput :workflow="workflow" :wf-node="wfNode" />
-    <div class="mt-6">
-      <div class="text-xl mb-1">
-        模型
-      </div>
-      <div>
-        <WfLLMSelector :model-name="nodeConfig.model_name" @llm-selected="llmSelected" />
-      </div>
-    </div>
     <div class="mt-6">
       <div class="text-xl mb-1">
         提示词
@@ -45,6 +31,22 @@ function llmSelected(modelName: string) {
       <div class="flex flex-col">
         <ReferComment />
         <NInput v-model:value="nodeConfig.prompt" type="textarea" :autosize="{ minRows: 3, maxRows: 10 }" />
+      </div>
+    </div>
+    <div class="mt-6">
+      <div class="text-xl mb-1">
+        图像大小
+      </div>
+      <div>
+        <NSelect v-model:value="nodeConfig.size" :options="dalle3SizeOptions" />
+      </div>
+    </div>
+    <div class="mt-6">
+      <div class="text-xl mb-1">
+        图像质量
+      </div>
+      <div>
+        <NSelect v-model:value="nodeConfig.quality" :options="dalle3QualityOptions" />
       </div>
     </div>
   </div>

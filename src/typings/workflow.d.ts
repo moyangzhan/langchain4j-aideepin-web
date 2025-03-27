@@ -169,7 +169,7 @@ declare namespace Workflow {
   }
 
   interface NodeIOData {
-    name: string
+    title: string
     type: number
     value: any
   }
@@ -244,6 +244,26 @@ declare namespace Workflow {
   interface NodeConfigFaqExtractor implements NodeConfig {
     model_name: string
     top_n: number
+  }
+
+  interface NodeConfigGoogleSearch implements NodeConfig {
+    query: string
+    country: string
+    language: string
+    top_n: number
+  }
+
+  interface NodeConfigDalle3 implements NodeConfig {
+    prompt: string
+    size: string
+    quality: string
+  }
+
+  interface NodeConfigTongyiwanx implements NodeConfig {
+    model_name: string
+    prompt: string
+    size: string
+    seed: number
   }
 
   interface NodeIOData {

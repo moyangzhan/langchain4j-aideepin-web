@@ -33,6 +33,11 @@ export const useAppStore = defineStore('app-store', {
           return enableList[0]
       }
     },
+    getImageModelByName(state: AppState) {
+      return (name: string) => {
+        return state.imageModels.find(item => item.modelName === name)
+      }
+    },
   },
 
   actions: {

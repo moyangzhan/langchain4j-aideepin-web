@@ -55,9 +55,7 @@ watch(
   >
     <div class="flex flex-col h-full" :style="mobileSafeArea">
       <main class="flex flex-col flex-1 min-h-0">
-        <div class="flex-1 min-h-0 pb-4 overflow-hidden">
-          <List />
-        </div>
+        <List class="flex-1 min-h-0 pb-4" />
       </main>
     </div>
   </NLayoutSider>

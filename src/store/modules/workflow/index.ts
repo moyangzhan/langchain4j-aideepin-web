@@ -150,7 +150,8 @@ export const useWfStore = defineStore('wf-store', {
       this.wfComponents = components
     },
     addWorkflowAndActive(info: Workflow.WorkflowInfo) {
-      this.appendWorkflows([info], true)
+      this.initWorkflowFields(info)
+      this.myWorkflows.unshift(info)
       this.setActiveAndGo(info.uuid, 'workflowDefine')
     },
     appendWorkflows(infos: Workflow.WorkflowInfo[], isMine: boolean) {
@@ -158,29 +159,33 @@ export const useWfStore = defineStore('wf-store', {
       infos.forEach((workflow) => {
         if (workflows.findIndex(wf => wf.uuid === workflow.uuid) !== -1)
           return
-        workflows.push(workflow)
-        workflow.nodes.forEach((node) => {
-          node.workflowUuid = workflow.uuid
-          node.sourceHandleIds = []
-          const wfComponent = this.wfComponents.find(component => component.id === node.workflowComponentId)
-          if (wfComponent)
-            node.wfComponent = wfComponent
 
-          if (!node.inputConfig)
-            node.inputConfig = { user_inputs: [], ref_inputs: [] }
-        })
-        workflow.edges.forEach((edge) => {
-          edge.workflowUuid = workflow.uuid
-        })
-        workflow.deleteEdges = []
-        workflow.deleteNodes = []
+        this.initWorkflowFields(workflow)
+        workflows.push(workflow)
       })
     },
     updateBaseInfo(uuid: string, info: { title: string; remark: string; isPublic: boolean }) {
       this.myWorkflows.forEach((item) => {
         if (item.uuid === uuid)
-          Object.assign(item, { ...info })
+          Object.assign(item, { title: info.title, remark: info.remark, isPublic: info.isPublic })
       })
+    },
+    initWorkflowFields(workflow: Workflow.WorkflowInfo) {
+      workflow.nodes.forEach((node) => {
+        node.workflowUuid = workflow.uuid
+        node.sourceHandleIds = []
+        const wfComponent = this.wfComponents.find(component => component.id === node.workflowComponentId)
+        if (wfComponent)
+          node.wfComponent = wfComponent
+
+        if (!node.inputConfig)
+          node.inputConfig = { user_inputs: [], ref_inputs: [] }
+      })
+      workflow.edges.forEach((edge) => {
+        edge.workflowUuid = workflow.uuid
+      })
+      workflow.deleteEdges = []
+      workflow.deleteNodes = []
     },
     updateNodesAndEdges(uuid: string, info: Workflow.WorkflowInfo) {
       this.myWorkflows.forEach((item) => {
@@ -188,12 +193,32 @@ export const useWfStore = defineStore('wf-store', {
           item.nodes.forEach((node) => {
             const nodeInfo = info.nodes.find(n => n.uuid === node.uuid)
             if (nodeInfo)
-              Object.assign(node, nodeInfo)
+              Object.assign(node, { ...nodeInfo })
           })
           item.edges.forEach((edge) => {
             const edgeInfo = info.edges.find(e => e.uuid === edge.uuid)
             if (edgeInfo)
-              Object.assign(edge, edgeInfo)
+              Object.assign(edge, { ...edgeInfo })
+          })
+        }
+      })
+    },
+    updateNodesAndEdgesId(uuid: string, updatedWorkflow: Workflow.WorkflowInfo) {
+      this.myWorkflows.forEach((item) => {
+        if (item.uuid === uuid) {
+          item.nodes.forEach((node) => {
+            if (!node.id) {
+              const updatedNodeInfo = updatedWorkflow.nodes.find(updatedNode => updatedNode.uuid === node.uuid)
+              if (updatedNodeInfo)
+                node.id = updatedNodeInfo.id
+            }
+          })
+          item.edges.forEach((edge) => {
+            if (!edge.id) {
+              const edgeInfo = updatedWorkflow.edges.find(updatedEdge => updatedEdge.uuid === edge.uuid)
+              if (edgeInfo)
+                edge.id = edgeInfo.id
+            }
           })
         }
       })
@@ -216,6 +241,12 @@ export const useWfStore = defineStore('wf-store', {
       this.getWorkflowInfo(wfUuid)?.nodes.forEach((node) => {
         if (node.uuid === nodeUuid)
           node.title = newNodeTitle
+      })
+    },
+    updateWfNode(wfUuid: string, nodeUuid: string, newNode: Workflow.WorkflowNode) {
+      this.getWorkflowInfo(wfUuid)?.nodes.forEach((node) => {
+        if (node.uuid === nodeUuid)
+          Object.assign(node, { ...newNode })
       })
     },
     addRefInputToNode(wfUuid: string, nodeUuid: string, newInput: Workflow.NodeIORefDinition) {

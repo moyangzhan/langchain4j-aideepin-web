@@ -12,6 +12,8 @@ import { useIconRender } from '@/hooks/useIconRender'
 import { t } from '@/locales'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAuthStore } from '@/store'
+import { getRealFileUrl } from '@/utils/functions'
+
 import NoPic from '@/assets/no_pic.png'
 
 const props = withDefaults(defineProps<Props>(), {
@@ -188,7 +190,10 @@ function renderToolbarOut2(imageUrl: string) {
               <!-- <NImageGroup :render-toolbar="renderToolbar"> -->
               <NSpace>
                 <template v-for="imageUrl in imageUrls" :key="imageUrl">
-                  <NImage v-if="imageUrl" width="100" :src="`/api${imageUrl}?token=${token}`" :fallback-src="NoPic" :render-toolbar="renderToolbarOut2(imageUrl)" />
+                  <NImage
+                    v-if="imageUrl" width="100" :src="`${getRealFileUrl(imageUrl)}?token=${token}`"
+                    :fallback-src="NoPic" :render-toolbar="renderToolbarOut2(imageUrl)"
+                  />
                 </template>
               </NSpace>
               <!-- </NImageGroup> -->

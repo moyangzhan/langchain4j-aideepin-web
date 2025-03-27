@@ -32,6 +32,12 @@ export function createNewNode(
     createFaqExtractor(newWfNode)
   else if (component.name === 'KnowledgeRetrieval')
     createKnowledgeRetrieval(newWfNode)
+  else if (component.name === 'Dalle3')
+    createDalle3(newWfNode)
+  else if (component.name === 'Tongyiwanx')
+    createTongyiwanx(newWfNode)
+  else if (component.name === 'Google')
+    createGoogle(newWfNode)
 
   workflow.nodes.push(newWfNode)
   uiWorkflow.nodes.push(wfNodeToUiNode(newWfNode))
@@ -237,6 +243,39 @@ function createKnowledgeRetrieval(node: Workflow.WorkflowNode) {
   }
 }
 
+function createDalle3(node: Workflow.WorkflowNode) {
+  node.nodeConfig = {
+    prompt: '',
+    size: '1024x1024',
+    quality: 'standard',
+  }
+}
+
+function createTongyiwanx(node: Workflow.WorkflowNode) {
+  const appStore = useAppStore()
+  const opts = appStore.imageModels.filter((item) => {
+    if (item.modelName.includes('wanx-background'))
+      return false
+
+    return item.modelPlatform === 'dashscope'
+  })
+  node.nodeConfig = {
+    model_name: opts.length > 0 ? opts[0].modelName : '',
+    prompt: '',
+    size: '1024*1024',
+    seed: -1,
+  }
+}
+
+function createGoogle(node: Workflow.WorkflowNode) {
+  node.nodeConfig = {
+    query: '',
+    country: 'cn',
+    language: 'zh-cn',
+    top_n: 5,
+  }
+}
+
 export function getInputLabelFromParamName(workflow: Workflow.WorkflowInfo, nodeUuid: string, nodeParamName: string) {
   const node = workflow.nodes.find(node => node.uuid === nodeUuid)
   if (!node)
@@ -285,7 +324,9 @@ export function getIconByComponentName(name: string) {
       return 'oui:logstash-if'
     case 'template':
       return 'carbon:prompt-template'
-    case 'draw':
+    case 'dalle3':
+      return 'solar:pallete-2-linear'
+    case 'tongyiwanx':
       return 'solar:pallete-2-linear'
     case 'google':
       return 'ri:google-line'
@@ -316,7 +357,9 @@ export function getIconClassByComponentName(name: string) {
       return 'text-yellow-900'
     case 'template':
       return 'text-sky-800'
-    case 'draw':
+    case 'dalle3':
+      return 'text-fuchsia-700'
+    case 'tongyiwanx':
       return 'text-fuchsia-700'
     case 'google':
       return 'text-emerald-900'

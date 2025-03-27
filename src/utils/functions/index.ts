@@ -239,6 +239,13 @@ export function calcImageUrls(draw: Chat.Draw) {
   }
 }
 
+export function getRealFileUrl(fileUrl: string) {
+  if (!fileUrl.includes('http') && !fileUrl.includes('/api'))
+    return `/api${fileUrl}`
+  else
+    return fileUrl
+}
+
 export function emptyQuota(): User.Config {
   return {
     userQuota: {

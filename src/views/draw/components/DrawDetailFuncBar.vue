@@ -6,7 +6,7 @@ import { useAuthStore, useDrawStore, useGalleryStore, useUserStore } from '@/sto
 import defaultAvatar from '@/assets/avatar.jpg'
 import NoPic from '@/assets/no_pic.png'
 import api from '@/api'
-import { emptyDraw } from '@/utils/functions'
+import { emptyDraw, getRealFileUrl } from '@/utils/functions'
 
 const props = withDefaults(defineProps<Props>(), {
   draw: () => emptyDraw(),
@@ -100,12 +100,12 @@ async function handleStar(uuid: string) {
       <NFlex>
         <NImageGroup>
           <NImage
-            :src="`${draw.dynamicParams.base_image_url}?token=${authStore.token}`" :fallback-src="NoPic"
-            object-fit="cover" title="原图" width="100"
+            :src="`${getRealFileUrl(draw.dynamicParams.base_image_url)}?token=${authStore.token}`"
+            :fallback-src="NoPic" object-fit="cover" title="原图" width="100"
           />
           <NImage
             v-if="draw.dynamicParams.ref_image_url"
-            :src="`${draw.dynamicParams.ref_image_url}?token=${authStore.token}`" :fallback-src="NoPic"
+            :src="`${getRealFileUrl(draw.dynamicParams.ref_image_url)}?token=${authStore.token}`" :fallback-src="NoPic"
             object-fit="cover" title="引导图" width="100"
           />
         </NImageGroup>

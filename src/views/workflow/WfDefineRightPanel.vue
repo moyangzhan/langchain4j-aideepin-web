@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from 'vue'
 import { NInput } from 'naive-ui'
-import { AnswerNodeProperty, ClassifierNodeProperty, DocumentExtractorNodeProperty, EndNodeProperty, FaqExtractorNodeProperty, KeywordExtractorNodeProperty, KnowledgeRetrievalNodeProperty, StartNodeProperty, SwticherNodeProperty, TemplateNodeProperty } from './components/nodes'
+import { AnswerNodeProperty, ClassifierNodeProperty, Dalle3NodeProperty, DocumentExtractorNodeProperty, EndNodeProperty, FaqExtractorNodeProperty, GoogleNodeProperty, KeywordExtractorNodeProperty, KnowledgeRetrievalNodeProperty, StartNodeProperty, SwticherNodeProperty, TemplateNodeProperty, TongyiwanxNodeProperty } from './components/nodes'
 import { useWfStore } from '@/store'
 import { SvgIcon } from '@/components/common'
 import { getIconByComponentName, getIconClassByComponentName } from '@/utils/workflow-util'
@@ -101,7 +101,19 @@ onMounted(() => {
           :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
         />
         <KnowledgeRetrievalNodeProperty
-          v-else-if="wfNode.wfComponent.name === 'KnowledgeRetrieval'" :key="`knowledge_${wfNode.uuid}`"
+          v-else-if="wfNode.wfComponent.name === 'KnowledgeRetrieval'"
+          :key="`knowledge_${wfNode.uuid}`" :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
+        />
+        <Dalle3NodeProperty
+          v-else-if="wfNode.wfComponent.name === 'Dalle3'" :key="`dalle3_${wfNode.uuid}`"
+          :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
+        />
+        <TongyiwanxNodeProperty
+          v-else-if="wfNode.wfComponent.name === 'Tongyiwanx'" :key="`tongyiwanx_${wfNode.uuid}`"
+          :workflow="workflow" :wf-node="wfNode"
+        />
+        <GoogleNodeProperty
+          v-else-if="wfNode.wfComponent.name === 'Google'" :key="`google_${wfNode.uuid}`"
           :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
         />
         <EndNodeProperty

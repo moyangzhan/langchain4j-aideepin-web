@@ -12,6 +12,7 @@ const wfStore = useWfStore()
 const { activeUuid, myWorkflows, publicWorkflows, selectedType } = storeToRefs<any>(wfStore)
 const authStore = useAuthStore()
 const authStoreRef = ref<AuthState>(authStore)
+const innerHeight = window.innerHeight < 800 ? 800 : window.innerHeight - 60
 
 async function initAll() {
   await loadWfComponents()
@@ -98,17 +99,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <NTabs
-    v-model:value="selectedType" tab-class="h-10" pane-class="h-full" type="line" justify-content="space-evenly"
-    animated
-  >
+  <NTabs v-model:value="selectedType" tab-class="h-10" pane-class="h-full" type="line" justify-content="space-evenly">
     <NTabPane name="mine" tab="我的" size="small">
-      <div class="p-4">
-        <NButton dashed block @click="handleAdd">
-          新建应用
-        </NButton>
+      <div class="flex flex-col space-y-2" :style="`height:${innerHeight}px`">
+        <div class="px-4">
+          <NButton dashed block @click="handleAdd">
+            新建应用
+          </NButton>
+        </div>
+        <SubList :list="myWorkflows" :active-wf-uuid="activeUuid" />
       </div>
-      <SubList :list="myWorkflows" :active-wf-uuid="activeUuid" />
     </NTabPane>
     <NTabPane name="public" tab="公开">
       <SubList :list="publicWorkflows" :active-wf-uuid="activeUuid" />

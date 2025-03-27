@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { NIcon, NInput, NTooltip } from 'naive-ui'
+import { NButton, NIcon, NInput, NInputNumber, NSelect, NTooltip } from 'naive-ui'
 import { QuestionCircle16Regular } from '@vicons/fluent'
 import NodePropertyInput from '../NodePropertyInput.vue'
+import WfImageModelSelector from '../WfImageModelSelector.vue'
 import ReferComment from '../ReferComment.vue'
-import WfLLMSelector from '../WfLLMSelector.vue'
+import { tongyiwanxSizeOptions } from '@/utils/constant'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
   wfNode: Workflow.WorkflowNode
 }
-
 const props = defineProps<Props>()
-const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigAnswer
+const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigTongyiwanx
 
-function llmSelected(modelName: string) {
+function selected(modelName: string) {
   console.log('nodeConfig.modelName', nodeConfig.model_name, modelName)
   nodeConfig.model_name = modelName
 }
@@ -27,7 +27,10 @@ function llmSelected(modelName: string) {
         模型
       </div>
       <div>
-        <WfLLMSelector :model-name="nodeConfig.model_name" @llm-selected="llmSelected" />
+        <WfImageModelSelector
+          :model-name="nodeConfig.model_name" platform="dashscope" :exclulde-model-names="['wanx-background-generation-v2']"
+          @image-model-selected="selected"
+        />
       </div>
     </div>
     <div class="mt-6">
@@ -45,6 +48,25 @@ function llmSelected(modelName: string) {
       <div class="flex flex-col">
         <ReferComment />
         <NInput v-model:value="nodeConfig.prompt" type="textarea" :autosize="{ minRows: 3, maxRows: 10 }" />
+      </div>
+    </div>
+    <div class="mt-6">
+      <div class="text-xl mb-1">
+        图像大小
+      </div>
+      <div>
+        <NSelect v-model:value="nodeConfig.size" :options="tongyiwanxSizeOptions" />
+      </div>
+    </div>
+    <div class="mt-6">
+      <div class="text-xl mb-1">
+        随机种子
+      </div>
+      <div class="flex space-x-2 items-center">
+        <NInputNumber v-model:value="nodeConfig.seed" :min="-1" :max="2147483647" class="grow" />
+        <NButton type="primary" size="tiny" ghost @click="nodeConfig.seed = Math.floor(Math.random() * 2147483647)">
+          随机生成
+        </NButton>
       </div>
     </div>
   </div>

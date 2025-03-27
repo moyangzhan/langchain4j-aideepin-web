@@ -1,10 +1,13 @@
 <script setup lang='ts'>
 import { computed, ref } from 'vue'
-import { NDropdown } from 'naive-ui'
+import { NDropdown, NImage, NImageGroup, NList, NListItem } from 'naive-ui'
 import AvatarComponent from '@/views/chat/components/Message/Avatar.vue'
 import TextComponent from '@/views/chat/components/Message/Text.vue'
+import NoPic from '@/assets/no_pic.png'
 import { SvgIcon } from '@/components/common'
 import { useIconRender } from '@/hooks/useIconRender'
+import { useAuthStore } from '@/store'
+import { getRealFileUrl } from '@/utils/functions'
 import { t } from '@/locales'
 
 interface Props {
@@ -16,7 +19,7 @@ interface Props {
   error?: boolean
   loading?: boolean
 }
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   showAvatar: true,
 })
 const emit = defineEmits<Emit>()
@@ -25,8 +28,10 @@ interface Emit {
   (ev: 'delete'): void
 }
 const { iconRender } = useIconRender()
-const textRef = ref<HTMLElement>()
+const authStore = useAuthStore()
 const messageRef = ref<HTMLElement>()
+const imageUrls = ref<string[]>([])
+const fileUrls = ref<string[]>([])
 const options = computed(() => {
   const common = [
     {
@@ -43,6 +48,52 @@ function handleSelect(key: 'copyText' | 'setPublic' | 'setPrivate' | 'delete') {
     case 'delete':
       emit('delete')
   }
+}
+
+const txt = computed(() => {
+  let result = ''
+  for (const key in props.ioObject) {
+    const content = props.ioObject[key] as Workflow.NodeIOData
+    if (content.type === 4)
+      extractFileUrls(content)
+    else
+      result += content.value
+  }
+  return result
+})
+
+function extractFileUrls(nodeIOData: Workflow.NodeIOData) {
+  if (Array.isArray(nodeIOData.value)) {
+    nodeIOData.value.forEach((url) => {
+      const lc = url.toLowerCase()
+      if (isImageUrl(lc))
+        imageUrls.value.push(url)
+      else
+        fileUrls.value.push(url)
+    })
+  } else {
+    console.warn('nodeIOData.value is not an array', nodeIOData)
+  }
+}
+
+function isImageUrl(url: string) {
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg']
+  const extension = url.slice(url.lastIndexOf('.'))
+  return imageExtensions.includes(extension.toLowerCase())
+}
+
+function openFileInNewTab(filelUrl: string) {
+  const x = new window.XMLHttpRequest()
+  x.open('GET', `${getRealFileUrl(filelUrl)}?token=${authStore.token}`, true)
+  x.responseType = 'blob'
+  x.onload = () => {
+    const url = window.URL.createObjectURL(x.response)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filelUrl.split('/').pop() || 'file'
+    a.click()
+  }
+  x.send()
 }
 </script>
 
@@ -62,28 +113,27 @@ function handleSelect(key: 'copyText' | 'setPublic' | 'setPrivate' | 'delete') {
       <div class="flex items-center w-full" :class="[{ 'flex-row-reverse': inversion }]">
         <!-- 1、渲染文字 -->
         <div v-if="Object.keys(ioObject).length === 0" class="flex items-start gap-1 mt-2">
-          <TextComponent
-            ref="textRef" :inversion="inversion" :error="error" text="无内容" :loading="loading"
-            :as-raw-text="true"
-          />
+          <TextComponent :inversion="inversion" :error="error" text="无内容" :loading="loading" :as-raw-text="true" />
         </div>
         <TextComponent
-          v-if="Object.keys(ioObject).length === 1" ref="textRef" :inversion="inversion" :error="error"
-          :text="`${(Object.entries(ioObject)[0][1] as Workflow.UserInputContent).value}`" :loading="loading"
-          :as-raw-text="true"
+          v-else-if="txt" :inversion="inversion" :error="error" :text="txt" :loading="loading"
+          :as-raw-text="false"
         />
-        <div v-for="(inputContent, propName) in ioObject" v-else :key="`${propName}_${inputContent.title}`">
-          <template v-if="(`${propName}`).indexOf('_wf_user_input_title') === -1">
-            <div class="flex items-start gap-1 mt-2" :class="[inversion ? 'flex-row-reverse' : 'flex-row']">
-              <template v-if="inputContent.type === 1 || inputContent.type === 2 || inputContent.type === 5">
-                <TextComponent
-                  ref="textRef" :inversion="inversion" :error="error"
-                  :text="`##${inputContent.title}\n\r${inputContent.value}`" :loading="loading"
-                  :as-raw-text="true"
-                />
-              </template>
-            </div>
-          </template>
+        <NImageGroup v-if="imageUrls.length > 0" class="my-2">
+          <NImage
+            v-for="imageUrl in imageUrls" :key="imageUrl" style="height:100px"
+            :src="`${getRealFileUrl(imageUrl)}?token=${authStore.token}`" :fallback-src="NoPic" object-fit="cover"
+          />
+        </NImageGroup>
+        <div v-if="fileUrls.length > 0" class="flex flex-col space-y-2 mt-2">
+          <NList hoverable clickable>
+            <NListItem v-for="fileUrl in fileUrls" :key="fileUrl">
+              <div class="flex items-center" @click="openFileInNewTab(fileUrl)">
+                <SvgIcon icon="carbon:attachment" class="mr-1 text-sm" />
+                <span>{{ fileUrl.split('/').pop() }}</span>
+              </div>
+            </NListItem>
+          </NList>
         </div>
         <!-- 消息框侧边下拉选择列表 -->
         <div v-show="inversion" class="flex flex-col">

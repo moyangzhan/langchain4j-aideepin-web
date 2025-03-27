@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { NInput } from 'naive-ui'
 import NodePropertyInput from '../NodePropertyInput.vue'
+import ReferComment from '../ReferComment.vue'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -20,7 +21,8 @@ if (!nodeConfig.result)
       <div class="text-xl mb-1">
         内容
       </div>
-      <div>
+      <div class="flex flex-col">
+        <ReferComment />
         <NInput v-model:value="nodeConfig.result" type="textarea" :autosize="{ minRows: 3, maxRows: 10 }" />
       </div>
     </div>

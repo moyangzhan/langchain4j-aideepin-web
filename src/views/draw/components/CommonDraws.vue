@@ -8,7 +8,7 @@ import { useAuthStore, useDrawStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import LoginTip from '@/views/user/LoginTip.vue'
 import NoPic from '@/assets/no_pic.png'
-import { emptyDraw } from '@/utils/functions'
+import { emptyDraw, getRealFileUrl } from '@/utils/functions'
 
 const props = withDefaults(defineProps<Props>(), {
   draws: () => [],
@@ -98,7 +98,7 @@ defineExpose({ gotoTop, gotoBottom })
                 <template v-for="imageUrl in draw.imageUrls" :key="imageUrl">
                   <NImage
                     v-if="imageUrl && draw.uuid !== drawStore.loadingUuid" width="100%"
-                    :src="`${imageUrl}?token=${authStore.token}`" :fallback-src="NoPic" preview-disabled
+                    :src="`${getRealFileUrl(imageUrl)}?token=${authStore.token}`" :fallback-src="NoPic" preview-disabled
                     @click="openDraw(draw)"
                   />
                 </template>
