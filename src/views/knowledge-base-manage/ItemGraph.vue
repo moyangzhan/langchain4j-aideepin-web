@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, onUpdated, ref } from 'vue'
 import { NButton, NDivider, NFlex } from 'naive-ui'
 import cytoscape from 'cytoscape'
 import api from '@/api'
@@ -11,52 +11,58 @@ const props = withDefaults(defineProps<Props>(), {
   kbItemUuid: '',
 })
 const limit = 100
-const loading = ref(false)
+const loading = ref<boolean>(false)
+const vertexCount = ref<number>(0)
 const selectedVertex = ref<KnowledgeBase.KbVertex | null>()
 const selectedEdge = ref<KnowledgeBase.KbEdge | null>()
+const isEmpty = ref<boolean>(false)
 let cy: any = null
 
 async function loadGraph(maxVertexId: number, maxEdgeId: number) {
   if (loading.value)
     return
 
+  if (!props.kbItemUuid) {
+    console.log('loadGraph kbItemUuid is empty')
+    return
+  }
+
   loading.value = true
   try {
-    if (cy) {
-      console.log(cy.$('node'))
-      cy.$('node').remove()
-      cy.$('edge').remove()
-    }
+    cy.$('node').remove()
+    cy.$('edge').remove()
     const resp = await api.knowledgeBaseGraph<KnowledgeBase.KbItemGraphResp>(props.kbItemUuid, maxVertexId, maxEdgeId, limit)
+    vertexCount.value = resp.data.vertices.length
     const nodes = resp.data.vertices.map((item) => {
       return { group: 'nodes', data: item }
     })
     const edges = resp.data.edges.map((item) => {
       return { group: 'edges', data: { source: `${item.startId}`, target: `${item.endId}`, ...item } }
     })
-    nextTick(() => {
-      if (!cy)
-        initCy()
-
-      renderGraph(nodes, edges)
-    })
+    renderGraph(nodes, edges)
   } finally {
     loading.value = false
   }
 }
 
+onUpdated(() => {
+  console.log('ItemGraph onUpdated')
+  nextTick(() => {
+    loadGraph(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+  })
+})
+
 onMounted(() => {
-  if (!cy) {
-    nextTick(() => {
-      console.log('onMounted nextTick')
-      // initCy()
-    })
-  }
+  console.log('ItemGraph onMounted')
+  nextTick(() => {
+    initCy()
+    loadGraph(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+  })
 })
 
 function initCy() {
   cy = cytoscape({
-    container: document.getElementById('cy'),
+    container: document.getElementById('itemGraphCy'),
     elements: [],
     style: [
       {
@@ -90,6 +96,7 @@ function renderGraph(nodes: any, edges: any) {
     })
   }
   relayout()
+  isEmpty.value = cy.elements().length === 0
 }
 
 function relayout() {
@@ -134,24 +141,17 @@ function relayout() {
   const layout = cy.layout(options)
   layout.run()
 }
-
-watch(
-  () => props.kbItemUuid,
-  (newVal, oldVal) => {
-    console.log(`newVal:${props.kbItemUuid},oldVal:${oldVal}`)
-    if (newVal !== oldVal)
-      loadGraph(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
-  },
-  { immediate: true },
-)
 </script>
 
 <template>
   <NFlex>
-    <div id="cy" style="width:80%; height: 400px;" class="border border-gray-300" />
+    <div id="itemGraphCy" style="width:80%; height: 400px;" class="border border-gray-300" />
     <div class="w-1/6 h-[400px] overflow-y-auto">
-      <NButton size="small" :loading="loading" type="info" ghost @click="relayout">
+      <NButton v-show="!isEmpty" size="small" :loading="loading" type="info" ghost @click="relayout">
         重新布局
+      </NButton>
+      <NButton v-show="isEmpty" size="small" type="warning" ghost>
+        无数据
       </NButton>
       <NFlex v-if="selectedVertex" vertical>
         <NDivider title-placement="left">

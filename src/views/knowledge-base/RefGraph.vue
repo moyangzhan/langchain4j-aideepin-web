@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { nextTick, onActivated, onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, onUpdated, ref } from 'vue'
 import { NButton, NDivider, NFlex } from 'naive-ui'
 import cytoscape from 'cytoscape'
 import { useKbStore } from '@/store'
@@ -27,29 +27,18 @@ function getAndRenderGraph() {
 }
 
 function parseAndRender(graphRef: KnowledgeBase.QaRecordGraphRef) {
-  if (cy) {
-    console.log(cy.$('node'))
-    cy.$('node').remove()
-    cy.$('edge').remove()
-  }
+  cy.$('node').remove()
+  cy.$('edge').remove()
   const nodes = graphRef.vertices.map((item) => {
     return { group: 'nodes', data: { id: `${item.id}`, name: item.name, description: item.description } }
   })
   const edges = graphRef.edges.map((item) => {
     return { group: 'edges', data: { id: `${item.id}`, label: `${item.label}`, source: `${item.startId}`, target: `${item.endId}`, description: item.description } }
   })
-  if (!cy) {
-    nextTick(() => {
-      initCy()
-      renderGraph(nodes, edges)
-    })
-  } else {
-    renderGraph(nodes, edges)
-  }
+  renderGraph(nodes, edges)
 }
 
 function renderGraph(nodes: any, edges: any) {
-  console.log('renderGraph')
   if (nodes.length > 0) {
     cy.add(nodes)
     cy.nodes().on('click', (e: any) => {
@@ -97,8 +86,9 @@ async function loadGraph() {
 }
 
 function initCy() {
+  console.log('ref graph initCy')
   cy = cytoscape({
-    container: document.getElementById('cy'),
+    container: document.getElementById('refGraphCy'),
     elements: [],
     style: [
       {
@@ -118,38 +108,30 @@ function relayout() {
     name: 'cose',
   })
   layout.run()
-  if (cy.elements().length === 0)
-    isEmpty.value = true
+  isEmpty.value = cy.elements().length === 0
 }
 
-watch(
-  () => props.qaRecordUuid,
-  (newVal, oldVal) => {
-    console.log(`newVal:${props.qaRecordUuid},oldVal:${oldVal}`)
-    if (newVal !== oldVal)
-      getAndRenderGraph()
-  },
-  { immediate: true },
-)
-
-onActivated(() => {
-  loading.value = kbStore.isLoadingGraphRef(props.qaRecordUuid)
-  isEmpty.value = false
+onUpdated(() => {
+  console.log('RefGraph onUpdated')
+  nextTick(() => {
+    selectedVertex.value = null
+    selectedEdge.value = null
+    getAndRenderGraph()
+  })
 })
 
 onMounted(() => {
-  if (!cy) {
-    nextTick(() => {
-      console.log('onMounted nextTick')
-      // initCy()
-    })
-  }
+  console.log('RefGraph onMounted')
+  nextTick(() => {
+    initCy()
+    getAndRenderGraph()
+  })
 })
 </script>
 
 <template>
   <NFlex>
-    <div id="cy" style="width:80%; height: 400px;" class="border border-gray-300" />
+    <div id="refGraphCy" style="width:80%; height: 400px;" class="border border-gray-300" />
     <div class="w-1/6 h-[400px] overflow-y-auto">
       <NButton v-show="!isEmpty" size="small" :loading="loading" type="info" ghost @click="relayout">
         重新布局

@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
-import { NAlert, NBreadcrumb, NBreadcrumbItem, NButton, NCard, NCheckbox, NCheckboxGroup, NDataTable, NFlex, NIcon, NInput, NModal, NP, NSpace, NText, NUpload, NUploadDragger, useDialog, useMessage } from 'naive-ui'
+import { NAlert, NBreadcrumb, NBreadcrumbItem, NButton, NCard, NCheckbox, NCheckboxGroup, NDataTable, NFlex, NIcon, NInput, NModal, NP, NSpace, NTag, NText, NUpload, NUploadDragger, useDialog, useMessage } from 'naive-ui'
 import { ArchiveOutline } from '@vicons/ionicons5'
 import { Cloud32Regular, LockClosed32Regular } from '@vicons/fluent'
 import { useRoute } from 'vue-router'
@@ -50,6 +50,7 @@ const { isMobile } = useBasicLayout()
 const authStore = useAuthStore()
 const token = ref<string>(authStore.token)
 const checkedItemRowKeys = ref<string[]>([])
+const checkedItems = ref<KnowledgeBase.Item[]>([])
 const curKnowledgeBase: KnowledgeBase.Info = reactive<KnowledgeBase.Info>(knowledgeBaseEmptyInfo())
 
 // 文件预览
@@ -173,6 +174,7 @@ async function textIndexing() {
     ms.error(error.message ?? 'error')
   } finally {
     loading.value = false
+    kbItemUuidForGraph.value = ''
   }
 }
 
@@ -192,7 +194,17 @@ async function indexingCheck() {
 
 function onHandleCheckedRowKeys(keys: Array<string | number>, rows: object[], meta: { row: object | undefined; action: 'check' | 'uncheck' | 'checkAll' | 'uncheckAll' }) {
   checkedItemRowKeys.value = keys.map((key) => {
-    return key = `${key}`
+    return `${key}`
+  })
+  checkedItems.value = rows as KnowledgeBase.Item[]
+}
+
+function removeCheckedItem(item: KnowledgeBase.Item) {
+  checkedItemRowKeys.value = checkedItemRowKeys.value.filter((key) => {
+    return key !== item.uuid
+  })
+  checkedItems.value = checkedItems.value.filter((row) => {
+    return row.uuid !== item.uuid
   })
 }
 
@@ -342,6 +354,9 @@ watch(
           </NButton>
           <NButton type="primary" size="small" @click="changeIndexModal()">
             索引选中内容
+            <template v-if="checkedItemRowKeys.length > 0">
+              ({{ checkedItemRowKeys.length }}项)
+            </template>
           </NButton>
         </div>
         <div class="flex items-center">
@@ -354,7 +369,8 @@ watch(
       <NDataTable
         remote :loading="loading" :max-height="400" :columns="columns" :data="itemList"
         :pagination="paginationReactive" :single-line="false" :bordered="true" :row-key="rowKey"
-        @update:checked-row-keys="onHandleCheckedRowKeys" @update:page="onHandlePageChange"
+        :checked-row-keys="checkedItemRowKeys" @update:checked-row-keys="onHandleCheckedRowKeys"
+        @update:page="onHandlePageChange"
       />
     </NCard>
   </div>
@@ -370,9 +386,11 @@ watch(
       />
       内容
       <NInput v-model:value="tmpItem.remark" type="textarea" show-count :autosize="{ minRows: 5, maxRows: 10 }" />
-      <NButton block type="primary" :disabled="inputStatus" @click="() => { saveOrUpdate() }">
-        {{ t('common.confirm') }}
-      </NButton>
+      <div class="flex juestify-end">
+        <NButton type="primary" :disabled="inputStatus" @click="() => { saveOrUpdate() }">
+          {{ t('common.confirm') }}
+        </NButton>
+      </div>
     </NSpace>
   </NModal>
 
@@ -427,7 +445,21 @@ watch(
           <NCheckbox value="graphical" label="图谱化" />
         </NFlex>
       </NCheckboxGroup>
-      <NButton type="primary" size="small" @click="textIndexing()">
+      <div class="flex flex-wrap space-x-2">
+        <NTag
+          v-for="checkedItem in checkedItems" :key="`_${checkedItem.uuid}`" :bordered="false" type="info" closable
+          size="small" class="mt-1" @close="removeCheckedItem(checkedItem)"
+        >
+          {{ checkedItem.title }}
+        </NTag>
+        <NTag v-if="checkedItems.length === 0" :bordered="false" type="warning" size="small">
+          先选择知识点
+        </NTag>
+      </div>
+      <NButton
+        type="primary" size="small" :disabled="checkedItems.length === 0 || indexTypeSelected.length === 0"
+        @click="textIndexing()"
+      >
         确定
       </NButton>
     </NFlex>

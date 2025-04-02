@@ -78,7 +78,10 @@ onUnmounted(() => {
           </div>
           <div v-if="mouseEnterKbUuid === item.uuid || isMobile" class="absolute z-10 flex visible right-1 pd-2">
             <button class="p-1">
-              <SvgIcon icon="carbon:edit" @click.stop="wfStore.setShowCreateView(true, item.uuid)" />
+              <SvgIcon
+                :icon="(!item.isPublic) ? 'carbon:edit' : 'carbon:information'"
+                @click.stop="wfStore.setShowCreateView(true, item.uuid)"
+              />
             </button>
           </div>
         </a>

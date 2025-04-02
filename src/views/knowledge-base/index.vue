@@ -391,7 +391,7 @@ onActivated(async () => {
       </NCollapse>
     </NModal>
 
-    <NModal v-model:show="showRefGraphModal" style="max-width: 80%;" preset="card" title="引用图谱">
+    <NModal v-model:show="showRefGraphModal" display-directive="show" style="max-width: 80%;" preset="card" title="引用图谱">
       <RefGraph :qa-record-uuid="showRefGraphRecordUuid" />
     </NModal>
   </div>

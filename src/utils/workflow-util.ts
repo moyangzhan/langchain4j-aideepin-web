@@ -69,6 +69,7 @@ export function createNewEdge(params: {
       type: 'special',
       animated: true,
       sourceHandle: params.sourceHandle ? params.sourceHandle : undefined,
+      data: wfEdge,
     }
     params.uiWorkflow.edges.push(uiEdge)
   }

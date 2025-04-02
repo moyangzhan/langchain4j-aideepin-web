@@ -54,11 +54,11 @@ export const createColumns = (showEmbeddingListFn: Function, showGraphFn: Functi
           renderElements.push(createShowListButton(showGraphFn, row))
           renderElements.push(createText('处理中'))
           renderElements.push(createText(row.graphicalStatusChangeTime))
-        } else if (row.embeddingStatus === 'DONE') {
+        } else if (row.graphicalStatus === 'DONE') {
           renderElements.push(createShowListButton(showGraphFn, row))
           renderElements.push(createText('已图谱化'))
           renderElements.push(createText(row.graphicalStatusChangeTime))
-        } else if (row.embeddingStatus === 'FAIL') {
+        } else if (row.graphicalStatus === 'FAIL') {
           renderElements.push(createText('失败'))
           renderElements.push(createText(row.graphicalStatusChangeTime))
         }

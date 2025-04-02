@@ -119,6 +119,7 @@ export const useWfStore = defineStore('wf-store', {
 
   actions: {
     setShowCreateView(status: boolean, wfUuid: string) {
+      console.log(`setShowCreateView: ${status}, ${wfUuid}`)
       this.showCreateOrEditView = status
       this.createOrEditWfUuid = wfUuid
     },
@@ -384,6 +385,7 @@ export const useWfStore = defineStore('wf-store', {
     },
     appendChunkToRuntimeNode(wfRuntimeUuid: string, runtimeNodeUuid: string, chunk: string) {
       const runtimeNode = this.getRuntimeNode(wfRuntimeUuid, runtimeNodeUuid)
+      // runtimeNode.output 格式： {output:'default output', 'output_name1': 'output_content1'}
       if (runtimeNode)
         runtimeNode.output.output = runtimeNode.output.output + chunk
     },
