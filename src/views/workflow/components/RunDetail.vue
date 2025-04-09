@@ -31,6 +31,7 @@ const submitting = ref<boolean>(wfStore.submitting)
 const startNode = wfStore.getStartNode(props.workflow.uuid)
 const wfRuntimeUuid = ref<string>('')
 const runtimeNodes = reactive<Workflow.WfRuntimeNode[]>([])
+const runtimeErrorMsg = ref<string>('')
 const userInputs = ref<Workflow.UserInput[]>(startNode?.inputConfig.user_inputs.map((input) => {
   return {
     uuid: input.uuid,
@@ -184,6 +185,7 @@ async function run() {
           submitting.value = false
           resetInputs()
           wfStore.updateSuccess(currWfUuid, wfRuntimeUuid.value, chunk)
+          runtimeErrorMsg.value = ''
           ms.success('执行成功')
           emit('runDone')
         })
@@ -191,8 +193,9 @@ async function run() {
       errorCallback: (error) => {
         submitting.value = false
         resetInputs()
-        ms.error(error)
         ms.error(`系统提示：${error}`)
+        wfStore.updateErrorMsg(currWfUuid, wfRuntimeUuid.value, error)
+        runtimeErrorMsg.value = error || ''
         emit('runError', error)
       },
     })
@@ -264,7 +267,7 @@ onUnmounted(() => {
       <NTabPane name="runtimes" display-directive="show" :tab-props="{ style: 'display:none' }">
         <transition name="collapse">
           <div v-show="showCurrentExecution" class="max-h-[500px] overflow-y-auto mb-2">
-            <RuntimeNodes :nodes="runtimeNodes" :workflow="workflow" />
+            <RuntimeNodes :nodes="runtimeNodes" :workflow="workflow" :error-msg="runtimeErrorMsg" />
             <div class="sticky bottom-0 left-0 flex justify-center">
               <NButton v-show="submitting" size="tiny" @click="handleStop">
                 <template #icon>

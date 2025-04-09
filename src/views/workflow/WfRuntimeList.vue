@@ -34,8 +34,8 @@ const currWfUuid = props.workflow.uuid
 console.log('instance list currWfUuid', currWfUuid)
 const showDetailModal = ref<boolean>(false)
 const detailNodes = ref<Workflow.WfRuntimeNode[]>([])
+const detailErrorMsg = ref<string>('')
 const inputRef = ref<Ref | null>(null)
-const errorMsg = ref<string>('')
 const loadedAll = ref<boolean>(false)
 const pageSize = 20
 let currentPage = 1
@@ -146,6 +146,7 @@ function runDone() {
 async function onShowRuntimeDetail(instUuid: string) {
   showDetailModal.value = true
   detailNodes.value = []
+  detailErrorMsg.value = ''
   const wfRuntime = wfStore.getWfRuntime(instUuid)
   if (!wfRuntime)
     return
@@ -159,7 +160,11 @@ async function onShowRuntimeDetail(instUuid: string) {
   } catch (error) {
     console.error('onShowRuntimeDetail error', error)
   } finally {
-    detailNodes.value = wfStore.getWfRuntime(instUuid)?.nodes || []
+    const runtime = wfStore.getWfRuntime(instUuid)
+    if (runtime) {
+      detailNodes.value = runtime.nodes || []
+      detailErrorMsg.value = runtime.status === 4 ? runtime.statusRemark : ''
+    }
   }
 }
 
@@ -194,15 +199,12 @@ onActivated(async () => {
         <template v-else>
           <div v-for="wfRuntime of wfRuntimes" :key="wfRuntime.uuid">
             <Message
-              :wf-runtime="wfRuntime" :io-object="wfRuntime.input" :inversion="true" :error="wfRuntime.error"
-              :loading="false" @delete="handleDelete(wfRuntime.uuid)"
+              :wf-runtime="wfRuntime" :io-object="wfRuntime.input" :inversion="true" :loading="false"
+              @delete="handleDelete(wfRuntime.uuid)"
             />
-            <div v-if="errorMsg">
-              {{ errorMsg }}
-            </div>
             <Message
-              :workflow="workflow" :wf-runtime="wfRuntime" :io-object="wfRuntime.output" :inversion="false"
-              :error="wfRuntime.error" :loading="wfRuntime.loading"
+              :workflow="workflow" :wf-runtime="wfRuntime" :io-object="wfRuntime.output"
+              :error-msg="wfRuntime.statusRemark" :inversion="false" :loading="wfRuntime.loading"
             >
               <NButton v-if="!wfRuntime.loading" size="tiny" text @click="onShowRuntimeDetail(wfRuntime.uuid)">
                 执行详情
@@ -217,6 +219,6 @@ onActivated(async () => {
     <RunDetail :workflow="workflow" @run-done="runDone" @run-error="runError" />
   </footer>
   <NModal v-model:show="showDetailModal" title="执行详情" style="width: 90%; max-width: 900px;" preset="card">
-    <RuntimeNodes :workflow="workflow" :nodes="detailNodes" class="max-h-[750px] overflow-y-auto" />
+    <RuntimeNodes :workflow="workflow" :nodes="detailNodes" :error-msg="detailErrorMsg" class="max-h-[750px] overflow-y-auto" />
   </NModal>
 </template>

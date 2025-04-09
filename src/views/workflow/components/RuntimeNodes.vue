@@ -10,6 +10,7 @@ import TextComponent from '@/views/chat/components/Message/Text.vue'
 interface Props {
   nodes: Workflow.WfRuntimeNode[]
   workflow: Workflow.WorkflowInfo
+  errorMsg: string
 }
 const props = defineProps<Props>()
 const wfStore = useWfStore()
@@ -22,7 +23,10 @@ const prologue = computed(() => {
 
 <template>
   <div>
-    <div v-show="nodes.length === 0" class="text-center py-2 text-neutral-400">
+    <div v-if="errorMsg" class="py-2 text-red-500">
+      错误：{{ errorMsg }}
+    </div>
+    <div v-else-if="nodes.length === 0" class="text-center py-2 text-neutral-400">
       无内容
     </div>
     <div v-show="prologue" class="p-2">

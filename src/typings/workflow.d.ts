@@ -77,7 +77,6 @@ declare namespace Workflow {
     status: number
     statusRemark: string
     createTime: string
-    error: boolean
     loading: boolean
 
     wfUuid: string
@@ -102,7 +101,6 @@ declare namespace Workflow {
     wfRuntimeUuid: string
     nodeUuid: string
     nodeTitle: string
-    error: boolean
   }
 
   interface WorkflowState {

@@ -73,6 +73,26 @@ export function createNewEdge(params: {
     }
     params.uiWorkflow.edges.push(uiEdge)
   }
+  // 判断源节点是否【条件分支】或【内容分类】
+  params.workflow.nodes.forEach((node) => {
+    if (node.uuid === params.source) {
+      if (node.wfComponent.name === 'Switcher') {
+        if (wfEdge.sourceHandle === 'default_handle') {
+          (node.nodeConfig as Workflow.NodeConfigSwitcher).default_target_node_uuid = wfEdge.targetNodeUuid
+        } else {
+          (node.nodeConfig as Workflow.NodeConfigSwitcher).cases.forEach((item) => {
+            if (item.uuid === wfEdge.sourceHandle)
+              item.target_node_uuid = wfEdge.targetNodeUuid
+          })
+        }
+      } else if (node.wfComponent.name === 'Classifier') {
+        (node.nodeConfig as Workflow.NodeConfigClassifier).categories.forEach((item) => {
+          if (item.category_uuid === wfEdge.sourceHandle)
+            item.target_node_uuid = wfEdge.targetNodeUuid
+        })
+      }
+    }
+  })
 }
 
 export function updateEdgeBySourceHandle(params:
@@ -171,6 +191,7 @@ function createSwitcherNode(workflow: Workflow.WorkflowInfo, node: Workflow.Work
     default_target_node_uuid: '',
     cases: [
       {
+        uuid: uuidv4().replace(/-/g, ''),
         operator: 'and',
         target_node_uuid: '',
         conditions:
@@ -179,6 +200,7 @@ function createSwitcherNode(workflow: Workflow.WorkflowInfo, node: Workflow.Work
           ],
       },
       {
+        uuid: uuidv4().replace(/-/g, ''),
         operator: 'and',
         target_node_uuid: '',
         conditions:
@@ -196,12 +218,12 @@ function createClassifierNode(node: Workflow.WorkflowNode) {
     model_name: appStore.getFirstLLM().modelName,
     categories: [
       {
-        category_uuid: 'and',
+        category_uuid: uuidv4().replace(/-/g, ''),
         category_name: '',
         target_node_uuid: '',
       },
       {
-        category_uuid: 'and',
+        category_uuid: uuidv4().replace(/-/g, ''),
         category_name: '',
         target_node_uuid: '',
       },

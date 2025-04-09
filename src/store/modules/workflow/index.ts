@@ -406,13 +406,27 @@ export const useWfStore = defineStore('wf-store', {
       if (wfRuntimes) {
         const inst = wfRuntimes.find((inst: { uuid: string }) => inst.uuid === wfRuntimeUuid)
         if (inst) {
-          inst.status = 2
+          inst.status = 3
           try {
             inst.output = JSON.parse(outputJson)
           } catch (e) {
             console.error(e)
             console.log('outputJson is not json', outputJson)
           }
+        }
+      }
+    },
+    updateErrorMsg(wfUuid: string, wfRuntimeUuid: string, errorMsg: string) {
+      if (!wfRuntimeUuid) {
+        console.log('updateSuccess instUuid is empty')
+        return
+      }
+      const wfRuntimes = this.wfUuidToWfRuntimes.get(wfUuid)
+      if (wfRuntimes) {
+        const inst = wfRuntimes.find((inst: { uuid: string }) => inst.uuid === wfRuntimeUuid)
+        if (inst) {
+          inst.status = 4
+          inst.statusRemark = errorMsg || 'error'
         }
       }
     },

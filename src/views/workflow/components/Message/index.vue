@@ -16,7 +16,7 @@ interface Props {
   workflow?: Workflow.WorkflowInfo
   inversion?: boolean
   showAvatar?: boolean
-  error?: boolean
+  errorMsg?: string
   loading?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
@@ -112,12 +112,15 @@ function openFileInNewTab(filelUrl: string) {
       </p>
       <div class="flex items-center w-full" :class="[{ 'flex-row-reverse': inversion }]">
         <!-- 1、渲染文字 -->
-        <div v-if="Object.keys(ioObject).length === 0" class="flex items-start gap-1 mt-2">
-          <TextComponent :inversion="inversion" :error="error" text="无内容" :loading="loading" :as-raw-text="true" />
+        <div v-if="errorMsg" class="flex items-start gap-1 mt-2">
+          <TextComponent :inversion="inversion" :error="true" :text="errorMsg" :loading="false" :as-raw-text="true" />
+        </div>
+        <div v-else-if="Object.keys(ioObject).length === 0" class="flex items-start gap-1 mt-2">
+          <TextComponent :inversion="inversion" :error="true" text="无内容" :loading="loading" :as-raw-text="true" />
         </div>
         <TextComponent
-          v-else-if="txt" :inversion="inversion" :error="error" :text="txt" :loading="loading"
-          :as-raw-text="false"
+          v-else-if="txt" :inversion="inversion" :error="false" :text="txt" :loading="loading"
+          :as-raw-text="inversion ? true : false"
         />
         <NImageGroup v-if="imageUrls.length > 0" class="my-2">
           <NImage

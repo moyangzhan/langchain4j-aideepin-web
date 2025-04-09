@@ -112,6 +112,7 @@ onEdgesChange((changes) => {
  * You can add additional properties to your new edge (like a type or label) or block the creation altogether by not calling `addEdges`
  */
 onConnect((connection) => {
+  console.log('onConnect', connection)
   createNewEdge({
     workflow: props.workflow,
     uiWorkflow,
