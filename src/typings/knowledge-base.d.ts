@@ -17,7 +17,8 @@ declare namespace KnowledgeBase {
     retrieveMaxResults: number
     retrieveMinScore: number
     queryLlmTemperature: number
-
+    querySystemMessage: string
+    
     ingestModelName: string
   }
   interface InfoListResp {

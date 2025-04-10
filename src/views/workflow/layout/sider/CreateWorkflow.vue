@@ -155,7 +155,7 @@ watch(() => wfStore.createOrEditWfUuid, (val) => {
               </template>
             </NSwitch>
           </NFormItem>
-          <div class="flex justify-center space-x-4">
+          <div class="flex justify-end space-x-4">
             <NButton
               v-show="tmpWorkflow.uuid" type="primary" :loading="saving" :disabled="saving"
               @click="handleSave()"

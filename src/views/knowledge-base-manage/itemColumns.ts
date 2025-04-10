@@ -12,10 +12,15 @@ export const createColumns = (showEmbeddingListFn: Function, showGraphFn: Functi
     {
       title: '标题',
       key: 'title',
+      width: 200,
     },
     {
       title: '摘要',
       key: 'brief',
+      width: 250,
+      render(row) {
+        return row.brief.substring(0, 50)
+      },
     },
     {
       title: '向量化',

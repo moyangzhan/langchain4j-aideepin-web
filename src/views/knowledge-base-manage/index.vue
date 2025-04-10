@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import type { DataTableColumns } from 'naive-ui'
 import { computed, h, reactive, ref, watch } from 'vue'
-import { NBreadcrumb, NBreadcrumbItem, NButton, NCollapse, NCollapseItem, NDataTable, NIcon, NInput, NInputNumber, NModal, NRadio, NRadioGroup, NSelect, NSpace, NTooltip, useDialog, useMessage } from 'naive-ui'
+import { NBreadcrumb, NBreadcrumbItem, NButton, NCollapse, NCollapseItem, NDataTable, NIcon, NInput, NInputNumber, NModal, NRadio, NRadioGroup, NSelect, NTooltip, useDialog, useMessage } from 'naive-ui'
 import { RouterLink, useRouter } from 'vue-router'
 import { QuestionCircle16Regular } from '@vicons/fluent'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
@@ -31,6 +31,7 @@ const { isMobile } = useBasicLayout()
 const authStore = useAuthStore()
 const kbStore = useKbStore()
 const token = ref<string>(authStore.token)
+const itemBoxClass = 'bg-gray-100 rounded-md px-2 pt-1 pb-2 space-y-1'
 
 const changeShowModal = (selected: KnowledgeBase.Info = knowledgeBaseEmptyInfo()) => {
   Object.assign(tmpKb, selected)
@@ -242,69 +243,121 @@ watch(
   </div>
 
   <NModal
-    v-model:show="showModal" :title="tmpKb.id === '0' ? '新建' : '编辑'" style="width: 90%; max-width: 600px;"
+    v-model:show="showModal" :title="tmpKb.id === '0' ? '新建' : '编辑'" style="width: 90%; max-width: 700px; "
     preset="card"
   >
-    <NSpace vertical>
-      <NInput v-model:value="tmpKb.title" maxlength="100" :placeholder="t('store.title')" show-count />
-      <NInput
-        v-model:value="tmpKb.remark" type="textarea" :placeholder="t('store.description')" maxlength="500"
-        show-count :autosize="{ minRows: 5, maxRows: 30 }"
-      />
-      是否公开
-      <NRadioGroup v-model:value="tmpKb.isPublic" name="radiogroup">
-        <NRadio key="public_yes" :value="true">
-          公开
-        </NRadio>
-        <NRadio key="public_no" :value="false">
-          私有
-        </NRadio>
-      </NRadioGroup>
-      <div>
-        严格模式
-        <NTooltip trigger="hover">
-          <template #trigger>
-            <NIcon style="padding-top: 0.1rem">
-              <QuestionCircle16Regular />
-            </NIcon>
-          </template>
-          <div> 严格模式：严格匹配知识库，知识库中如无搜索结果，直接返回无答案</div>
-          <div> 非严格模式：知识库中如无搜索结果，将用户提问传给LLM继续请求答案</div>
-        </NTooltip>
+    <div class="max-h-[600px] overflow-y-auto pr-2">
+      <div class="flex flex-col space-y-2">
+        <div :class="itemBoxClass">
+          <div>标题<span class="text-red-400"> *</span></div>
+          <NInput v-model:value="tmpKb.title" maxlength="100" :placeholder="t('store.title')" show-count />
+        </div>
+        <div :class="itemBoxClass">
+          <div>描述</div>
+          <NInput
+            v-model:value="tmpKb.remark" type="textarea" :placeholder="t('store.description')" maxlength="500"
+            show-count :autosize="{ minRows: 3, maxRows: 10 }"
+          />
+        </div>
+        <div :class="itemBoxClass">
+          <div>是否公开</div>
+          <NRadioGroup v-model:value="tmpKb.isPublic" name="radiogroup">
+            <NRadio key="public_yes" :value="true">
+              公开
+            </NRadio>
+            <NRadio key="public_no" :value="false">
+              私有
+            </NRadio>
+          </NRadioGroup>
+        </div>
+        <div :class="itemBoxClass">
+          <div>
+            严格模式
+            <NTooltip trigger="hover">
+              <template #trigger>
+                <NIcon style="padding-top: 0.1rem">
+                  <QuestionCircle16Regular />
+                </NIcon>
+              </template>
+              <div> 严格模式：严格匹配知识库，知识库中如无搜索结果，直接返回无答案</div>
+              <div> 非严格模式：知识库中如无搜索结果，将用户提问传给LLM继续请求答案</div>
+            </NTooltip>
+          </div>
+          <NRadioGroup v-model:value="tmpKb.isStrict" name="radiogroup">
+            <NRadio key="strict_yes" :value="true">
+              是
+            </NRadio>
+            <NRadio key="strict_no" :value="false">
+              否
+            </NRadio>
+          </NRadioGroup>
+        </div>
+        <NCollapse>
+          <NCollapseItem title="文档索引设置">
+            <div class="flex flex-col space-y-2">
+              <div :class="itemBoxClass">
+                <div>文档切割时重叠数量（改动后对新索引生效）</div>
+                <NInputNumber v-model:value="tmpKb.ingestMaxOverlap" />
+              </div>
+              <div :class="itemBoxClass">
+                <div>
+                  模型名称
+                  <NTooltip trigger="hover">
+                    <template #trigger>
+                      <NIcon style="padding-top: 0.1rem">
+                        <QuestionCircle16Regular />
+                      </NIcon>
+                    </template>
+                    <div> 抽取图数据时使用的模型，为空则使用第一个可用的模型</div>
+                  </NTooltip>
+                </div>
+                <NSelect :value="tmpKb.ingestModelName" :options="appStore.llms" :on-update:value="onModelChange" />
+              </div>
+            </div>
+          </NCollapseItem>
+        </NCollapse>
+        <NCollapse>
+          <NCollapseItem title="文档召回设置">
+            <div class="flex flex-col space-y-2">
+              <div :class="itemBoxClass">
+                <div>文档召回最大数量</div>
+                <NInputNumber v-model:value="tmpKb.retrieveMaxResults" />
+              </div>
+              <div :class="itemBoxClass">
+                <div>文档召回最小分数</div>
+                <NInputNumber v-model:value="tmpKb.retrieveMinScore" :precision="1" :min="0" :max="1" />
+              </div>
+            </div>
+          </NCollapseItem>
+        </NCollapse>
+        <NCollapse>
+          <NCollapseItem title="大模型参数设置">
+            <div class="flex flex-col space-y-2">
+              <div :class="itemBoxClass">
+                <div>系统提示词（角色设定）</div>
+                <NInput
+                  v-model:value="tmpKb.querySystemMessage" type="textarea"
+                  :autosize="{ minRows: 2, maxRows: 5 }"
+                />
+              </div>
+              <div :class="itemBoxClass">
+                <div>响应时的创造性/随机性</div>
+                <NInputNumber v-model:value="tmpKb.queryLlmTemperature" :precision="1" :min="0" :max="1" />
+              </div>
+            </div>
+          </NCollapseItem>
+        </NCollapse>
       </div>
-      <NRadioGroup v-model:value="tmpKb.isStrict" name="radiogroup">
-        <NRadio key="strict_yes" :value="true">
-          是
-        </NRadio>
-        <NRadio key="strict_no" :value="false">
-          否
-        </NRadio>
-      </NRadioGroup>
-      <NCollapse>
-        <NCollapseItem title="文档索引设置">
-          文档切割时重叠数量（改动后对新索引生效）
-          <NInputNumber v-model:value="tmpKb.ingestMaxOverlap" />
-          模型名称（抽取图数据时使用的模型，为空则使用第一个可用的模型）
-          <NSelect :value="tmpKb.ingestModelName" :options="appStore.llms" :on-update:value="onModelChange" />
-        </NCollapseItem>
-      </NCollapse>
-      <NCollapse>
-        <NCollapseItem title="文档召回设置">
-          文档召回最大数量
-          <NInputNumber v-model:value="tmpKb.retrieveMaxResults" />
-          文档召回最小分数
-          <NInputNumber v-model:value="tmpKb.retrieveMinScore" :precision="1" :min="0" :max="1" />
-        </NCollapseItem>
-      </NCollapse>
-      <NCollapse>
-        <NCollapseItem title="用户请求设置">
-          响应时的创造性/随机性
-          <NInputNumber v-model:value="tmpKb.queryLlmTemperature" :precision="1" :min="0" :max="1" />
-        </NCollapseItem>
-      </NCollapse>
-      <NButton block type="primary" :disabled="inputStatus" @click="() => { saveOrUpdateKb() }">
-        {{ t('common.confirm') }}
-      </NButton>
-    </NSpace>
+    </div>
+    <template #footer>
+      <div class="flex space-x-2 justify-end">
+        <NButton type="primary" size="small" :disabled="inputStatus" @click="() => { saveOrUpdateKb() }">
+          {{ t('common.confirm') }}
+        </NButton>
+        <NButton size="small" :disabled="inputStatus" @click="() => { showModal = false }">
+          取消
+        </NButton>
+      </div>
+    </template>
   </NModal>
 </template>

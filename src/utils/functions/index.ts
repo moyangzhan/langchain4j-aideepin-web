@@ -27,6 +27,7 @@ export function knowledgeBaseEmptyInfo() {
     retrieveMaxResults: 0,
     retrieveMinScore: 0,
     queryLlmTemperature: 0,
+    querySystemMessage: '',
 
     ingestModelName: '',
   }
