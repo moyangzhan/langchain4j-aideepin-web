@@ -599,13 +599,7 @@ function workflowDel<T = any>(uuid: string) {
   })
 }
 
-function workflowSetPublic<T = any>(uuid: string) {
-  return post<T>({
-    url: `/workflow/set-public/${uuid}`,
-  })
-}
-
-function workflowBaseInfoUpdate<T = any>(data: { uuid: string; title: string; remark: string }) {
+function workflowBaseInfoUpdate<T = any>(data: { uuid: string; title: string; remark: string; isPublic: boolean }) {
   return post<T>({
     url: '/workflow/base-info/update',
     data,
@@ -751,7 +745,6 @@ export default {
   workflowAdd,
   workflowCopy,
   workflowUpdate,
-  workflowSetPublic,
   workflowDel,
   workflowBaseInfoUpdate,
   workflowRun,
