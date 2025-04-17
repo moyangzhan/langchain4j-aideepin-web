@@ -140,7 +140,7 @@ function onDelCase(nodeCase: Workflow.NodeConfigSwitcherCase) {
                   :exclude-nodes="[wfNode.wfComponent.name]"
                   class="mr-1 h-full max-w-[150px]" @variable-selected="onConditionSelected(condition, $event)"
                 />
-                <OperatorSelector :selected="condition.operator" class="mr-1 h-full max-w-[120px]" />
+                <OperatorSelector :selected="condition.operator" class="mr-1 h-full max-w-[120px]" @operator-selected="(op) => condition.operator = op" />
                 <NInput v-model:value="condition.value" class="flex-1 min-w-16" />
                 <SvgIcon
                   v-show="wfCase.conditions.length > 1" class="text-base ml-0.5 h-full cursor-pointer"
