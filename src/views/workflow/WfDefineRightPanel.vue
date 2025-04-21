@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from 'vue'
 import { NInput } from 'naive-ui'
-import { AnswerNodeProperty, ClassifierNodeProperty, Dalle3NodeProperty, DocumentExtractorNodeProperty, EndNodeProperty, FaqExtractorNodeProperty, GoogleNodeProperty, KeywordExtractorNodeProperty, KnowledgeRetrievalNodeProperty, StartNodeProperty, SwticherNodeProperty, TemplateNodeProperty, TongyiwanxNodeProperty } from './components/nodes'
+import { AnswerNodeProperty, ClassifierNodeProperty, Dalle3NodeProperty, DocumentExtractorNodeProperty, EndNodeProperty, FaqExtractorNodeProperty, GoogleNodeProperty, HumanFeedbackNodeProperty, KeywordExtractorNodeProperty, KnowledgeRetrievalNodeProperty, StartNodeProperty, SwticherNodeProperty, TemplateNodeProperty, TongyiwanxNodeProperty } from './components/nodes'
 import { useWfStore } from '@/store'
 import { SvgIcon } from '@/components/common'
 import { getIconByComponentName, getIconClassByComponentName } from '@/utils/workflow-util'
@@ -114,6 +114,10 @@ onMounted(() => {
         />
         <GoogleNodeProperty
           v-else-if="wfNode.wfComponent.name === 'Google'" :key="`google_${wfNode.uuid}`"
+          :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
+        />
+        <HumanFeedbackNodeProperty
+          v-else-if="wfNode.wfComponent.name === 'HumanFeedback'" :key="`feedback_${wfNode.uuid}`"
           :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
         />
         <EndNodeProperty

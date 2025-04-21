@@ -38,6 +38,8 @@ export function createNewNode(
     createTongyiwanx(newWfNode)
   else if (component.name === 'Google')
     createGoogle(newWfNode)
+  else if (component.name === 'HumanFeedback')
+    createHumanFeedback(newWfNode)
 
   workflow.nodes.push(newWfNode)
   uiWorkflow.nodes.push(wfNodeToUiNode(newWfNode))
@@ -299,6 +301,12 @@ function createGoogle(node: Workflow.WorkflowNode) {
   }
 }
 
+function createHumanFeedback(node: Workflow.WorkflowNode) {
+  node.nodeConfig = {
+    tip: '',
+  }
+}
+
 export function getInputLabelFromParamName(workflow: Workflow.WorkflowInfo, nodeUuid: string, nodeParamName: string) {
   const node = workflow.nodes.find(node => node.uuid === nodeUuid)
   if (!node)
@@ -353,6 +361,8 @@ export function getIconByComponentName(name: string) {
       return 'solar:pallete-2-linear'
     case 'google':
       return 'ri:google-line'
+    case 'humanfeedback':
+      return 'covid:transmission-virus-human-transmit-2'
     case 'end':
       return 'carbon:closed-caption'
     case 'start':
@@ -386,6 +396,8 @@ export function getIconClassByComponentName(name: string) {
       return 'text-fuchsia-700'
     case 'google':
       return 'text-emerald-900'
+    case 'humanfeedback':
+      return 'text-zinc-800'
     case 'end':
       return 'text-orange-800'
     case 'start':

@@ -599,7 +599,13 @@ function workflowDel<T = any>(uuid: string) {
   })
 }
 
-function workflowBaseInfoUpdate<T = any>(data: { uuid: string; title: string; remark: string; isPublic: boolean }) {
+function workflowSetPublic<T = any>(uuid: string, isPublic?: boolean) {
+  return post<T>({
+    url: `/workflow/set-public/${uuid}?isPublic=${isPublic}`,
+  })
+}
+
+function workflowBaseInfoUpdate<T = any>(data: { uuid: string; title: string; remark: string }) {
   return post<T>({
     url: '/workflow/base-info/update',
     data,
@@ -615,6 +621,18 @@ function workflowRun(params: {
   errorCallback: (error: string) => void
 }) {
   commonSseProcess(`/api/workflow/run/${params.options.uuid}`, params)
+}
+
+function workflowRuntimeResume<T = any>(params: {
+  runtimeUuid: string
+  feedbackContent: string
+}) {
+  return post<T>({
+    url: `/workflow/runtime/resume/${params.runtimeUuid}`,
+    data: {
+      ...params,
+    },
+  })
 }
 
 function workflowComponents<T = any>() {
@@ -745,6 +763,7 @@ export default {
   workflowAdd,
   workflowCopy,
   workflowUpdate,
+  workflowSetPublic,
   workflowDel,
   workflowBaseInfoUpdate,
   workflowRun,
@@ -756,4 +775,5 @@ export default {
   workflowRuntimesClear,
   workflowOperators,
   workflowRuntimeDelete,
+  workflowRuntimeResume,
 }

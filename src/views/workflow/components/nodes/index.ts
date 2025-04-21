@@ -12,6 +12,7 @@ import KnowledgeRetrievalNode from './KnowledgeRetrievalNode.vue'
 import GoogleNode from './GoogleNode.vue'
 import SwitcherNode from './SwitcherNode.vue'
 import TemplateNode from './TemplateNode.vue'
+import HumanFeedbackNode from './HumanFeedbackNode.vue'
 
 import StartNodeProperty from './StartNodeProperty.vue'
 import AnswerNodeProperty from './AnswerNodeProperty.vue'
@@ -26,5 +27,6 @@ import Dalle3NodeProperty from './Dalle3NodeProperty.vue'
 import TongyiwanxNodeProperty from './TongyiwanxNodeProperty.vue'
 import GoogleNodeProperty from './GoogleNodeProperty.vue'
 import EndNodeProperty from './EndNodeProperty.vue'
+import HumanFeedbackNodeProperty from './HumanFeedbackNodeProperty.vue'
 
-export { SpecialNode, StartNode, EndNode, AnswerNode, ClassifierNode, DocumentExtractorNode, KeywordExtractorNode, FaqExtractorNode, Dalle3Node, TongyiwanxNode, KnowledgeRetrievalNode, GoogleNode, SwitcherNode, TemplateNode, StartNodeProperty, AnswerNodeProperty, ClassifierNodeProperty, SwticherNodeProperty, TemplateNodeProperty, KeywordExtractorNodeProperty, FaqExtractorNodeProperty, DocumentExtractorNodeProperty, KnowledgeRetrievalNodeProperty, Dalle3NodeProperty, TongyiwanxNodeProperty, GoogleNodeProperty, EndNodeProperty }
+export { SpecialNode, StartNode, EndNode, AnswerNode, ClassifierNode, DocumentExtractorNode, KeywordExtractorNode, FaqExtractorNode, Dalle3Node, TongyiwanxNode, KnowledgeRetrievalNode, GoogleNode, SwitcherNode, TemplateNode, StartNodeProperty, AnswerNodeProperty, ClassifierNodeProperty, SwticherNodeProperty, TemplateNodeProperty, KeywordExtractorNodeProperty, FaqExtractorNodeProperty, DocumentExtractorNodeProperty, KnowledgeRetrievalNodeProperty, Dalle3NodeProperty, TongyiwanxNodeProperty, GoogleNodeProperty, EndNodeProperty, HumanFeedbackNode, HumanFeedbackNodeProperty }

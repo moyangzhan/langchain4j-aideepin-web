@@ -52,6 +52,9 @@ const tabObj = ref<TabObj>({ name: 'runtimes', defaultTab: '流程执行详情',
 const fileListLength = ref(0)
 const uploadRef = ref<UploadInst | null>(null)
 const uploadedFileUuids = ref<string[]>([])
+const humanFeedback = ref<boolean>(false)
+const humanFeedbackTip = ref<string>('')
+const humanFeedbackContent = ref<string>('')
 let controller = new AbortController()
 
 async function uploadBeforeRun() {
@@ -175,6 +178,10 @@ async function run() {
               runtimeNodeUuid,
               chunk,
             )
+          } else if (eventName.includes('[NODE_WAIT_FEEDBACK_BY_')) {
+            humanFeedback.value = true
+            humanFeedbackTip.value = chunk || ''
+            ms.info(humanFeedbackTip.value)
           }
         } catch (error) {
           console.error(error)
@@ -203,6 +210,23 @@ async function run() {
     const errorMessage = error?.message ?? t('common.wrong')
     ms.error(errorMessage)
     submitting.value = false
+  }
+}
+
+async function resume() {
+  submitting.value = true
+  try {
+    await api.workflowRuntimeResume({
+      runtimeUuid: wfRuntimeUuid.value,
+      feedbackContent: humanFeedbackContent.value,
+    },
+    )
+  } catch (e) {
+    ms.error(`系统提示：${e}`)
+  } finally {
+    humanFeedback.value = false
+    humanFeedbackTip.value = ''
+    humanFeedbackContent.value = ''
   }
 }
 
@@ -284,41 +308,67 @@ onUnmounted(() => {
       {{ errorMsg }}
     </div>
     <div class="flex flex-col items-center justify-between space-y-2 max-h-[300px] overflow-y-auto">
-      <div v-for="(userInput, idx) in userInputs" :key="`${idx}_${userInput.name}`" class="w-full flex">
-        <div class="min-w-24">
-          {{ userInput.content.title }}
+      <template v-if="!humanFeedback">
+        <div v-for="(userInput, idx) in userInputs" :key="`${idx}_${userInput.name}`" class="w-full flex">
+          <div class="min-w-24">
+            {{ userInput.content.title }}
+          </div>
+          <!-- 文本 -->
+          <NInput
+            v-if="userInput.content.type === 1" v-model:value="userInput.content.value" type="textarea"
+            :autosize="{ minRows: 1, maxRows: 5 }"
+          />
+          <!-- 数字 -->
+          <NInputNumber v-if="userInput.content.type === 2" v-model:value="userInput.content.value" />
+          <!-- 下拉列表 -->
+          <div v-if="userInput.content.type === 3" />
+          <!-- 文件列表 -->
+          <NUpload
+            v-if="userInput.content.type === 4" ref="uploadRef" multiple directory-dnd action="/api/file/upload"
+            :default-upload="false"
+            :max="startNode?.inputConfig.user_inputs.find(item => item.uuid === userInput.uuid)?.limit || 10"
+            :headers="headers" @update:file-list="handleFileListChange" @finish="onUploadFinish"
+            @change="onUploadChange"
+          >
+            <NUploadDragger>
+              <NText style="font-size: 16px">
+                点击或者拖动文件到该区域来上传
+              </NText>
+              <NP depth="2" style="margin: 4px 0 0 0">
+                文件格式: TXT、PDF、DOC、DOCX、XLS、XLXS、PPT、PPTX；文件大小：不超过10M
+              </NP>
+            </NUploadDragger>
+          </NUpload>
+          <!-- 布尔值 -->
+          <NSwitch v-if="userInput.content.type === 5" v-model:value="userInput.content.value" />
         </div>
-        <!-- 文本 -->
-        <NInput
-          v-if="userInput.content.type === 1" v-model:value="userInput.content.value" type="textarea"
-          :autosize="{ minRows: 1, maxRows: 5 }"
-        />
-        <!-- 数字 -->
-        <NInputNumber v-if="userInput.content.type === 2" v-model:value="userInput.content.value" />
-        <!-- 下拉列表 -->
-        <div v-if="userInput.content.type === 3" />
-        <!-- 文件列表 -->
-        <NUpload
-          v-if="userInput.content.type === 4" ref="uploadRef" multiple directory-dnd action="/api/file/upload"
-          :default-upload="false"
-          :max="startNode?.inputConfig.user_inputs.find(item => item.uuid === userInput.uuid)?.limit || 10"
-          :headers="headers" @update:file-list="handleFileListChange" @finish="onUploadFinish" @change="onUploadChange"
-        >
-          <NUploadDragger>
-            <NText style="font-size: 16px">
-              点击或者拖动文件到该区域来上传
-            </NText>
-            <NP depth="2" style="margin: 4px 0 0 0">
-              文件格式: TXT、PDF、DOC、DOCX、XLS、XLXS、PPT、PPTX；文件大小：不超过10M
-            </NP>
-          </NUploadDragger>
-        </NUpload>
-        <!-- 布尔值 -->
-        <NSwitch v-if="userInput.content.type === 5" v-model:value="userInput.content.value" />
-      </div>
-      <NButton type="primary" :disabled="submitting" :loading="submitting" @click="run">
-        提交
-      </NButton>
+        <div class="w-full flex justify-end">
+          <NButton type="primary" :disabled="submitting" :loading="submitting" @click="run">
+            提交
+          </NButton>
+        </div>
+      </template>
+      <!-- 流程执行过程中用户的输入 -->
+      <template v-if="humanFeedback">
+        <div class="flex flex-col p-2 w-full space-y-2">
+          <div class="flex bg-gray-100 px-2 py-1 rounded-md">
+            <div class="text-base text-red-500">
+              流程已暂停，等待用户输入中...
+            </div>
+          </div>
+          <div class="flex flex-col w-full">
+            <div v-if="humanFeedbackTip" class="text-sm leading-8">
+              提示：{{ humanFeedbackTip }}
+            </div>
+            <NInput v-model:value="humanFeedbackContent" type="textarea" :autosize="{ minRows: 2, maxRows: 5 }" />
+          </div>
+          <div class="flex justify-end">
+            <NButton type="primary" @click="resume">
+              提交
+            </NButton>
+          </div>
+        </div>
+      </template>
     </div>
   </div>
 </template>

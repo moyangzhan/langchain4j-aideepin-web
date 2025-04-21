@@ -37,7 +37,7 @@ const avatar = computed(() => userStore.userInfo.avatar)
       round
       :size="imageSize ? imageSize : 32"
       :src="defaultAvatar"
-      style="backgroundcolor: transparent"
+      style="background-color: transparent"
     />
   </template>
   <!-- Model platform's avatar -->

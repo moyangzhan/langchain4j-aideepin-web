@@ -264,6 +264,10 @@ declare namespace Workflow {
     seed: number
   }
 
+  interface NodeConfigHumanFeedback implements NodeConfig {
+    tip: string
+  }
+
   interface NodeIOData {
     name: string
     value: any

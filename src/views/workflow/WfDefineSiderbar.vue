@@ -4,8 +4,6 @@ import { SvgIcon } from '@/components/common'
 import { getIconByComponentName, getIconClassByComponentName } from '@/utils/workflow-util'
 const wfStore = useWfStore()
 
-// TODO
-
 function onDragStart(event: DragEvent, nodeType: string) {
   if (event.dataTransfer) {
     event.dataTransfer.setData('application/vueflow', nodeType)
