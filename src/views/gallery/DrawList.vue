@@ -33,7 +33,6 @@ function loadMore() {
 function openDraw(item: Chat.Draw) {
   showDetailModal.value = true
   selectedDraw.value = item
-  console.log(item)
 }
 
 function handleDelDraw(uuid: string, prompt: string) {
@@ -49,7 +48,7 @@ onMounted(() => {
   <div class="h-full overflow-y-auto">
     <CommonDraws :draws="draws" :login-btn-enable="true" @click-draw="openDraw" @load-more="loadMore" />
     <NModal v-model:show="showDetailModal" preset="card" style="width:95%" :bordered="true">
-      <DrawDetail :from-page-type="fromPageType" :draw-uuid="selectedDraw.uuid" @draw-deleted="handleDelDraw" />
+      <DrawDetail :from-page-type="fromPageType" :draw-uuid="selectedDraw.uuid" @draw-deleted="handleDelDraw" @hide="showDetailModal = false" />
     </NModal>
   </div>
 </template>

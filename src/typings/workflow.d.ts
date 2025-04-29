@@ -268,6 +268,43 @@ declare namespace Workflow {
     tip: string
   }
 
+  interface NodeConfigMailSend implements NodeConfig {
+    sender_type: number
+    cc_mails: string
+    to_mails: string
+    subject: string
+    content: string
+    smtp: {
+      host: string
+      port: number
+    }
+    sender: {
+      name: string
+      mail: string
+      password: string
+    }
+  }
+
+  interface NodeConfigHttpRequestParam {
+    name: string
+    value: string
+  }
+
+  interface NodeConfigHttpRequest implements NodeConfig {
+    method: string
+    url: string
+    headers: NodeConfigHttpRequestParam[]
+    params: NodeConfigHttpRequestParam[]
+    text_body: string
+    json_body: object
+    form_data_body: NodeConfigHttpRequestParam[]
+    form_urlencoded_body: NodeConfigHttpRequestParam[]
+    content_type: string
+    timeout: number
+    retry_times: number
+    clear_html: boolean
+  }
+
   interface NodeIOData {
     name: string
     value: any

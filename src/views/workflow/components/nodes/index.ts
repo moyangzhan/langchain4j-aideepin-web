@@ -13,6 +13,8 @@ import GoogleNode from './GoogleNode.vue'
 import SwitcherNode from './SwitcherNode.vue'
 import TemplateNode from './TemplateNode.vue'
 import HumanFeedbackNode from './HumanFeedbackNode.vue'
+import MailSendNode from './MailSendNode.vue'
+import HttpRequestNode from './HttpRequestNode.vue'
 
 import StartNodeProperty from './StartNodeProperty.vue'
 import AnswerNodeProperty from './AnswerNodeProperty.vue'
@@ -28,5 +30,7 @@ import TongyiwanxNodeProperty from './TongyiwanxNodeProperty.vue'
 import GoogleNodeProperty from './GoogleNodeProperty.vue'
 import EndNodeProperty from './EndNodeProperty.vue'
 import HumanFeedbackNodeProperty from './HumanFeedbackNodeProperty.vue'
+import MailSendNodeProperty from './MailSendNodeProperty.vue'
+import HttpRequestNodeProperty from './HttpRequestNodeProperty.vue'
 
-export { SpecialNode, StartNode, EndNode, AnswerNode, ClassifierNode, DocumentExtractorNode, KeywordExtractorNode, FaqExtractorNode, Dalle3Node, TongyiwanxNode, KnowledgeRetrievalNode, GoogleNode, SwitcherNode, TemplateNode, StartNodeProperty, AnswerNodeProperty, ClassifierNodeProperty, SwticherNodeProperty, TemplateNodeProperty, KeywordExtractorNodeProperty, FaqExtractorNodeProperty, DocumentExtractorNodeProperty, KnowledgeRetrievalNodeProperty, Dalle3NodeProperty, TongyiwanxNodeProperty, GoogleNodeProperty, EndNodeProperty, HumanFeedbackNode, HumanFeedbackNodeProperty }
+export { SpecialNode, StartNode, EndNode, AnswerNode, ClassifierNode, DocumentExtractorNode, KeywordExtractorNode, FaqExtractorNode, Dalle3Node, TongyiwanxNode, KnowledgeRetrievalNode, GoogleNode, SwitcherNode, TemplateNode, StartNodeProperty, AnswerNodeProperty, ClassifierNodeProperty, SwticherNodeProperty, TemplateNodeProperty, KeywordExtractorNodeProperty, FaqExtractorNodeProperty, DocumentExtractorNodeProperty, KnowledgeRetrievalNodeProperty, Dalle3NodeProperty, TongyiwanxNodeProperty, GoogleNodeProperty, EndNodeProperty, HumanFeedbackNode, HumanFeedbackNodeProperty, MailSendNode, MailSendNodeProperty, HttpRequestNode, HttpRequestNodeProperty }

@@ -51,7 +51,7 @@ const prologue = computed(() => {
           输入
         </div>
         <div v-for="(content, name) in node.input" :key="`input_${name}`" class="flex">
-          <div class="min-w-24">
+          <div class="min-w-24 pr-2">
             {{ name }}
           </div>
           <div>
@@ -71,7 +71,7 @@ const prologue = computed(() => {
             </NImageGroup>
           </template>
           <template v-else>
-            <div class="min-w-24">
+            <div class="min-w-24 pr-2">
               {{ name }}
             </div>
             <div>

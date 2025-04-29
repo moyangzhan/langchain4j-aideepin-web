@@ -143,7 +143,7 @@ defineExpose({ gotoBottom })
       </template>
     </div>
     <NModal v-model:show="showDetailModal" preset="card" style="width: 95%" :bordered="true">
-      <DrawDetail from-page-type="mineInChat" :draw-uuid="selectedDraw.uuid" @draw-deleted="handleDeleted" />
+      <DrawDetail from-page-type="mineInChat" :draw-uuid="selectedDraw.uuid" @draw-deleted="handleDeleted" @hide="showDetailModal = false" />
     </NModal>
   </div>
 </template>

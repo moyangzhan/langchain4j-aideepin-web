@@ -70,36 +70,37 @@ function onVariableSelected(wfInput: Workflow.NodeIORefDinition, nodeUuidParamNa
 
 <template>
   <NCollapse :default-expanded-names="['1']">
-    <NCollapseItem title="输入" name="1" class="text-lg border border-gray-200 rounded-md m-2 px-3 pb-3">
+    <NCollapseItem title="输入" name="1" class="text-lg border border-gray-200 rounded-md m-2 px-3 pb-2">
       <template #header>
         <div class="text-xl">
           输入
         </div>
       </template>
-      <NList>
-        <NListItem v-for="refInput in wfNode.inputConfig.ref_inputs" :key="refInput.uuid" class="h-12">
-          <div class="flex items-center justify-start">
-            <NInput
-              v-show="showVarName" v-model:value="refInput.name" maxlength="50" show-count
-              class="mr-2 max-w-8 h-full" style="max-width:200px"
-            />
-            <WfVariableSelector
-              :workflow="workflow" :wf-node="wfNode" :wf-ref-var="refInput"
-              :white-list-components="onlyShowStartNode ? ['Start'] : []"
-              :white-list-user-input-types="whiteListUserInputTypes" :exclude-nodes="[props.wfNode.uuid]"
-              class="mr-2 h-full flex-1" @variable-selected="onVariableSelected(refInput, $event)"
-            />
-            <SvgIcon
-              class="text-3xl mr-0.5 h-full cursor-pointer" icon="ep:remove" style="width:16px"
-              @click="onDelete(refInput)"
-            />
-          </div>
-        </NListItem>
-      </NList>
+      <div class="flex flex-col space-y-1">
+        <NList>
+          <NListItem v-for="refInput in wfNode.inputConfig.ref_inputs" :key="refInput.uuid" class="h-12">
+            <div class="flex items-center justify-start">
+              <NInput
+                v-show="showVarName" v-model:value="refInput.name" maxlength="50" show-count
+                class="mr-2 max-w-8 h-full" style="max-width:200px"
+              />
+              <WfVariableSelector
+                :workflow="workflow" :wf-node="wfNode" :wf-ref-var="refInput"
+                :white-list-components="onlyShowStartNode ? ['Start'] : []"
+                :white-list-user-input-types="whiteListUserInputTypes" :exclude-nodes="[props.wfNode.uuid]"
+                class="mr-2 h-full flex-1" @variable-selected="onVariableSelected(refInput, $event)"
+              />
+              <SvgIcon
+                class="text-3xl mr-0.5 h-full cursor-pointer" icon="ep:remove" style="width:16px"
+                @click="onDelete(refInput)"
+              />
+            </div>
+          </NListItem>
+        </NList>
+        <NButton v-if="inputsCount < props.limit" dashed @click="onAdd">
+          +新增变量
+        </NButton>
+      </div>
     </NCollapseItem>
   </NCollapse>
-  <br>
-  <NButton v-if="inputsCount < props.limit" dashed @click="onAdd">
-    +新增变量
-  </NButton>
 </template>

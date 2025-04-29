@@ -1,6 +1,7 @@
 <script setup lang='ts'>
 import { computed, onMounted, ref, watch } from 'vue'
 import { NAvatar, NButton, NCard, NCarousel, NEmpty, NFlex, NFloatButton, NIcon, NImage, NImageGroup, NInput, NList, NListItem, NPagination, NSpin, NTag, NThing, NTooltip, useDialog, useLoadingBar, useMessage } from 'naive-ui'
+import { useRouter } from 'vue-router'
 import { ArrowDown, ArrowUp, Reload } from '@vicons/ionicons5'
 import DrawDetailFuncBar from './DrawDetailFuncBar.vue'
 import { useAuthStore, useDrawStore, useGalleryStore } from '@/store'
@@ -15,6 +16,7 @@ const props = withDefaults(defineProps<Props>(), {
   fromPageType: '',
 })
 const emit = defineEmits<Emit>()
+const router = useRouter()
 const dialog = useDialog()
 const drawStore = useDrawStore()
 const authStore = useAuthStore()
@@ -38,6 +40,7 @@ interface Props {
 }
 interface Emit {
   (e: 'drawDeleted', uuid: string, prompt: string): void
+  (e: 'hide'): void
 }
 function handleDelDraw(uuid: string, prompt: string) {
   dialog.warning({
@@ -169,6 +172,13 @@ async function handleSubmit() {
   }
 }
 
+function openDrawTab() {
+  router.replace({
+    name: 'Draw',
+  })
+  emit('hide')
+}
+
 const submitDisable = computed(() => newComment.value.trim().length < 3 || submitting)
 
 onMounted(() => {
@@ -269,15 +279,18 @@ watch(
               />
             </NFlex>
             <NInput
-              v-model:value="newComment" class="mt-3" type="textarea" :autosize="{
+              v-model:value="newComment" class="mt-3" type="textarea" placeholder="这张图片如何？发表你的看法吧~" :autosize="{
                 minRows: 2,
               }"
             />
-            <NFlex justify="end">
+            <div class="flex justify-between">
+              <NButton type="primary" text tag="a" target="_blank" :disable="submitDisable" @click="openDrawTab">
+                我也要画一张
+              </NButton>
               <NButton type="primary" ghost :disable="submitDisable" @click="handleSubmit">
                 提交
               </NButton>
-            </NFlex>
+            </div>
           </NFlex>
         </NCard>
       </div>

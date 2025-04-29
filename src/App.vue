@@ -2,7 +2,7 @@
 import { NButton, NConfigProvider, NIcon, NLayout, NLayoutSider, NMenu, NSpace, NTooltip } from 'naive-ui'
 import type { MenuOption } from 'naive-ui'
 import type { Component } from 'vue'
-import { defineAsyncComponent, h, onMounted, ref } from 'vue'
+import { defineAsyncComponent, h, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { AppsOutline, ChatboxEllipsesOutline, ColorPaletteOutline, ImagesOutline, LibraryOutline, PersonCircleOutline, SearchOutline, SettingsOutline } from '@vicons/ionicons5'
 import { Prompt as PromptIcon } from '@vicons/tabler'
@@ -26,7 +26,7 @@ const { language } = useLanguage()
 const route = useRoute()
 const routeName = route.name as string
 console.log(`menu-${routeName.toLowerCase()}`)
-const activeKey = ref<string>('`menu-chat')
+const activeKey = ref<string>('menu-chat')
 const showPrompt = ref<boolean>(false)
 const showSetting = ref<boolean>(false)
 
@@ -143,6 +143,18 @@ const menuOptions: MenuOption[] = [
 function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) })
 }
+
+watch(
+  () => route.name, // 监听 path 变化
+  (newName, oldName) => {
+    // 代码中使用router.push()方法跳转到不同菜单的路径时，route.name会发生变化，activeKey不会变化，如果做以下处理，activeKey会是上一个路由的值，导致菜单高亮错误
+    // 这里可以根据 newName 来判断当前路由，并设置 activeKey 的值
+    menuKeyToRouteNames.forEach((val, key) => {
+      if (val.includes(newName as string) && activeKey.value !== `menu-${key.toLowerCase()}`)
+        activeKey.value = `menu-${key.toLowerCase()}`
+    })
+  },
+)
 
 onMounted(async () => {
   const llms = await api.loadLLMs<AiModelInfo[]>()

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from 'vue'
 import { NInput } from 'naive-ui'
-import { AnswerNodeProperty, ClassifierNodeProperty, Dalle3NodeProperty, DocumentExtractorNodeProperty, EndNodeProperty, FaqExtractorNodeProperty, GoogleNodeProperty, HumanFeedbackNodeProperty, KeywordExtractorNodeProperty, KnowledgeRetrievalNodeProperty, StartNodeProperty, SwticherNodeProperty, TemplateNodeProperty, TongyiwanxNodeProperty } from './components/nodes'
+import { AnswerNodeProperty, ClassifierNodeProperty, Dalle3NodeProperty, DocumentExtractorNodeProperty, EndNodeProperty, FaqExtractorNodeProperty, GoogleNodeProperty, HttpRequestNodeProperty, HumanFeedbackNodeProperty, KeywordExtractorNodeProperty, KnowledgeRetrievalNodeProperty, MailSendNodeProperty, StartNodeProperty, SwticherNodeProperty, TemplateNodeProperty, TongyiwanxNodeProperty } from './components/nodes'
 import { useWfStore } from '@/store'
 import { SvgIcon } from '@/components/common'
 import { getIconByComponentName, getIconClassByComponentName } from '@/utils/workflow-util'
@@ -118,6 +118,14 @@ onMounted(() => {
         />
         <HumanFeedbackNodeProperty
           v-else-if="wfNode.wfComponent.name === 'HumanFeedback'" :key="`feedback_${wfNode.uuid}`"
+          :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
+        />
+        <MailSendNodeProperty
+          v-else-if="wfNode.wfComponent.name === 'MailSend'" :key="`mailsend_${wfNode.uuid}`"
+          :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
+        />
+        <HttpRequestNodeProperty
+          v-else-if="wfNode.wfComponent.name === 'HttpRequest'" :key="`httprequest_${wfNode.uuid}`"
           :workflow="workflow" :ui-workflow="uiWorkflow" :wf-node="wfNode"
         />
         <EndNodeProperty

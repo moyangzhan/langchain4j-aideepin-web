@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 import CommonNodeHeader from '../CommonNodeHeader.vue'
@@ -11,7 +12,7 @@ interface WfProps {
 interface CombinedProps extends NodeProps, WfProps { }
 defineProps<CombinedProps>()
 const wfStore = useWfStore()
-let yposition = 0
+const yposition = ref<number>(0)
 </script>
 
 <template>

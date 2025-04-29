@@ -40,6 +40,10 @@ export function createNewNode(
     createGoogle(newWfNode)
   else if (component.name === 'HumanFeedback')
     createHumanFeedback(newWfNode)
+  else if (component.name === 'MailSend')
+    createMailSend(newWfNode)
+  else if (component.name === 'HttpRequest')
+    createHttpRequest(newWfNode)
 
   workflow.nodes.push(newWfNode)
   uiWorkflow.nodes.push(wfNodeToUiNode(newWfNode))
@@ -307,6 +311,43 @@ function createHumanFeedback(node: Workflow.WorkflowNode) {
   }
 }
 
+function createMailSend(node: Workflow.WorkflowNode) {
+  node.nodeConfig = {
+    sender_type: 1,
+    cc_mails: '',
+    to_mails: '',
+    subject: '',
+    content: '',
+    smtp: {
+      host: '',
+      port: 465,
+    },
+    sender: {
+      name: '',
+      mail: '',
+      password: '',
+    },
+  }
+}
+
+function createHttpRequest(node: Workflow.WorkflowNode) {
+  node.nodeConfig = {
+    method: 'GET',
+    url: '',
+    content_type: 'text/plain', // text/plain, application/json, application/x-www-form-urlencoded, multipart/form-data
+    headers: [{ name: 'Accept', value: '*/*' }, { name: 'Cache-Control', value: 'no-cache' }, { name: 'Connection', value: 'keep-alive' }],
+    params: [],
+    text_body: '',
+    json_body: {},
+    form_data_body: [],
+    form_urlencoded_body: [],
+    body: {},
+    timeout: 10,
+    retry_times: 0,
+    clear_html: false,
+  }
+}
+
 export function getInputLabelFromParamName(workflow: Workflow.WorkflowInfo, nodeUuid: string, nodeParamName: string) {
   const node = workflow.nodes.find(node => node.uuid === nodeUuid)
   if (!node)
@@ -363,6 +404,10 @@ export function getIconByComponentName(name: string) {
       return 'ri:google-line'
     case 'humanfeedback':
       return 'covid:transmission-virus-human-transmit-2'
+    case 'mailsend':
+      return 'carbon:mail-all'
+    case 'httprequest':
+      return 'carbon:http'
     case 'end':
       return 'carbon:closed-caption'
     case 'start':
@@ -398,6 +443,10 @@ export function getIconClassByComponentName(name: string) {
       return 'text-emerald-900'
     case 'humanfeedback':
       return 'text-zinc-800'
+    case 'mailsend':
+      return 'text-amber-800'
+    case 'httprequest':
+      return 'text-slate-800'
     case 'end':
       return 'text-orange-800'
     case 'start':
