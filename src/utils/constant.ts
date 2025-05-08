@@ -1,3 +1,8 @@
+export const tokenEstimator = [
+  { label: 'Openai', value: 'openai' },
+  { label: '通义千问', value: 'qwen' },
+  { label: 'Huggingface', value: 'huggingface' },
+]
 export const dalle3SizeOptions = [
   { label: '方(1024x1024)', value: '1024x1024' },
   { label: '竖屏(1024x1792)', value: '1024x1792' },

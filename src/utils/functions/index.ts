@@ -24,6 +24,7 @@ export function knowledgeBaseEmptyInfo() {
     embeddingCount: 0,
     ingestMaxOverlap: 0,
     ingestModelId: '0',
+    ingestTokenEstimator: '',
     retrieveMaxResults: 0,
     retrieveMinScore: 0,
     queryLlmTemperature: 0,

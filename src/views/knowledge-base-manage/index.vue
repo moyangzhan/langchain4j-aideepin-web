@@ -7,6 +7,7 @@ import { QuestionCircle16Regular } from '@vicons/fluent'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAppStore, useAuthStore, useKbStore } from '@/store'
 import { knowledgeBaseEmptyInfo } from '@/utils/functions'
+import { tokenEstimator } from '@/utils/constant'
 import { t } from '@/locales'
 import api from '@/api'
 
@@ -45,6 +46,8 @@ const changeShowModal = (selected: KnowledgeBase.Info = knowledgeBaseEmptyInfo()
   } else {
     tmpKb.ingestModelName = appStore.llms.find(item => item.modelName === tmpKb.ingestModelName)?.modelName || ''
   }
+  if (!tmpKb.ingestTokenEstimator)
+    tmpKb.ingestTokenEstimator = tokenEstimator[0].value
 }
 // table相关
 const createColumns = (): DataTableColumns<KnowledgeBase.Info> => {
@@ -199,6 +202,10 @@ function onModelChange(modelName: string) {
   tmpKb.ingestModelId = appStore.llms.find(item => item.modelName === modelName)?.modelId || ''
 }
 
+function onTokenEstimatorChange(tokenEstimator: string) {
+  tmpKb.ingestTokenEstimator = tokenEstimator
+}
+
 async function initData() {
   search(1)
 }
@@ -280,7 +287,7 @@ watch(
                 </NIcon>
               </template>
               <div> 严格模式：严格匹配知识库，知识库中如无搜索结果，直接返回无答案</div>
-              <div> 非严格模式：知识库中如无搜索结果，将用户提问传给LLM继续请求答案</div>
+              <div> 宽松模式：知识库中如无搜索结果，将用户提问传给LLM继续请求答案</div>
             </NTooltip>
           </div>
           <NRadioGroup v-model:value="tmpKb.isStrict" name="radiogroup">
@@ -293,12 +300,22 @@ watch(
           </NRadioGroup>
         </div>
         <NCollapse>
-          <NCollapseItem title="文档索引设置">
+          <NCollapseItem title="文档索引设置（向量）">
             <div class="flex flex-col space-y-2">
               <div :class="itemBoxClass">
                 <div>文档切割时重叠数量（改动后对新索引生效）</div>
                 <NInputNumber v-model:value="tmpKb.ingestMaxOverlap" />
               </div>
+              <div :class="itemBoxClass">
+                <div>
+                  Token计数器
+                </div>
+                <NSelect :value="tmpKb.ingestTokenEstimator" :options="tokenEstimator" :on-update:value="onTokenEstimatorChange" />
+              </div>
+            </div>
+          </NCollapseItem>
+          <NCollapseItem title="文档索引设置（图谱）">
+            <div class="flex flex-col space-y-2">
               <div :class="itemBoxClass">
                 <div>
                   模型名称
@@ -315,8 +332,6 @@ watch(
               </div>
             </div>
           </NCollapseItem>
-        </NCollapse>
-        <NCollapse>
           <NCollapseItem title="文档召回设置">
             <div class="flex flex-col space-y-2">
               <div :class="itemBoxClass">
@@ -329,8 +344,6 @@ watch(
               </div>
             </div>
           </NCollapseItem>
-        </NCollapse>
-        <NCollapse>
           <NCollapseItem title="大模型参数设置">
             <div class="flex flex-col space-y-2">
               <div :class="itemBoxClass">
