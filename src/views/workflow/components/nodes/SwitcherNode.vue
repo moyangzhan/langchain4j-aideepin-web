@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 import CommonNodeHeader from '../CommonNodeHeader.vue'
@@ -12,23 +11,31 @@ interface WfProps {
 interface CombinedProps extends NodeProps, WfProps { }
 defineProps<CombinedProps>()
 const wfStore = useWfStore()
-const yposition = ref<number>(0)
+let yposition = 0
+function startPosition() {
+  yposition = 40
+  return yposition
+}
+function inceaseYPosition() {
+  yposition += 36
+  return yposition
+}
 </script>
 
 <template>
   <div class="flex flex-col w-full">
     <Handle type="target" :position="Position.Left" />
-    <CommonNodeHeader :wf-node="data" :data-yposition="yposition = 40" />
+    <CommonNodeHeader :wf-node="data" :data-yposition="startPosition()" />
     <div clas="flex-1 flex-col">
       <div v-for="(wfCase, idx) in data.nodeConfig.cases" :key="wfCase.target_node_uuid" class="flex flex-col">
-        <div class="h-8 leading-8 mt-1 px-1 bg-gray-200 rounded-md" :data-yposition="yposition = yposition + 36">
+        <div class="h-8 leading-8 mt-1 px-1 bg-gray-200 rounded-md" :data-yposition="inceaseYPosition()">
           分支情况{{ idx + 1 }}
           <Handle :id="wfCase.uuid" type="source" :position="Position.Right" :style="`top: ${yposition}px`" />
         </div>
         <div class="flex flex-col items-center">
           <div
             v-for="(condition, cidx) in wfCase.conditions" :key="condition.uuid"
-            class="flex w-full h-8 mt-1 p-1 bg-gray-100 rounded-md" :data-yposition="yposition = yposition + 36"
+            class="flex w-full h-8 mt-1 p-1 bg-gray-100 rounded-md" :data-yposition="inceaseYPosition()"
           >
             <div class="max-w-24 h-6 leading-6 overflow-hidden text-gray-500 px-1 rounded-md text-xs">
               {{ getInputLabelFromParamName(workflow, condition.node_uuid, condition.node_param_name) }}
@@ -48,7 +55,7 @@ const yposition = ref<number>(0)
           </div>
         </div>
       </div>
-      <div class="h-8 leading-8 mt-1 px-1 bg-gray-200 rounded-md" :data-yposition="yposition = yposition + 36">
+      <div class="h-8 leading-8 mt-1 px-1 bg-gray-200 rounded-md" :data-yposition="inceaseYPosition()">
         保底情况
         <Handle id="default_handle" type="source" :position="Position.Right" :style="`top:${yposition}px`" />
       </div>
