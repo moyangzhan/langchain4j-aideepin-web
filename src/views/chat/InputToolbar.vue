@@ -22,6 +22,7 @@ const token = ref<string>(authStore.token)
 const ms = useMessage()
 const uploadedFileInfoList = ref<UploadFileInfo[]>([])
 const uploadedUuidList = ref<string[]>([])
+const uploadedUrls = ref<string[]>([])
 const currConv = computed(() => chatStore.getCurConv || defaultConv())
 const canUploadImage = ref<boolean>(false)
 
@@ -46,12 +47,13 @@ function handleFinish({ file, event }: { file: UploadFileInfo; event?: ProgressE
   const res = JSON.parse((event?.target as XMLHttpRequest).response)
   if (res.success) {
     uploadedUuidList.value.push(res.data.uuid)
+    uploadedUrls.value.push(res.data.url)
     uploadedFileInfoList.value.push(file)
     console.log(`image uuid:${res.data.uuid}`)
   } else {
     console.log(`handleOriginalFinish err:${res.data}`)
   }
-  emit('imagesChange', uploadedUuidList.value)
+  emit('imagesChange', uploadedUrls.value)
 }
 
 function handlerRemove({ file }: { file: UploadFileInfo }) {
@@ -59,10 +61,11 @@ function handlerRemove({ file }: { file: UploadFileInfo }) {
   const removeUuid = uploadedUuidList.value.at(itemIndex)
   if (removeUuid) {
     api.fileDel(removeUuid)
+    uploadedUrls.value.splice(itemIndex, 1)
     uploadedUuidList.value.splice(itemIndex, 1)
     uploadedFileInfoList.value.splice(itemIndex, 1)
   }
-  emit('imagesChange', uploadedUuidList.value)
+  emit('imagesChange', uploadedUrls.value)
 }
 
 function toggleUsingContext() {

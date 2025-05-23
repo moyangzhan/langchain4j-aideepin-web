@@ -23,8 +23,7 @@ const baseImageList = ref<UploadFileInfo[]>()
 const baseImage = ref<UploadResult>({ uuid: '', url: '' })
 const refImageList = ref<UploadFileInfo[]>()
 const refImage = ref<UploadResult>({ uuid: '', url: '' })
-const showOssTip = ref<boolean>(false)
-
+const isProd = import.meta.env.PROD
 interface UploadResult {
   uuid: string
   url: string
@@ -52,10 +51,6 @@ function handleBaseImageFinish({ file, event }: { file: UploadFileInfo; event?: 
   if (res.success) {
     baseImage.value = res.data
     baseImageList.value?.push(file)
-    if (!baseImage.value.url.includes('http')) {
-      ms.error('没有开启OSS服务，请开启OSS服务后再试')
-      showOssTip.value = true
-    }
     console.log(`image url:${baseImage.value}`)
   } else {
     console.log(`handleBaseImageFinish err:${res.data}`)
@@ -68,10 +63,6 @@ function handleRefImageFinish({ file, event }: { file: UploadFileInfo; event?: P
     refImage.value = res.data
     refImageList.value?.push(file)
     console.log(`ref image uuid:${refImage.value}`)
-    if (!refImage.value.url.includes('http')) {
-      ms.error('没有开启OSS服务，请开启OSS服务后再试')
-      showOssTip.value = true
-    }
   } else {
     console.log(`handleRefImageFinish err:${res.data}`)
   }
@@ -141,9 +132,10 @@ async function handleSubmit(prompt: string) {
 
 <template>
   <div>
-    <NAlert v-if="showOssTip" title="提示" type="error">
-      1. 本功能需要开启阿里云OSS存储，并确保图片的访问权限为公共读。<br>
-      2. OSS开启方式：管理后台=》系统配置=》存储位置<br>
+    <NAlert v-if="!isProd" title="提示" type="error">
+      1. 如果开启了阿里云OSS存储，需要确保图片的访问权限为公共读。<br>
+      2. 如果开启了本地存储，需要确保上传的主图及引导图可公网访问，本地开发时本功能不可用。<br>
+      3. OSS开启方式：管理后台=》系统配置=》存储位置<br>
       原因：【通义万相-背景生成】模型需要通过公网获取主体图片及引导图片，因此请确保主体图片及引导图片均为公网可访问的图片链接。
     </NAlert>
     <NSpace vertical>
