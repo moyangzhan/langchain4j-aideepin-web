@@ -246,10 +246,17 @@ function onUploadFinish({
   file: UploadFileInfo
   event?: ProgressEvent
 }) {
-  if ((event?.target as XMLHttpRequest).response.success)
+  const respData = JSON.parse((event?.target as XMLHttpRequest).response)
+  if (!respData) {
+    ms.error('上传失败，响应数据格式错误')
+    return
+  }
+  const { success, message } = respData
+  console.log('onUploadFinish', success, message)
+  if (success)
     ms.success('上传成功')
   else
-    ms.error((event?.target as XMLHttpRequest).response.message)
+    ms.error(message || '上传失败')
 
   return file
 }
