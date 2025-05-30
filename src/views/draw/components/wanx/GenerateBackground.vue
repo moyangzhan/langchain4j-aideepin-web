@@ -159,6 +159,16 @@ async function handleSubmit(prompt: string) {
     <NRow>
       <NCol :span="2" class="min-w-fit">
         主图<span class="text-red-500">*</span>
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <NIcon style="padding-top: 0.1rem">
+              <QuestionCircle16Regular />
+            </NIcon>
+          </template>
+          <span>
+            背景透明的图像（带透明背景的RGBA四通道图像）
+          </span>
+        </NTooltip>
       </NCol>
       <NCol :span="12">
         <NUpload
