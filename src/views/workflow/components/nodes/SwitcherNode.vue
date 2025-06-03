@@ -43,7 +43,7 @@ function inceaseYPosition() {
             <div class="h-6 leading-6 overflow-hidden px-1 text-xs">
               {{ wfStore.getOperatorDesc(condition.operator) }}
             </div>
-            <div class="h-6 leading-6 flex-1 overflow-hidden text-gray-500 px-1 rounded-md text-xs">
+            <div v-show="condition.operator !== 'empty' && condition.operator !== 'not empty'" class="h-6 leading-6 flex-1 overflow-hidden text-gray-500 px-1 rounded-md text-xs">
               {{ condition.value }}
             </div>
             <div

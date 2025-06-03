@@ -138,10 +138,10 @@ function onDelCase(nodeCase: Workflow.NodeConfigSwitcherCase) {
                 <WfVariableSelector
                   :workflow="workflow" :wf-node="wfNode" :wf-ref-var="condition"
                   :exclude-nodes="[wfNode.wfComponent.name]"
-                  class="mr-1 h-full max-w-[150px]" @variable-selected="onConditionSelected(condition, $event)"
+                  class="flex-1 mr-1 h-full max-w-[150px]" @variable-selected="onConditionSelected(condition, $event)"
                 />
                 <OperatorSelector :selected="condition.operator" class="mr-1 h-full max-w-[120px]" @operator-selected="(op) => condition.operator = op" />
-                <NInput v-model:value="condition.value" class="flex-1 min-w-16" />
+                <NInput v-show="condition.operator !== 'empty' && condition.operator !== 'not empty'" v-model:value="condition.value" class="flex-1 min-w-16" />
                 <SvgIcon
                   v-show="wfCase.conditions.length > 1" class="text-base ml-0.5 h-full cursor-pointer"
                   icon="ep:remove" @click="onDelCondition(wfCase, condition)"
@@ -150,7 +150,7 @@ function onDelCase(nodeCase: Workflow.NodeConfigSwitcherCase) {
             </div>
           </div>
           <div class="my-3 border border-gray-200 rounded-md p-3">
-            <div class="text-sm bg-blue-100 rounded-md p-2 my-2 w-full flex">
+            <div class="text-sm bg-indigo-100 rounded-md p-2 my-2 w-full flex">
               <div v-if="wfCase.operator === 'and'">
                 以上所有的条件都满足时跳转到下面的节点
               </div>
