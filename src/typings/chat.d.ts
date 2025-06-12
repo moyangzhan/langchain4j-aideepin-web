@@ -39,6 +39,7 @@ declare namespace Chat {
 		loadedAll: boolean
 		loadedFirstPageMsg: boolean
 		minMsgUuid?: string | ''
+		mcpIds: string[]
 	}
 
 	interface ConvWithMessages {

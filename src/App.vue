@@ -5,6 +5,7 @@ import type { Component } from 'vue'
 import { defineAsyncComponent, h, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { AppsOutline, ChatboxEllipsesOutline, ColorPaletteOutline, ImagesOutline, LibraryOutline, PersonCircleOutline, SearchOutline, SettingsOutline } from '@vicons/ionicons5'
+import { ToolKit } from '@vicons/carbon'
 import { Prompt as PromptIcon } from '@vicons/tabler'
 import { NaiveProvider, PromptStore } from '@/components/common'
 import { useTheme } from '@/hooks/useTheme'
@@ -38,6 +39,7 @@ const menuKeyToRouteNames = new Map<string, string[]>(
     ['knowledge-base', ['QAIndex', 'QADetail', 'KnowledgeBaseManage', 'KnowledgeBaseManageDetail']],
     ['workflow', ['WfDetail']],
     ['aisearch', ['AiSearch']],
+    ['mcp', ['Mcp']],
   ])
 
 menuKeyToRouteNames.forEach((val, key) => {
@@ -123,6 +125,20 @@ const menuOptions: MenuOption[] = [
           },
         },
         { default: () => '应用' },
+      ),
+  },
+  {
+    key: 'menu-mcp',
+    icon: renderIcon(ToolKit),
+    label: () =>
+      h(
+        RouterLink,
+        {
+          to: {
+            name: 'Mcp',
+          },
+        },
+        { default: () => '工具' },
       ),
   },
   {

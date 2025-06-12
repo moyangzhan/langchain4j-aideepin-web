@@ -685,6 +685,25 @@ function workflowRuntimeDelete<T = any>(wfRuntimeUuid: string) {
   })
 }
 
+function mcpSearch<T = any>(keyword: string, currentPage: number, pageSize: number) {
+  return get<T>({
+    url: `/mcp/public/search?keyword=${keyword}&currentPage=${currentPage}&pageSize=${pageSize}`,
+  })
+}
+
+function userMcpList<T = any>(currentPage: number, pageSize: number) {
+  return get<T>({
+    url: `/user/mcp/list?currentPage=${currentPage}&pageSize=${pageSize}`,
+  })
+}
+
+function userMcpSaveOrUpdate<T = any>(data: Mcp.UserMcpUpdateReq) {
+  return post<T>({
+    url: '/user/mcp/saveOrUpdate',
+    data,
+  })
+}
+
 export default {
   login,
   register,
@@ -776,4 +795,7 @@ export default {
   workflowOperators,
   workflowRuntimeDelete,
   workflowRuntimeResume,
+  mcpSearch,
+  userMcpList,
+  userMcpSaveOrUpdate,
 }

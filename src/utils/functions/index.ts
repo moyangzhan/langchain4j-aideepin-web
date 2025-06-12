@@ -220,6 +220,7 @@ export function emptyConv(): Chat.Conversation {
     loadedAll: false,
     loadedFirstPageMsg: false,
     minMsgUuid: '',
+    mcpIds: [],
   }
 }
 
@@ -284,6 +285,38 @@ export function emptyQuota(): User.Config {
         monthDrawTimes: 0,
       },
     },
+  }
+}
+
+export function emptyMcp(): Mcp.McpInfo {
+  return {
+    id: '',
+    uuid: '',
+    title: '',
+    transportType: '',
+    sseUrl: '',
+    sseTimeout: 0,
+    stdioCommand: '',
+    stdioArg: '',
+    presetParams: [],
+    customizedParamDefinitions: [],
+    installType: 'git',
+    website: '',
+    remark: '',
+    isEnable: false,
+    configured: false, // 是否已配置
+  }
+}
+
+export function emptyUserMcp(): Mcp.UserMcp {
+  return {
+    id: '',
+    uuid: '',
+    userId: '',
+    mcpId: '',
+    mcpCustomizedParams: [],
+    isEnable: false,
+    mcpInfo: emptyMcp(), // mcp信息
   }
 }
 

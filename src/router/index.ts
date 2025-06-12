@@ -79,6 +79,11 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/mcp',
+    name: 'Mcp',
+    component: () => import('@/views/mcp/index.vue'),
+  },
+  {
     path: '/404',
     name: '404',
     component: () => import('@/views/exception/404/index.vue'),

@@ -11,6 +11,7 @@ const defaultConversation = {
   loadedAll: false,
   loadedFirstPageMsg: false,
   usedPreset: false,
+  mcpIds: [],
 }
 
 export function defaultState(): Chat.ChatState {

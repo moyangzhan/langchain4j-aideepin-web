@@ -45,13 +45,22 @@ AIDEEPIN
 * 多模型随意切换
 * 多搜索引擎随意切换
 
-## 接入的模型：
+* AI工作流
+* MCP服务市场
 
-* ChatGPT 3.5
-* 通义千问
+## 接入的平台/模型：
+
+* DeepSeek
+* OpenAI
+  * ChatGPT 3.5
+  * DALL-E 2
+  * DALL-E 3
+* 灵积
+  * 通义千问
+  * 通义万相
+* 硅基流动
 * 文心一言
 * ollama
-* DALL-E 2
 
 ## 前置要求
 

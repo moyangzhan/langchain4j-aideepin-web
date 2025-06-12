@@ -1,7 +1,9 @@
 <script setup lang='ts'>
 import { onMounted, ref, watch } from 'vue'
-import { NButton, NFlex, NFormItem, NInput, NList, NListItem, NModal, NScrollbar, NTabPane, NTabs, NThing, useMessage } from 'naive-ui'
+import { NButton, NList, NListItem, NModal, NScrollbar, NTabPane, NTabs, NThing, useMessage } from 'naive-ui'
 import { useAuthStore, useChatStore } from '@/store'
+import { emptyConv } from '@/utils/functions'
+import EditConvDetail from '@/views/chat/components/Header/EditConvDetail.vue'
 import api from '@/api'
 
 const authStore = useAuthStore()
@@ -9,9 +11,7 @@ const authStoreRef = ref<AuthState>(authStore)
 const convSaving = ref<boolean>(false)
 const loadingPresetConvs = ref<boolean>(false)
 const loadingRels = ref<boolean>(false)
-const tmpTitle = ref<string>('')
-const tmpRemark = ref<string>('')
-const tmpAiSystemMessage = ref<string>('')
+const tmpConv = ref<Chat.Conversation>(emptyConv())
 const showModal = ref<boolean>(false)
 const chatStore = useChatStore()
 const ms = useMessage()
@@ -44,36 +44,8 @@ async function searchPresetConvRel() {
   }
 }
 
-async function handleSave(event?: KeyboardEvent) {
-  event?.stopPropagation()
-  if (!tmpTitle.value) {
-    ms.error('标题不能为空', {
-      duration: 2000,
-    })
-    return
-  }
-  if (convSaving.value)
-    return
-
-  convSaving.value = true
-  const params = { title: tmpTitle.value, remark: tmpRemark.value, aiSystemMessage: tmpAiSystemMessage.value }
-  try {
-    const { data: newConv } = await api.convAdd<Chat.Conversation>(params)
-    chatStore.addConvAndActive(newConv)
-
-    tmpTitle.value = ''
-    tmpAiSystemMessage.value = ''
-  } catch (error: any) {
-    console.log('addConv error', error)
-    if (error.message) {
-      ms.error(error.message, {
-        duration: 2000,
-      })
-    }
-  } finally {
-    convSaving.value = false
-    showModal.value = false
-  }
+function handleSubmitted() {
+  showModal.value = false
 }
 
 async function handleUsePresetConv(presetConvUuid: string) {
@@ -127,23 +99,7 @@ defineExpose({ toggleModal })
   <NModal v-model:show="showModal" style="min-width:200px; width: 60%;" preset="card">
     <NTabs type="line" justify-content="space-evenly" animated>
       <NTabPane name="newConv" tab="新的角色">
-        <NFlex class="grow" justify="space-between" vertical>
-          <NFormItem label="名称" :show-feedback="false" :show-require-mark="true">
-            <NInput v-model:value="tmpTitle" type="text" size="large" placeholder="如：李白" />
-          </NFormItem>
-          <NFormItem label="备注" :show-feedback="false">
-            <NInput v-model:value="tmpRemark" type="text" size="large" placeholder="如：多年写诗经验" />
-          </NFormItem>
-          <NFormItem label="角色设定" :show-feedback="false">
-            <NInput
-              v-model:value="tmpAiSystemMessage" type="textarea" size="large"
-              placeholder="如：你是唐朝的李白，诗才出众，被誉为诗仙"
-            />
-          </NFormItem>
-          <NButton block type="primary" @click="handleSave()">
-            {{ $t('common.save') }}
-          </NButton>
-        </NFlex>
+        <EditConvDetail :conversation="tmpConv" @submitted="handleSubmitted" />
       </NTabPane>
       <NTabPane name="presetConv" tab="预设角色">
         <NScrollbar class="max-h-96">
