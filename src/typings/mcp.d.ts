@@ -4,7 +4,7 @@ declare namespace Mcp {
     name: string
     title: string
     value: any
-    requireEncrypt: boolean
+    require_encrypt: boolean
     enctrypted: boolean
   }
 
@@ -12,7 +12,7 @@ declare namespace Mcp {
     //接口定义字段
     name: string
     title: string
-    requireEncrypt: boolean
+    require_encrypt: boolean
 
     //前端增加字段
     value: any

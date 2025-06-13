@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import { ref, watch } from 'vue'
-import { NAlert, NButton, NCheckbox, NIcon, NInput, NModal, NRadio, NRadioGroup, NTabPane, NTable, NTabs, NTooltip, useLoadingBar, useMessage } from 'naive-ui'
+import { NAlert, NButton, NIcon, NInput, NModal, NRadio, NRadioGroup, NTabPane, NTable, NTabs, NTooltip, useLoadingBar, useMessage } from 'naive-ui'
 import { QuestionCircle16Regular } from '@vicons/fluent'
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
@@ -203,7 +203,8 @@ watch(
                       />
                     </td>
                     <td class="flex justify-center">
-                      <NCheckbox v-model:checked="uninitParam.requireEncrypt" />
+                      <span v-if="uninitParam.require_encrypt">是</span>
+                      <span v-if="!uninitParam.require_encrypt">否</span>
                     </td>
                   </tr>
                 </tbody>
