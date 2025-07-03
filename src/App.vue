@@ -172,6 +172,14 @@ watch(
   },
 )
 
+watch(
+  () => authStore.token,
+  (newToken, oldToken) => {
+    if (!newToken && oldToken)
+      showSetting.value = false
+  },
+)
+
 onMounted(async () => {
   const llms = await api.loadLLMs<AiModelInfo[]>()
   appStore.setLLMs(llms.data)

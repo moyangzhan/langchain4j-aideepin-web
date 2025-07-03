@@ -78,7 +78,7 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col w-full h-full pb-3">
-    <div class="flex-1 flex flex-wrap justify-start items-start overflow-y-auto">
+    <div class="flex flex-wrap justify-start items-start overflow-y-auto">
       <div
         v-for="mcpInfo in mcpInfoList" :key="mcpInfo.uuid"
         class="m-2 flex flex-col space-y-2 border border-gray-200 p-3 rounded-md h-[180px] w-[380px] hover:bg-orange-50"

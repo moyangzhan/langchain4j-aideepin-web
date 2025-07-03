@@ -164,7 +164,7 @@ watch(
             class="flex-none cursor-pointer text-sm" icon="clarity:remove-line"
             @click="handlerRemove({ file: fileInfo })"
           />
-        </div>et:tools-2
+        </div>
       </NListItem>
     </NList>
     <NModal v-model:show="mcpModalShow" style="width: 90%; max-width: 640px" preset="card" title="配置会话使用的服务与工具">

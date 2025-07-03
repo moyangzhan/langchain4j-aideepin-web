@@ -1,3 +1,3 @@
 import Message from './Message/index.vue'
-
-export { Message }
+import AudioMessage from './Message/AudioMessage.vue'
+export { Message, AudioMessage }

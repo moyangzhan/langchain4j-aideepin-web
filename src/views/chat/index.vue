@@ -3,16 +3,17 @@ import type { Ref } from 'vue'
 import { computed, nextTick, onActivated, onDeactivated, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { NAutoComplete, NButton, NIcon, NInput, NTabPane, NTabs, useDialog, useLoadingBar, useMessage } from 'naive-ui'
+import { NAutoComplete, NButton, NCard, NIcon, NInput, NModal, NTabPane, NTabs, useDialog, useLoadingBar, useMessage } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { v4 as uuidv4 } from 'uuid'
-import { Message } from './components'
+import { AudioMessage, Message } from './components'
 import { useScroll } from './hooks/useScroll'
 import { useChat } from './hooks/useChat'
 import { useCopyCode } from './hooks/useCopyCode'
 import HeaderComponent from './components/Header/index.vue'
 import PcHeader from './components/Header/pc.vue'
 import InputToolbar from './InputToolbar.vue'
+import AudioRecorder from '@/components/AudioRecorder.vue'
 import LoginTip from '@/views/user/LoginTip.vue'
 import { SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
@@ -21,6 +22,7 @@ import { defaultConv } from '@/store/modules/chat/helper'
 import api from '@/api'
 import { t } from '@/locales'
 import { debounce } from '@/utils/functions/debounce'
+import { emptyAudioPlayState } from '@/utils/functions'
 let controller = new AbortController()
 
 const pageSize = 10
@@ -42,6 +44,7 @@ const messages = computed(() => {
 })
 const currConv = computed(() => chatStore.getCurConv || defaultConv())
 const imageUuids = ref<string[]>([])
+const showAudioRecorderModal = ref<boolean>(false)
 const prompt = ref<string>('')
 const loading = ref<boolean>(false)
 const loadingMsgs = ref<boolean>(false)
@@ -66,7 +69,25 @@ function handleSubmit() {
   createChatTask()
 }
 
-const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string) => {
+function handleShowAudioRecorderModal() {
+  if (!authStore.token) {
+    authStore.setLoginView(true)
+    return
+  }
+  showAudioRecorderModal.value = true
+}
+
+function handleAudioRecorded(audioUrl: string, audioBlob: Blob, audioDuration: number) {
+  console.log(`handleAudioRecorded, url:${audioUrl}`)
+}
+
+function handleAudioSubmitted(uuid: string, url: string, audioDuration: number) {
+  console.log(`handleAudioSubmitted, uuid:${uuid}, url:${url}, audioDuration:${audioDuration}`)
+  showAudioRecorderModal.value = false
+  createChatTask(uuid, url, audioDuration)
+}
+
+const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string, audioUuid: string, audioDuration: number) => {
   console.log('begin sseProcess')
   api.sseProcess({
     options: {
@@ -75,6 +96,8 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
       regenerateQuestionUuid,
       modelName: appStore.selectedLLM.modelName,
       imageUrls: imageUuids.value,
+      audioUuid,
+      audioDuration,
     },
     signal: controller.signal,
     startCallback(chunk) {
@@ -141,7 +164,7 @@ const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string)
   })
 }
 
-async function createChatTask() {
+async function createChatTask(audioUuid = '', audioUrl = '', audioDuration = 0) {
   if (!authStore.token) {
     authStore.setLoginView(true)
     return
@@ -152,13 +175,16 @@ async function createChatTask() {
   if (loading.value)
     return
 
-  if (!message || message.trim() === '')
+  if ((!message || message.trim() === '') && !audioUuid)
     return
 
   const questionUuid = uuidv4().replace(/-/g, '')
   const answerUuid = uuidv4().replace(/-/g, '')
   controller = new AbortController()
 
+  const audioPlayState = emptyAudioPlayState()
+  audioPlayState.audioUrl = audioUrl
+  audioPlayState.audioUuid = audioUuid
   // add my question
   addMessage(
     curConvUuid,
@@ -166,20 +192,28 @@ async function createChatTask() {
       uuid: questionUuid,
       createTime: new Date().toLocaleString(),
       remark: message,
+      audioUuid,
+      audioUrl,
+      audioDuration,
       children: [{
         uuid: answerUuid,
         createTime: new Date().toLocaleString(),
         remark: '',
+        audioUuid: '',
+        audioUrl: '',
+        audioDuration: 0,
         children: [],
         loading: true,
         inversion: false,
         error: false,
         aiModelPlatform: appStore.selectedLLM.modelPlatform,
         attachmentUrls: [],
+        audioPlayState: emptyAudioPlayState(),
       }],
       inversion: true,
       error: false,
       attachmentUrls: [],
+      audioPlayState,
     },
     true,
   )
@@ -190,7 +224,7 @@ async function createChatTask() {
   scrollToBottom()
 
   try {
-    fetchChatAPIOnce(message, '')
+    fetchChatAPIOnce(message, '', audioUuid, audioDuration)
   } catch (error: any) {
     console.error(`fetchChatAPIOnce error:${error}`)
     loading.value = false
@@ -221,16 +255,20 @@ async function onRegenerate(questionUuid: string) {
       uuid: answerUuid,
       createTime: new Date().toLocaleString(),
       remark: '',
+      audioUuid: '',
+      audioUrl: '',
+      audioDuration: 0,
       children: [],
       inversion: false,
       error: false,
       loading: true,
       attachmentUrls: [],
+      audioPlayState: emptyAudioPlayState(),
     },
   )
 
   try {
-    await fetchChatAPIOnce('', questionUuid)
+    await fetchChatAPIOnce('', questionUuid, '', 0)
     selectedLatestAnswer(questionUuid)
   } catch (error: any) {
     console.error(error)
@@ -503,16 +541,31 @@ onDeactivated(() => {
             <div v-for="(question, index) of messages" :key="index">
               <!-- 多模态的请求消息，携带有附件 -->
               <template v-if="question.attachmentUrls.length > 0">
+                <!-- 语音聊天 -->
+                <AudioMessage
+                  v-if="question.audioUrl" :inversion="true" :message-uuid="question.uuid"
+                  :date-time="question.createTime" :audio-play-state="question.audioPlayState"
+                  :duration="question.audioDuration" @delete="handleDelete(question.uuid, '', true)"
+                />
+                <!-- 文本聊天 -->
                 <Message
-                  :date-time="question.createTime" :text="question.remark" :image-urls="question.attachmentUrls"
-                  type="text-image" :inversion="true" :error="question.error" :loading="false"
-                  @regenerate="onRegenerate(question.uuid)" @delete="handleDelete(question.uuid, '', true)"
+                  v-else :date-time="question.createTime" :text="question.remark"
+                  :image-urls="question.attachmentUrls" type="text-image" :inversion="true" :error="question.error"
+                  :loading="false" @regenerate="onRegenerate(question.uuid)"
+                  @delete="handleDelete(question.uuid, '', true)"
                 />
               </template>
               <!-- 非多模态的请求消息，没有附件 -->
               <template v-if="question.attachmentUrls.length === 0">
+                <!-- 语音聊天 -->
+                <AudioMessage
+                  v-if="question.audioUrl" :inversion="true" :message-uuid="question.uuid"
+                  :date-time="question.createTime" :audio-play-state="question.audioPlayState"
+                  :duration="question.audioDuration" @delete="handleDelete(question.uuid, '', true)"
+                />
+                <!-- 文本聊天 -->
                 <Message
-                  :date-time="question.createTime" :text="question.remark" type="text" :inversion="true"
+                  v-else :date-time="question.createTime" :text="question.remark" type="text" :inversion="true"
                   :error="question.error" :loading="false" @regenerate="onRegenerate(question.uuid)"
                   @delete="handleDelete(question.uuid, '', true)"
                 />
@@ -582,9 +635,24 @@ onDeactivated(() => {
               </span>
             </template>
           </NButton>
+          <NButton class="flex-none" type="primary" @click="handleShowAudioRecorderModal">
+            <template #icon>
+              <span class="dark:text-black">
+                <SvgIcon icon="icon-park-outline:voice" />
+              </span>
+            </template>
+          </NButton>
         </div>
       </div>
     </footer>
+    <NModal :show="showAudioRecorderModal">
+      <NCard style="max-width: 600px" title="语音对话" size="huge" :bordered="false" role="dialog" aria-modal="true">
+        <AudioRecorder
+          @recorded="handleAudioRecorded" @submitted="handleAudioSubmitted"
+          @exit="showAudioRecorderModal = false"
+        />
+      </NCard>
+    </NModal>
   </div>
 </template>
 <!-- <style scoped lang="less">

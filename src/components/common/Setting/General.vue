@@ -19,6 +19,8 @@ const avatar = ref(userInfo.value.avatar ?? '')
 
 const name = ref(userInfo.value.name ?? '')
 
+const submitting = ref(false)
+
 // const language = computed({
 //   get() {
 //     return appStore.language
@@ -53,7 +55,16 @@ const themeOptions: { label: string; key: Theme; icon: string }[] = [
 // ]
 
 async function logout() {
-  await api.logout()
+  if (submitting.value)
+    return
+  submitting.value = true
+  try {
+    await api.logout()
+  } catch (error) {
+    console.error(error)
+  } finally {
+    submitting.value = false
+  }
   authStore.removeToken()
   userStore.resetUserInfo()
   window.location.reload()
@@ -110,7 +121,10 @@ async function logout() {
         <span class="flex-shrink-0 w-[100px]">{{ $t('setting.theme') }}</span>
         <div class="flex flex-wrap items-center gap-4">
           <template v-for="item of themeOptions" :key="item.key">
-            <NButton size="small" :type="item.key === theme ? 'primary' : undefined" @click="appStore.setTheme(item.key)">
+            <NButton
+              size="small" :type="item.key === theme ? 'primary' : undefined"
+              @click="appStore.setTheme(item.key)"
+            >
               <template #icon>
                 <SvgIcon :icon="item.icon" />
               </template>
@@ -128,7 +142,7 @@ async function logout() {
         </div>
       </div> -->
       <div class="flex items-center space-x-4">
-        <NButton size="small" type="primary" @click="logout">
+        <NButton size="small" type="primary" :loading="submitting" :disabled="submitting" @click="logout">
           退出
         </NButton>
       </div>

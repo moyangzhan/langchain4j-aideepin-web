@@ -24,7 +24,7 @@ function onShowConfigModal(mcpInfo: Mcp.McpInfo) {
 
 <template>
   <div class="flex flex-col w-full h-full pb-3">
-    <div class="flex-1 flex flex-wrap justify-start items-start overflow-y-auto">
+    <div class="flex flex-wrap justify-start items-start overflow-y-auto">
       <LoginTip v-if="!authStore.token" />
       <div
         v-for="userMcp in mcpStore.myUserMcpList" :key="userMcp.uuid"

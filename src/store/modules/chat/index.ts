@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { defaultConv, defaultState, findMessageFromConv } from './helper'
 import { router } from '@/router'
+import { emptyAudioPlayState } from '@/utils/functions'
 
 export const useChatStore = defineStore('chat-store', {
   state: (): Chat.ChatState => defaultState(),
@@ -139,6 +140,7 @@ export const useChatStore = defineStore('chat-store', {
     addMessage(uuid: string, message: Chat.ChatMessage, tail?: boolean) {
       if (undefined === message.inversion)
         message.inversion = message.messageRole !== 3
+      this.initAudioText(message)
 
       if (this.conversations.length === 0) {
         this.conversations.push(defaultConv())
@@ -174,6 +176,7 @@ export const useChatStore = defineStore('chat-store', {
         return
       const cachedMsgs = this.chats[chatIndex].data
       messages.forEach((item) => {
+        this.initAudioText(item)
         cachedMsgs.unshift(item)
       })
     },
@@ -274,5 +277,24 @@ export const useChatStore = defineStore('chat-store', {
         item.used = hit
       })
     },
+
+    initAudioText(message: Chat.ChatMessage) {
+      if (!message.audioPlayState)
+        message.audioPlayState = emptyAudioPlayState()
+      message.audioPlayState.audioUrl = message.audioUrl
+      message.audioPlayState.audioUuid = message.audioUuid
+      if (message.remark && !message.audioPlayState.text)
+        message.audioPlayState.text = message.remark
+    },
+
+    updateAudioPlayState(messageUuid: string, audioPlayState: AudioPlayState) {
+      const chatIndex = this.chats.findIndex(item => item.uuid === this.active)
+      if (chatIndex !== -1) {
+        const message = this.chats[chatIndex].data.find(item => item.uuid === messageUuid)
+        if (message)
+          message.audioPlayState = audioPlayState
+      }
+    },
+
   },
 })

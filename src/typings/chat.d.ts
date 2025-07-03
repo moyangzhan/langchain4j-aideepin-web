@@ -4,13 +4,19 @@ declare namespace Chat {
 		uuid: string | '',
 		createTime: string
 		remark: string
+		audioUuid: string
+		audioUrl: string
+		audioDuration: number // in seconds
 		messageRole?: number
 		children: ChatMessage[]
+		aiModelPlatform?: string
+		attachmentUrls: string[]
+
+		//Frontend only
 		inversion?: boolean
 		error?: boolean
 		loading?: boolean
-		aiModelPlatform?: string
-		attachmentUrls: string[]
+		audioPlayState: AudioPlayState
 	}
 
 	interface ConversationPreset {

@@ -331,3 +331,14 @@ export function fillCompleteUrl(fileUrl: string) {
     return fileUrl
   return `/api${fileUrl}`
 }
+
+export function emptyAudioPlayState(): AudioPlayState {
+  return {
+    audioUrl: '',
+    playDuration: 0,
+    playing: false,
+    audio: null, // Audio object
+    text: '', // Text to be read
+    showText: false, // Whether to show the text
+  }
+}

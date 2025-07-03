@@ -104,7 +104,7 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
       </div>
       <NInput v-model:value="tmpConv.aiSystemMessage" type="textarea" placeholder="如：你是唐朝的李白，诗才出众，被誉为诗仙" :autosize="{ minRows: 1, maxRows: 10 }" />
     </div>
-    <div>
+    <div class="flex flex-col space-y-2">
       <div class="flex space-x-2 font-bold">
         服务与工具(MCP)
         <NTooltip trigger="hover">
@@ -119,11 +119,14 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
           去启用更多AI工具
         </NButton>
       </div>
-      <NCheckboxGroup v-model:value="tmpConv.mcpIds" class="flex flex-wrap space-x-2 mt-2">
+      <NCheckboxGroup v-model:value="tmpConv.mcpIds" class="flex flex-wrap space-x-2">
         <NCheckbox v-for="userMcp in mcpStore.myUserMcpList" :key="userMcp.uuid" :value="userMcp.mcpInfo.id" :label="userMcp.mcpInfo.title" />
       </NCheckboxGroup>
     </div>
     <NFlex justify="space-between">
+      <NButton type="primary" :loading="submitting" :disabled="submitting" @click="handleEdit()">
+        {{ $t('common.save') }}
+      </NButton>
       <NPopconfirm placement="top" @positive-click.stop="handleDeleteDebounce(tmpConv.uuid, $event)">
         <template #trigger>
           <NButton type="error" text tag="a" :loading="submitting" :disabled="submitting">
@@ -132,9 +135,6 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
         </template>
         {{ $t('chat.deleteConversationConfirm') }}
       </NPopconfirm>
-      <NButton type="primary" :loading="submitting" :disabled="submitting" @click="handleEdit()">
-        {{ $t('common.save') }}
-      </NButton>
     </NFlex>
   </div>
 </template>

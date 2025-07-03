@@ -30,6 +30,8 @@
     "@vueuse/core": "^9.13.0",
     "cytoscape": "^3.30.2",
     "date-fns": "^2.30.0",
+    "extendable-media-recorder": "^9.2.27",
+    "extendable-media-recorder-wav-encoder": "^7.0.129",
     "highlight.js": "^11.7.0",
     "html2canvas": "^1.4.1",
     "json-editor-vue": "^0.18.1",

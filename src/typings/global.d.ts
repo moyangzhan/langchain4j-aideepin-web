@@ -61,3 +61,18 @@ interface SearchEngineInfo {
   label: string,
   disabled: boolean
 }
+
+interface FileUploaded {
+  url: string
+  uuid: string
+}
+
+interface AudioPlayState {
+  audioUrl: string
+  audioUuid: string // UUID of the audio file
+  playDuration: number
+  playing: boolean
+  audio: any // Audio object
+  text: string // Text to be read
+  showText: boolean // Whether to show the text
+}

@@ -141,7 +141,7 @@ function commonSseProcess(
 }
 
 function sseProcess(params: {
-  options: { prompt?: string; conversationUuid?: string; parentMessageId?: string; regenerateQuestionUuid?: string; modelName?: string; imageUrls?: string[] }
+  options: { prompt?: string; conversationUuid?: string; parentMessageId?: string; regenerateQuestionUuid?: string; modelName?: string; imageUrls?: string[]; audioUuid?: string; audioDuration?: number }
   signal?: AbortSignal
   startCallback: (chunk: string) => void
   messageRecived: (chunk: string, eventName?: string) => void
@@ -316,6 +316,18 @@ function drawCommentAdd<T = any>(uuid: string, comment: string) {
   })
 }
 
+function fileUpload<T = any>(file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return post<T>({
+    url: '/file/upload',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}
+
 function fileDel<T = any>(uuid: string) {
   return post<T>({
     url: `/file/del/${uuid}`,
@@ -387,6 +399,12 @@ function drawThumbnailImage<T = any>(uuid: string, imageUuid: string) {
 function messageDel<T = any>(uuid: string) {
   return post<T>({
     url: `/conversation/message/del/${uuid}`,
+  })
+}
+
+function messageTextByAudio<T = any>(audioUuid: string) {
+  return get<T>({
+    url: `/conversation/message/text/${audioUuid}`,
   })
 }
 
@@ -728,6 +746,7 @@ export default {
   promptDel,
   promptEdit,
   promptAutocomplete,
+  fileUpload,
   fileDel,
   fetchDraw,
   fetchNewerPublicDraw,
@@ -751,6 +770,7 @@ export default {
   drawThumbnailImage,
   drawCommentAdd,
   messageDel,
+  messageTextByAudio,
   knowledgeBaseInfo,
   knowledgeBaseStar,
   knowledgeBaseSearchMine,
