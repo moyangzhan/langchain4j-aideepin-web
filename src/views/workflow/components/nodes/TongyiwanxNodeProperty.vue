@@ -4,7 +4,7 @@ import { QuestionCircle16Regular } from '@vicons/fluent'
 import NodePropertyInput from '../NodePropertyInput.vue'
 import WfImageModelSelector from '../WfImageModelSelector.vue'
 import ReferComment from '../ReferComment.vue'
-import { tongyiwanxSizeOptions } from '@/utils/constant'
+import { TONGYI_WANX_SIZE_OPTIONS } from '@/utils/constant'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -55,7 +55,7 @@ function selected(modelName: string) {
         图像大小
       </div>
       <div>
-        <NSelect v-model:value="nodeConfig.size" :options="tongyiwanxSizeOptions" />
+        <NSelect v-model:value="nodeConfig.size" :options="TONGYI_WANX_SIZE_OPTIONS" />
       </div>
     </div>
     <div class="mt-6">

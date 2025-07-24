@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
-import { NButton, NCheckbox, NCheckboxGroup, NFlex, NIcon, NInput, NPopconfirm, NTooltip, useMessage } from 'naive-ui'
+import { NButton, NCheckbox, NCheckboxGroup, NFlex, NIcon, NInput, NPopconfirm, NRadio, NRadioGroup, NTooltip, useMessage } from 'naive-ui'
 import { QuestionCircle16Regular } from '@vicons/fluent'
 import { useChatStore, useMcpStore } from '@/store'
 import { router } from '@/router'
@@ -96,13 +96,19 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
       <div class="font-bold">
         备注
       </div>
-      <NInput v-model:value="tmpConv.remark" type="textarea" placeholder="如：多年写诗经验" :autosize="{ minRows: 1, maxRows: 10 }" />
+      <NInput
+        v-model:value="tmpConv.remark" type="textarea" placeholder="如：多年写诗经验"
+        :autosize="{ minRows: 1, maxRows: 10 }"
+      />
     </div>
     <div>
       <div class="font-bold">
         角色设定
       </div>
-      <NInput v-model:value="tmpConv.aiSystemMessage" type="textarea" placeholder="如：你是唐朝的李白，诗才出众，被誉为诗仙" :autosize="{ minRows: 1, maxRows: 10 }" />
+      <NInput
+        v-model:value="tmpConv.aiSystemMessage" type="textarea" placeholder="如：你是唐朝的李白，诗才出众，被誉为诗仙"
+        :autosize="{ minRows: 1, maxRows: 10 }"
+      />
     </div>
     <div class="flex flex-col space-y-2">
       <div class="flex space-x-2 font-bold">
@@ -120,13 +126,64 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
         </NButton>
       </div>
       <NCheckboxGroup v-model:value="tmpConv.mcpIds" class="flex flex-wrap space-x-2">
-        <NCheckbox v-for="userMcp in mcpStore.myUserMcpList" :key="userMcp.uuid" :value="userMcp.mcpInfo.id" :label="userMcp.mcpInfo.title" />
+        <NCheckbox
+          v-for="userMcp in mcpStore.myUserMcpList" :key="userMcp.uuid" :value="userMcp.mcpInfo.id"
+          :label="userMcp.mcpInfo.title"
+        />
       </NCheckboxGroup>
     </div>
+    <div class="flex flex-col space-y-2">
+      <div class="flex space-x-2 font-bold">
+        AI回复内容格式
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <NIcon style="margin-top: 0.2rem">
+              <QuestionCircle16Regular />
+            </NIcon>
+          </template>
+          <span>
+            自动：AI的回复内容格式跟用户一致，<br>
+            如用户以文字输入，则AI会以文字回复，如用户以语音输入，则AI以语音回复<br>
+            文字：AI以文字回复<br>
+            语音：AI以语音回复
+          </span>
+        </NTooltip>
+      </div>
+      <NRadioGroup
+        :value="tmpConv.answerContentType" name="answerTypeRadio"
+        class="flex flex-col space-y-2" size="small" @update:value="(checked) => tmpConv.answerContentType = checked"
+      >
+        <NRadio :value="1">
+          自动
+        </NRadio>
+        <NRadio :value="2">
+          文字
+        </NRadio>
+        <NRadio :value="3">
+          语音
+        </NRadio>
+      </NRadioGroup>
+    </div>
+    <div class="flex flex-col space-y-2">
+      <div class="flex space-x-2 font-bold">
+        是否自动播放AI的回复语音
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <NIcon style="margin-top: 0.2rem">
+              <QuestionCircle16Regular />
+            </NIcon>
+          </template>
+          <span>
+            当AI回复格式是语音时，是否需要自动播放内容
+          </span>
+        </NTooltip>
+      </div>
+      <NCheckbox
+        :checked="tmpConv.isAutoplayAnswer" label="是"
+        @update:checked="(checked) => tmpConv.isAutoplayAnswer = checked"
+      />
+    </div>
     <NFlex justify="space-between">
-      <NButton type="primary" :loading="submitting" :disabled="submitting" @click="handleEdit()">
-        {{ $t('common.save') }}
-      </NButton>
       <NPopconfirm placement="top" @positive-click.stop="handleDeleteDebounce(tmpConv.uuid, $event)">
         <template #trigger>
           <NButton type="error" text tag="a" :loading="submitting" :disabled="submitting">
@@ -135,6 +192,9 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
         </template>
         {{ $t('chat.deleteConversationConfirm') }}
       </NPopconfirm>
+      <NButton type="primary" :loading="submitting" :disabled="submitting" @click="handleEdit()">
+        {{ $t('common.save') }}
+      </NButton>
     </NFlex>
   </div>
 </template>

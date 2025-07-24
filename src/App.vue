@@ -187,6 +187,8 @@ onMounted(async () => {
   appStore.setImageModels(imageModels.data)
   const engines = await api.loadSearchEngines<SearchEngineInfo[]>()
   appStore.setSearchEngines(engines.data)
+  const sysConfig = await api.getSysConfig<SysConfigInfo>()
+  appStore.setSysConfig(sysConfig.data)
 })
 </script>
 

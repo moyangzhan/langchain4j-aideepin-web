@@ -154,7 +154,7 @@ function renderToolbarOut2(imageUrl: string) {
           <div class="flex flex-col">
             <button
               v-if="regenerate"
-              class="mb-2 transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-300"
+              class="mb-2 transition text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-300"
               @click="handleRegenerate"
             >
               <SvgIcon icon="ri:restart-line" />
@@ -163,7 +163,7 @@ function renderToolbarOut2(imageUrl: string) {
               :trigger="isMobile ? 'click' : 'hover'" :placement="!inversion ? 'right' : 'left'"
               :options="options" @select="handleSelect"
             >
-              <button class="transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-200">
+              <button class="transition text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200">
                 <SvgIcon icon="ri:more-2-fill" />
               </button>
             </NDropdown>

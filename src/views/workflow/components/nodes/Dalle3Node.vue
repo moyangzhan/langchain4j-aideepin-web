@@ -3,14 +3,14 @@ import { computed } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 import CommonNodeHeader from '../CommonNodeHeader.vue'
-import { dalle3QualityOptions, dalle3SizeOptions } from '@/utils/constant'
+import { DALLE3_QUALITY_OPTIONS, DALLE3_SIZE_OPTIONS } from '@/utils/constant'
 
 const props = defineProps<NodeProps>()
 const sizeLabel = computed(() => {
-  return dalle3SizeOptions.find(item => item.value === props.data.nodeConfig.size)?.label || ''
+  return DALLE3_SIZE_OPTIONS.find(item => item.value === props.data.nodeConfig.size)?.label || ''
 })
 const qualityLabel = computed(() => {
-  return dalle3QualityOptions.find(item => item.value === props.data.nodeConfig.quality)?.label || ''
+  return DALLE3_QUALITY_OPTIONS.find(item => item.value === props.data.nodeConfig.quality)?.label || ''
 })
 </script>
 

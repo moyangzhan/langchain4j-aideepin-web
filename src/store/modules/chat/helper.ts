@@ -1,18 +1,11 @@
 import { ss } from '@/utils/storage'
+import { emptyConv } from '@/utils/functions'
 
 const LOCAL_NAME = 'chatStorage'
 
-const defaultConversation = {
-  uuid: 'default',
-  title: 'New Chat',
-  remark: '',
-  aiSystemMessage: '',
-  understandContextEnable: false,
-  loadedAll: false,
-  loadedFirstPageMsg: false,
-  usedPreset: false,
-  mcpIds: [],
-}
+const defaultConversation = emptyConv()
+defaultConversation.uuid = 'default'
+defaultConversation.title = '默认对话'
 
 export function defaultState(): Chat.ChatState {
   return {

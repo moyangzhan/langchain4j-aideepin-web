@@ -1,21 +1,25 @@
 <script setup lang='ts'>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { NDropdown, useMessage } from 'naive-ui'
 import AvatarComponent from './Avatar.vue'
 import TextComponent from './Text.vue'
-import { useAuthStore } from '@/store'
+import { useAppStore, useAuthStore } from '@/store'
 import { SvgIcon } from '@/components/common'
 import { useIconRender } from '@/hooks/useIconRender'
+import { AUDIO_SYNTHESIZER_SIDE } from '@/utils/constant'
 import { t } from '@/locales'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
+import { emptyAudioPlayState } from '@/utils/functions'
 import api from '@/api'
 
 const props = withDefaults(defineProps<Props>(), {
+  audioPlayState: () => emptyAudioPlayState(),
   showAvatar: true,
 })
 const emit = defineEmits<Emit>()
 
 interface Props {
+  conversation: Chat.Conversation
   dateTime?: string
   inversion?: boolean
   showAvatar?: boolean
@@ -31,6 +35,7 @@ interface Emit {
   (ev: 'delete'): void
 }
 const ms = useMessage()
+const appStore = useAppStore()
 const authStore = useAuthStore()
 const { isMobile } = useBasicLayout()
 const { iconRender } = useIconRender()
@@ -38,8 +43,22 @@ const textRef = ref<HTMLElement>()
 const asRawText = ref(props.inversion)
 const messageRef = ref<HTMLElement>()
 const token = ref<string>(authStore.token)
+const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+const audioChunks: ArrayBuffer[] = [] // 存储音频数据块
 
-function playAudio() {
+let synthesis: SpeechSynthesis | null = null
+if ('speechSynthesis' in window)
+  synthesis = window.speechSynthesis
+else
+  console.log('浏览器不支持语音合成')
+
+function playAudioByClick() {
+  // 如果系统设置的是浏览器端合成音频，则调用浏览器的api播放文本，不需要检查是否有音频文件
+  if (appStore.audioSynthesizerSide === AUDIO_SYNTHESIZER_SIDE.client && props.audioPlayState.text) {
+    speekText(props.audioPlayState.text)
+    return
+  }
+  // 查检音频文件是否存在
   const audioPlayState = props.audioPlayState
   if (!audioPlayState.audioUrl) {
     ms.warning('音频文件不可用或已被删除')
@@ -48,7 +67,6 @@ function playAudio() {
   if (!audioPlayState.playing) {
     audioPlayState.playDuration = 0
     audioPlayState.playing = true
-    playDurationCount()
     if (!audioPlayState.audio) {
       audioPlayState.audio = new Audio(`/api${audioPlayState.audioUrl}?token=${token.value}`)
       audioPlayState.audio.addEventListener('ended', () => {
@@ -60,6 +78,7 @@ function playAudio() {
         once: true,
       })
     }
+    playDurationCount()
     audioPlayState.audio.play().catch((error: any) => {
       console.error('Audio play error:', error)
       audioPlayState.playDuration = 0
@@ -75,6 +94,78 @@ function playAudio() {
   }
 }
 
+/**
+ * 由浏览器朗读文本
+ * @description 该方法使用浏览器的语音合成功能朗读文本，
+ *              需要浏览器支持SpeechSynthesis API。
+ *              如果浏览器不支持，则会输出警告信息。
+ * @param synthesis 浏览器的语音合成对象
+ * @param utterance 语音合成的实例，包含要朗读的文本和其他参数
+ * @param text 要朗读的文本
+ */
+function speekText(text: string) {
+  if (!synthesis) {
+    console.warn('浏览器不支持语音合成')
+    return
+  }
+  const utterance = new SpeechSynthesisUtterance(text)
+  utterance.lang = 'zh-CN'
+  // 开始播放语音
+  synthesis.speak(utterance)
+}
+
+/**
+ * 播放后端传输过来的音频数据(base64)
+ * @param audioFrame PCM数据
+ */
+async function speekAudioFrame(audioFrame: string) {
+  if (!synthesis) {
+    console.warn('浏览器不支持语音合成')
+    return
+  }
+  if (!audioFrame)
+    console.warn('audioFrame is empty')
+
+  const binaryString = window.atob(audioFrame) // 使用window.atob()进行Base64解码
+  const binaryLen = binaryString.length
+  const bytes = new Uint8Array(binaryLen)
+  for (let i = 0; i < binaryLen; i++) {
+    const ascii = binaryString.charCodeAt(i)
+    bytes[i] = ascii
+  }
+  audioChunks.push(bytes.buffer) // 存入缓冲区
+  if (props.audioPlayState.playing)
+    return // 如果正在播放则不启动播放
+  playAudioStream() // 若未播放则启动播放
+}
+
+async function playAudioStream() {
+  if (audioChunks.length === 0)
+    return
+  const chunk = audioChunks.shift()
+  const ap = props.audioPlayState
+  if (chunk) {
+    ap.playing = true
+    try {
+      const buffer = await audioContext.decodeAudioData(chunk)
+      const source = audioContext.createBufferSource()
+      source.buffer = buffer
+      source.connect(audioContext.destination)
+      source.start()
+      source.onended = () => {
+        ap.playing = false
+        if (audioChunks.length > 0)
+          playAudioStream() // 播放下一段
+      }
+    } catch (error) {
+      console.error('Error decoding audio data:', error)
+      ap.playing = false
+    }
+  } else {
+    console.warn('No audio data to play')
+  }
+}
+
 function playDurationCount() {
   const audioPlayState = props.audioPlayState
   if (!audioPlayState.playing)
@@ -82,8 +173,8 @@ function playDurationCount() {
   if (audioPlayState.playDuration + 1 > props.duration)
     return
 
-  audioPlayState.playDuration = audioPlayState.playDuration + 1
-  setTimeout(playDurationCount, 1000)
+  audioPlayState.playDuration = Math.round(audioPlayState.audio.currentTime)
+  setTimeout(playDurationCount, 500)
 }
 
 const options = computed(() => {
@@ -130,6 +221,26 @@ function handleSelect(key: 'delete' | 'showText' | 'showAudio') {
       emit('delete')
   }
 }
+
+watch(() => props.audioPlayState.msgPart, (newVal, oldVal) => {
+  if (newVal && !props.loading)
+    return
+  speekText(props.audioPlayState.msgPart)
+}, { immediate: true })
+
+watch(() => props.audioPlayState.audioFrame, (audioFrame) => {
+  if (!audioFrame || !props.loading)
+    return
+  speekAudioFrame(audioFrame)
+})
+
+// watch(() => props.loading, (loadding) => {
+//   if (!loadding && props.audioPlayState.audioUrl && props.conversation.isAutoplayAnswer && !hasAutoPlayed.value)
+//     playAudioByClick()
+
+//   hasAutoPlayed.value = false
+//   audioContext.close()
+// })
 </script>
 
 <template>
@@ -152,12 +263,13 @@ function handleSelect(key: 'delete' | 'showText' | 'showAudio') {
         />
         <div
           v-else class="bg bg-[#d2f9d1] rounded-md py-1 px-2 mb-2 cursor-pointer flex items-center"
-          @click="playAudio"
+          @click="playAudioByClick"
         >
           <SvgIcon class="text-2xl cursor-pointer custom-hover mr-2" icon="mingcute:voice-2-line" />
-          <span v-if="props.audioPlayState.playDuration" class="text-sm pl-2">{{ props.audioPlayState.playDuration
+          <span v-if="props.audioPlayState.playDuration && duration > 0" class="text-xs pl-2">{{
+            props.audioPlayState.playDuration
           }}/{{ duration }}</span>
-          <span v-else class="text-sm px-2">{{ duration }}</span>
+          <span v-else-if="duration > 0" class="text-xs px-2">{{ duration }}</span>
         </div>
         <!-- 消息框侧边下拉选择列表 -->
         <div class="flex flex-col">
@@ -165,13 +277,12 @@ function handleSelect(key: 'delete' | 'showText' | 'showAudio') {
             :trigger="isMobile ? 'click' : 'hover'" :placement="!inversion ? 'right' : 'left'"
             :options="options" @select="handleSelect"
           >
-            <button class="transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-200">
+            <button class="transition text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200">
               <SvgIcon icon="ri:more-2-fill" />
             </button>
           </NDropdown>
         </div>
       </div>
-      <slot />
     </div>
   </div>
 </template>

@@ -140,7 +140,7 @@ watch(
           :action="`/api/image/upload?token=${token}`" response-type="text" :disabled="!canUploadImage"
           @before-upload="beforeUpload" @finish="handleFinish"
         >
-          <HoverButton :tooltip="canUploadImage ? '上传图片' : '模型不支持上传图片'">
+          <HoverButton :tooltip="canUploadImage ? '上传图片以识别其内容' : '模型不支持图片识别'">
             <span class="text-xl">
               <SvgIcon icon="ri:image-line" />
             </span>
@@ -174,7 +174,7 @@ watch(
           :label="userMcp.mcpInfo.title"
         />
       </NCheckboxGroup>
-      <span v-if="tmpMcpIds.length === 0" class="mr-1">无数据</span>
+      <span v-if="mcpStore.myUserMcpList.length === 0" class="mr-1">无数据</span>
       <NFlex justify="space-between" class="mt-4">
         <NButton type="primary" text tag="a" class="mt-4" @click="gotoMcp">
           去启用更多AI工具

@@ -3,7 +3,7 @@ import { NIcon, NInput, NInputNumber, NSelect, NTooltip } from 'naive-ui'
 import { QuestionCircle16Regular } from '@vicons/fluent'
 import NodePropertyInput from '../NodePropertyInput.vue'
 import ReferComment from '../ReferComment.vue'
-import { googleCountryOptions, googleLanguageOptions } from '@/utils/constant'
+import { GOOGLE_COUNTRY_OPTIONS, GOOGLE_LANGUAGE_OPTIONS } from '@/utils/constant'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -46,7 +46,7 @@ const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigGoogleSearch
         国家和地区
       </div>
       <div>
-        <NSelect v-model:value="nodeConfig.country" :options="googleCountryOptions" />
+        <NSelect v-model:value="nodeConfig.country" :options="GOOGLE_COUNTRY_OPTIONS" />
       </div>
     </div>
     <div class="mt-6">
@@ -54,7 +54,7 @@ const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigGoogleSearch
         语言
       </div>
       <div>
-        <NSelect v-model:value="nodeConfig.language" :options="googleLanguageOptions" />
+        <NSelect v-model:value="nodeConfig.language" :options="GOOGLE_LANGUAGE_OPTIONS" />
       </div>
     </div>
   </div>

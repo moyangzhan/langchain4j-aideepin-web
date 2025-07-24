@@ -3,7 +3,7 @@ import { NIcon, NInput, NSelect, NTooltip } from 'naive-ui'
 import { QuestionCircle16Regular } from '@vicons/fluent'
 import NodePropertyInput from '../NodePropertyInput.vue'
 import ReferComment from '../ReferComment.vue'
-import { dalle3QualityOptions, dalle3SizeOptions } from '@/utils/constant'
+import { DALLE3_QUALITY_OPTIONS, DALLE3_SIZE_OPTIONS } from '@/utils/constant'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -38,7 +38,7 @@ const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigDalle3
         图像大小
       </div>
       <div>
-        <NSelect v-model:value="nodeConfig.size" :options="dalle3SizeOptions" />
+        <NSelect v-model:value="nodeConfig.size" :options="DALLE3_SIZE_OPTIONS" />
       </div>
     </div>
     <div class="mt-6">
@@ -46,7 +46,7 @@ const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigDalle3
         图像质量
       </div>
       <div>
-        <NSelect v-model:value="nodeConfig.quality" :options="dalle3QualityOptions" />
+        <NSelect v-model:value="nodeConfig.quality" :options="DALLE3_QUALITY_OPTIONS" />
       </div>
     </div>
   </div>

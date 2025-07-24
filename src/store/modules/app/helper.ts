@@ -1,5 +1,5 @@
 import { ss } from '@/utils/storage'
-import { emptyAiModel } from '@/utils/functions'
+import { emptyAiModel, emptySysConfigInfo } from '@/utils/functions'
 
 const LOCAL_NAME = 'appSetting'
 
@@ -18,6 +18,7 @@ export interface AppState {
   searchEngines: SearchEngineInfo[]
   llms: AiModelInfo[]
   imageModels: AiModelInfo[]
+  sysConfigInfo: SysConfigInfo
 }
 
 export function defaultSetting(): AppState {
@@ -31,6 +32,7 @@ export function defaultSetting(): AppState {
     searchEngines: [],
     llms: [],
     imageModels: [],
+    sysConfigInfo: emptySysConfigInfo(),
   }
 }
 

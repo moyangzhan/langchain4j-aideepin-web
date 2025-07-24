@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { defaultConv, defaultState, findMessageFromConv } from './helper'
 import { router } from '@/router'
 import { emptyAudioPlayState } from '@/utils/functions'
+import { CHAT_MESSAGE_CONTENT_TYPE } from '@/utils/constant'
 
 export const useChatStore = defineStore('chat-store', {
   state: (): Chat.ChatState => defaultState(),
@@ -47,6 +48,15 @@ export const useChatStore = defineStore('chat-store', {
       if (currConversation)
         return currConversation.data.length > 0
       return false
+    },
+
+    answerContentType(state: Chat.ChatState) {
+      return (conv: Chat.Conversation, userAudioUuid: string) => {
+        const isAudioContent = (conv.answerContentType === CHAT_MESSAGE_CONTENT_TYPE.auto && userAudioUuid) || (conv.answerContentType === CHAT_MESSAGE_CONTENT_TYPE.audio)
+        if (isAudioContent)
+          return CHAT_MESSAGE_CONTENT_TYPE.audio
+        return CHAT_MESSAGE_CONTENT_TYPE.text
+      }
     },
   },
 
@@ -157,8 +167,11 @@ export const useChatStore = defineStore('chat-store', {
       let hit = false
       cachedMsgs.forEach((item) => {
         // 将之前的聊天信息中的loading状态全部置为false，保留当前消息的loading状态
-        if (message.loading)
+        if (message.loading) {
           item.loading = false
+          if (item.children.length > 0)
+            item.children.forEach(child => child.loading = false)
+        }
 
         if (item.uuid === message.uuid)
           hit = true
@@ -207,9 +220,13 @@ export const useChatStore = defineStore('chat-store', {
     appendChunk(convUuid: string, answerUuid: string, chunk: string) {
       const chatIndex = this.chats.findIndex(item => item.uuid === convUuid)
       if (chatIndex !== -1 && this.chats.length) {
-        const oldChat = findMessageFromConv(this.chats[chatIndex], answerUuid)
-        if (oldChat)
-          oldChat.remark = oldChat.remark + chunk
+        const answer = findMessageFromConv(this.chats[chatIndex], answerUuid)
+        if (answer) {
+          answer.remark = answer.remark + chunk
+          if (!answer.audioPlayState)
+            answer.audioPlayState = emptyAudioPlayState()
+          answer.audioPlayState.text = answer.remark
+        }
       }
     },
 
@@ -285,6 +302,13 @@ export const useChatStore = defineStore('chat-store', {
       message.audioPlayState.audioUuid = message.audioUuid
       if (message.remark && !message.audioPlayState.text)
         message.audioPlayState.text = message.remark
+
+      // AI answer message
+      if (message?.children) {
+        const childMessage = message.children[0]
+        if (childMessage)
+          this.initAudioText(childMessage)
+      }
     },
 
     updateAudioPlayState(messageUuid: string, audioPlayState: AudioPlayState) {
@@ -293,6 +317,11 @@ export const useChatStore = defineStore('chat-store', {
         const message = this.chats[chatIndex].data.find(item => item.uuid === messageUuid)
         if (message)
           message.audioPlayState = audioPlayState
+        if (message?.children) {
+          const childMessage = message.children[0]
+          if (childMessage)
+            childMessage.audioPlayState = audioPlayState
+        }
       }
     },
 

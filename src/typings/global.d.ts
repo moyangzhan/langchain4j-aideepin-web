@@ -73,6 +73,27 @@ interface AudioPlayState {
   playDuration: number
   playing: boolean
   audio: any // Audio object
-  text: string // Text to be read
+  text: string // The text content corresponding to the audio
   showText: boolean // Whether to show the text
+
+  msgPart: string // 聊天时不断接收到的消息片段，即时播放时使用
+  audioFrame: string // 聊天时不断接收到的音频片段(已经过base64编码)，即时播放时使用
+}
+
+interface TtsSetting {
+  synthesizer_side: string // TTS synthesizer, eg: client or server
+  model_name: string
+  platform: string // TTS model platform
+}
+
+interface AsrSetting {
+  model_name: string
+  platform: string
+  max_record_duration: number // Maximum recording duration in seconds
+  max_file_size: number // Maximum file size in bytes
+}
+
+interface SysConfigInfo {
+  ttsSetting: TtsSetting
+  asrSetting: AsrSetting
 }

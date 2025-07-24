@@ -1,5 +1,6 @@
 import { format } from 'date-fns'
 import type { Edge, Node } from '@vue-flow/core'
+import { CHAT_MESSAGE_CONTENT_TYPE } from '@/utils/constant'
 
 export function getCurrentDate() {
   const date = new Date()
@@ -221,6 +222,38 @@ export function emptyConv(): Chat.Conversation {
     loadedFirstPageMsg: false,
     minMsgUuid: '',
     mcpIds: [],
+    answerContentType: CHAT_MESSAGE_CONTENT_TYPE.auto, // 1: auto, 2: text, 3: audio
+    isAutoplayAnswer: false, // 聊天时音频类型的响应内容是否自动播放
+  }
+}
+
+export function emptyChatMessage(): Chat.ChatMessage {
+  return {
+    uuid: '',
+    createTime: '',
+    remark: '',
+    audioUuid: '',
+    audioUrl: '',
+    audioDuration: 0, // in seconds
+    messageRole: 0,
+    children: [{ // for reply
+      uuid: '',
+      createTime: '',
+      remark: '',
+      audioUuid: '',
+      audioUrl: '',
+      audioDuration: 0,
+      messageRole: 0,
+      children: [],
+      aiModelPlatform: '',
+      attachmentUrls: [],
+      audioPlayState: emptyAudioPlayState(),
+      contentType: CHAT_MESSAGE_CONTENT_TYPE.text, // 2: text, 3: audio
+    }], // for reply
+    aiModelPlatform: '',
+    attachmentUrls: [],
+    audioPlayState: emptyAudioPlayState(),
+    contentType: CHAT_MESSAGE_CONTENT_TYPE.text, // 2: text, 3: audio
   }
 }
 
@@ -340,5 +373,32 @@ export function emptyAudioPlayState(): AudioPlayState {
     audio: null, // Audio object
     text: '', // Text to be read
     showText: false, // Whether to show the text
+    audioUuid: '', // UUID of the audio file
+    msgPart: '', // 聊天时不断接收到的消息片段，即时播放时使用
+    audioFrame: '', // audio frame
+  }
+}
+
+export function emptyAsrSetting(): AsrSetting {
+  return {
+    model_name: '', // ASR model name
+    platform: '', // ASR platform, eg: local or remote
+    max_record_duration: 60, // Maximum recording duration in seconds
+    max_file_size: 10 * 1024 * 1024, // Maximum file
+  }
+}
+
+export function emptyTtsSetting(): TtsSetting {
+  return {
+    synthesizer_side: 'client', // client | server
+    model_name: '', // TTS model name
+    platform: '', // TTS platform, eg: local or remote
+  }
+}
+
+export function emptySysConfigInfo(): SysConfigInfo {
+  return {
+    asrSetting: emptyAsrSetting(),
+    ttsSetting: emptyTtsSetting(),
   }
 }

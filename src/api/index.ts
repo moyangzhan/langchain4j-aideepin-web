@@ -4,6 +4,12 @@ import { useAuthStore, useUserStore } from '@/store'
 
 class FatalError extends Error { }
 
+function getSysConfig<T = any>() {
+  return get<T>({
+    url: '/sys/config/public/info',
+  })
+}
+
 function fetchUserConfig<T = any>() {
   return get<T>({
     url: '/user/config',
@@ -84,6 +90,7 @@ function commonSseProcess(
     signal?: AbortSignal
     startCallback: (chunk: string) => void
     messageRecived: (chunk: string, eventName: string) => void
+    audioDataRecived?: (chunk: string) => void
     doneCallback: (chunk: string) => void
     errorCallback: (error: string) => void
   },
@@ -124,6 +131,9 @@ function commonSseProcess(
       } else if (eventMessage.event === '[DONE]') {
         params.doneCallback(eventMessage.data)
         return
+      } else if (eventMessage.event === '[AUDIO]') {
+        params.audioDataRecived && params.audioDataRecived(eventMessage.data)
+        return
       }
       if (eventMessage.data.indexOf('-_wrap_-') === 0)
         eventMessage.data = eventMessage.data.replace('-_wrap_-', '\n')
@@ -145,6 +155,7 @@ function sseProcess(params: {
   signal?: AbortSignal
   startCallback: (chunk: string) => void
   messageRecived: (chunk: string, eventName?: string) => void
+  audioDataRecived?: (pcmPart: any) => void
   doneCallback: (chunk: string) => void
   errorCallback: (error: string) => void
 }) {
@@ -723,6 +734,7 @@ function userMcpSaveOrUpdate<T = any>(data: Mcp.UserMcpUpdateReq) {
 }
 
 export default {
+  getSysConfig,
   login,
   register,
   logout,

@@ -2,8 +2,7 @@
 import type { Ref } from 'vue'
 import { computed, nextTick, onActivated, onDeactivated, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { storeToRefs } from 'pinia'
-import { NAutoComplete, NButton, NCard, NIcon, NInput, NModal, NTabPane, NTabs, useDialog, useLoadingBar, useMessage } from 'naive-ui'
+import { NButton, NIcon, NTabPane, NTabs, useDialog, useLoadingBar, useMessage } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { v4 as uuidv4 } from 'uuid'
 import { AudioMessage, Message } from './components'
@@ -13,12 +12,13 @@ import { useCopyCode } from './hooks/useCopyCode'
 import HeaderComponent from './components/Header/index.vue'
 import PcHeader from './components/Header/pc.vue'
 import InputToolbar from './InputToolbar.vue'
-import AudioRecorder from '@/components/AudioRecorder.vue'
+import InputEditor from './InputEditor.vue'
 import LoginTip from '@/views/user/LoginTip.vue'
-import { SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useAppStore, useAuthStore, useChatStore, usePromptStore } from '@/store'
+import { useAppStore, useAuthStore, useChatStore } from '@/store'
 import { defaultConv } from '@/store/modules/chat/helper'
+import { AUDIO_SYNTHESIZER_SIDE, CHAT_MESSAGE_CONTENT_TYPE } from '@/utils/constant'
+import { SvgIcon } from '@/components/common'
 import api from '@/api'
 import { t } from '@/locales'
 import { debounce } from '@/utils/functions/debounce'
@@ -26,37 +26,30 @@ import { emptyAudioPlayState } from '@/utils/functions'
 let controller = new AbortController()
 
 const pageSize = 10
+const appStore = useAppStore()
 const route = useRoute()
 const ms = useMessage()
 const dialog = useDialog()
-const appStore = useAppStore()
 const chatStore = useChatStore()
 const authStore = useAuthStore()
 const loaddingBar = useLoadingBar()
 const { isMobile } = useBasicLayout()
-const { addMessage, unshiftAnswer, updateMessageSomeFields, appendChunk } = useChat()
+const { unshiftAnswer, updateMessageSomeFields, appendChunk } = useChat()
 const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom, scrollTo } = useScroll()
 const { uuid: curConvUuid } = route.params as { uuid: string }
 const regenerateQuestionUuid = ref<string>('')
+const inputEditorRef = ref()
 const tabsActiveTab = ref<string[]>([])
 const messages = computed(() => {
   return chatStore.getMsgsByConv(curConvUuid)
 })
 const currConv = computed(() => chatStore.getCurConv || defaultConv())
 const imageUuids = ref<string[]>([])
-const showAudioRecorderModal = ref<boolean>(false)
-const prompt = ref<string>('')
-const loading = ref<boolean>(false)
+const isChatting = ref<boolean>(false)
 const loadingMsgs = ref<boolean>(false)
 const inputRef = ref<Ref | null>(null)
-let arrowKeyIdx = -1
 
-// 添加PromptStore
-const promptStore = usePromptStore()
-// 使用storeToRefs，保证store修改后，联想部分能够重新渲染
-const { promptList: promptTemplateList } = storeToRefs<any>(promptStore)
 let prevScrollTop: number
-
 useCopyCode()
 
 // 未知原因刷新页面，loading 状态不会重置，手动重置
@@ -65,177 +58,119 @@ messages.value.forEach((item: { loading?: boolean; uuid: string }) => {
     updateMessageSomeFields(curConvUuid, item.uuid, { loading: false })
 })
 
-function handleSubmit() {
-  createChatTask()
+function chatMessageReceiving(questionUuid: string) {
+  nextTick(() => {
+    scrollToBottomIfAtBottom()
+  })
 }
 
-function handleShowAudioRecorderModal() {
-  if (!authStore.token) {
-    authStore.setLoginView(true)
+function messageComplelted(questionUuid: string) {
+  nextTick(() => {
+    scrollToBottom()
+  })
+}
+
+function handleStop() {
+  if (isChatting.value) {
+    controller.abort()
+    isChatting.value = false
+  }
+  inputEditorRef.value?.handleStop()
+}
+
+const fetchChatAPIOnce = async (regenerateQuestionUuid: string, childAudioPlayState: AudioPlayState) => {
+  console.log('begin sseProcess')
+
+  const convUuid = currConv.value.uuid
+  const conv = chatStore.getConvByUuid(convUuid)
+  if (!conv) {
+    ms.error('会话不存在或已被删除')
     return
   }
-  showAudioRecorderModal.value = true
-}
-
-function handleAudioRecorded(audioUrl: string, audioBlob: Blob, audioDuration: number) {
-  console.log(`handleAudioRecorded, url:${audioUrl}`)
-}
-
-function handleAudioSubmitted(uuid: string, url: string, audioDuration: number) {
-  console.log(`handleAudioSubmitted, uuid:${uuid}, url:${url}, audioDuration:${audioDuration}`)
-  showAudioRecorderModal.value = false
-  createChatTask(uuid, url, audioDuration)
-}
-
-const fetchChatAPIOnce = async (message: string, regenerateQuestionUuid: string, audioUuid: string, audioDuration: number) => {
-  console.log('begin sseProcess')
   api.sseProcess({
     options: {
-      prompt: message,
-      conversationUuid: curConvUuid,
+      prompt: '',
+      conversationUuid: convUuid,
       regenerateQuestionUuid,
       modelName: appStore.selectedLLM.modelName,
       imageUrls: imageUuids.value,
-      audioUuid,
-      audioDuration,
+      audioUuid: '',
+      audioDuration: 0,
     },
     signal: controller.signal,
     startCallback(chunk) {
     },
     messageRecived: (chunk) => {
-      let question = null
-      if (regenerateQuestionUuid) {
-        question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
-        if (!question) {
-          ms.error('找不到提问')
-          return
-        }
-      } else {
-        question = messages.value[messages.value.length - 1]
+      const question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
+      if (!question) {
+        ms.error('找不到提问')
+        return
       }
       try {
         for (let i = 0; i < chunk.length; i++) {
           appendChunk(
-            curConvUuid,
+            convUuid,
             question.children[0].uuid,
             chunk[i],
           )
+          chatMessageReceiving(question.uuid)
         }
       } catch (error) {
         console.error(error)
       }
-      scrollToBottomIfAtBottom()
+      const answerContentType = chatStore.answerContentType(conv, question.audioUuid)
+      const ttsPartText = chunk.replace('\n', '')
+      if (ttsPartText && appStore.audioSynthesizerSide === AUDIO_SYNTHESIZER_SIDE.client && answerContentType === CHAT_MESSAGE_CONTENT_TYPE.audio && conv.isAutoplayAnswer) {
+        // settimeout是防止执行太快导致 AudioMessage 中的 watch 没有触发
+        setTimeout(() => {
+          childAudioPlayState.msgPart = chunk
+        }, 0)
+      }
+    },
+    audioDataRecived(audioFrame) {
+      // AudioMessage 监听pcmPart的变化并决定要不要自动播放
+      if (appStore.audioSynthesizerSide !== AUDIO_SYNTHESIZER_SIDE.client && audioFrame)
+        childAudioPlayState.audioFrame = audioFrame
     },
     doneCallback: (chunk) => {
+      const question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
+      if (!question) {
+        ms.error('找不到提问')
+        return
+      }
+      const answer = question.children[0]
       if (chunk.includes('[META]')) {
         const meta = chunk.replace('[META]', '')
         const metaData: Chat.MetaData = JSON.parse(meta)
-        let question = null
-        if (regenerateQuestionUuid) {
-          question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
-          if (!question) {
-            ms.error('找不到提问')
-            return
-          }
-        } else {
-          question = messages.value[messages.value.length - 1]
+        updateMessageSomeFields(convUuid, question.uuid, { ...metaData.question, loading: false })
+        // 保留临时answer的uuid以方便自动选中最新答案
+        updateMessageSomeFields(convUuid, answer.uuid, { ...metaData.answer, uuid: answer.uuid, loading: false })
+        if (metaData.audioInfo) {
+          answer.audioPlayState.audioUrl = metaData.audioInfo.url
+          answer.audioDuration = metaData.audioInfo.duration
+          answer.audioUuid = metaData.audioInfo.uuid
         }
-        updateMessageSomeFields(curConvUuid, question.uuid, { ...metaData.question, loading: false })
-        updateMessageSomeFields(curConvUuid, question.children[0].uuid, { ...metaData.answer, loading: false })
-        selectedLatestAnswer(question.uuid)
+      } else {
+        updateMessageSomeFields(convUuid, regenerateQuestionUuid, { loading: false })
+        updateMessageSomeFields(convUuid, answer.uuid, { uuid: answer.uuid, loading: false })
       }
-      loading.value = false
+      messageComplelted(regenerateQuestionUuid)
     },
     errorCallback: (error) => {
       ms.warning(error)
-      loading.value = false
-      let question = null
-      if (regenerateQuestionUuid) {
-        question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
-        if (!question) {
-          ms.error('找不到提问')
-          return
-        }
-      } else {
-        question = messages.value[messages.value.length - 1]
+      const question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
+      if (!question) {
+        ms.error('找不到提问')
+        return
       }
-      updateMessageSomeFields(curConvUuid, question.children[0].uuid, { remark: `系统提示：${error}`, loading: false })
+      updateMessageSomeFields(convUuid, question.children[0].uuid, { remark: `系统提示：${error}`, loading: false })
     },
   })
 }
 
-async function createChatTask(audioUuid = '', audioUrl = '', audioDuration = 0) {
-  if (!authStore.token) {
-    authStore.setLoginView(true)
-    return
-  }
-
-  const message = prompt.value
-
-  if (loading.value)
-    return
-
-  if ((!message || message.trim() === '') && !audioUuid)
-    return
-
-  const questionUuid = uuidv4().replace(/-/g, '')
-  const answerUuid = uuidv4().replace(/-/g, '')
-  controller = new AbortController()
-
-  const audioPlayState = emptyAudioPlayState()
-  audioPlayState.audioUrl = audioUrl
-  audioPlayState.audioUuid = audioUuid
-  // add my question
-  addMessage(
-    curConvUuid,
-    {
-      uuid: questionUuid,
-      createTime: new Date().toLocaleString(),
-      remark: message,
-      audioUuid,
-      audioUrl,
-      audioDuration,
-      children: [{
-        uuid: answerUuid,
-        createTime: new Date().toLocaleString(),
-        remark: '',
-        audioUuid: '',
-        audioUrl: '',
-        audioDuration: 0,
-        children: [],
-        loading: true,
-        inversion: false,
-        error: false,
-        aiModelPlatform: appStore.selectedLLM.modelPlatform,
-        attachmentUrls: [],
-        audioPlayState: emptyAudioPlayState(),
-      }],
-      inversion: true,
-      error: false,
-      attachmentUrls: [],
-      audioPlayState,
-    },
-    true,
-  )
-
-  loading.value = true
-  prompt.value = ''
-
-  scrollToBottom()
-
-  try {
-    fetchChatAPIOnce(message, '', audioUuid, audioDuration)
-  } catch (error: any) {
-    console.error(`fetchChatAPIOnce error:${error}`)
-    loading.value = false
-    const errorMessage = error?.message ?? t('common.wrong')
-    ms.error(errorMessage)
-  }
-}
-
 async function onRegenerate(questionUuid: string) {
   console.log(`onRegenerate,question uuid:${questionUuid}`)
-  if (loading.value)
+  if (isChatting.value)
     return
 
   regenerateQuestionUuid.value = questionUuid
@@ -243,38 +178,39 @@ async function onRegenerate(questionUuid: string) {
   if (!message)
     return
 
-  loading.value = true
+  isChatting.value = true
   controller = new AbortController()
 
-  const answerUuid = uuidv4().replace(/-/g, '')
-
-  unshiftAnswer(
-    curConvUuid,
-    questionUuid,
-    {
-      uuid: answerUuid,
-      createTime: new Date().toLocaleString(),
-      remark: '',
-      audioUuid: '',
-      audioUrl: '',
-      audioDuration: 0,
-      children: [],
-      inversion: false,
-      error: false,
-      loading: true,
-      attachmentUrls: [],
-      audioPlayState: emptyAudioPlayState(),
-    },
-  )
-
   try {
-    await fetchChatAPIOnce('', questionUuid, '', 0)
+    const answerContentType = chatStore.answerContentType(currConv.value, message.audioUuid)
+    const answerUuid = uuidv4().replace(/-/g, '')
+    const audioPlayState = emptyAudioPlayState()
+    unshiftAnswer(
+      curConvUuid,
+      questionUuid,
+      {
+        uuid: answerUuid,
+        contentType: answerContentType,
+        createTime: new Date().toLocaleString(),
+        remark: '',
+        audioUuid: '',
+        audioUrl: '',
+        audioDuration: 0,
+        children: [],
+        inversion: false,
+        error: false,
+        loading: true,
+        attachmentUrls: [],
+        audioPlayState,
+      },
+    )
+    await fetchChatAPIOnce(questionUuid, audioPlayState)
     selectedLatestAnswer(questionUuid)
   } catch (error: any) {
     console.error(error)
     ms.error(error ?? 'error')
   } finally {
-    loading.value = false
+    isChatting.value = false
   }
 }
 
@@ -282,8 +218,10 @@ function selectedLatestAnswer(questionUuid: string) {
   nextTick(() => {
     console.log('fetchChatAPIOnce nextTick')
     const index = messages.value.findIndex((msg: { uuid: string }) => msg.uuid === questionUuid)
-    if (index !== -1 && messages.value[index].children[0])
+    if (index !== -1 && messages.value[index].children[0]) {
       tabsActiveTab.value[index] = `tab_${messages.value[index].children[0].uuid}`
+      console.log(`tabsActiveTab[${index}]: ${tabsActiveTab.value[index]}`)
+    }
   })
 }
 
@@ -332,7 +270,7 @@ async function handleScroll(event: any) {
 }
 
 function handleDelete(questionUuid: string, answerUuid: string, isQuestion = false) {
-  if (loading.value)
+  if (isChatting.value)
     return
 
   let tip = t('chat.deleteMessageConfirm')
@@ -358,105 +296,6 @@ function handleDelete(questionUuid: string, answerUuid: string, isQuestion = fal
     },
   })
 }
-
-function handleUp(event: KeyboardEvent) {
-  if (event.key === 'ArrowUp' && prompt.value.indexOf('/') !== 0) {
-    event.preventDefault()
-    const msgLength = messages.value.length
-    if (msgLength === 0)
-      return
-
-    if (arrowKeyIdx === -1)
-      arrowKeyIdx = msgLength - 1
-    else
-      arrowKeyIdx--
-
-    const nextMessage = messages.value[arrowKeyIdx]
-    if (nextMessage)
-      prompt.value = nextMessage.remark
-    else
-      arrowKeyIdx++
-  }
-}
-
-function handleDown(event: KeyboardEvent) {
-  if (event.key === 'ArrowDown' && prompt.value.indexOf('/') !== 0) {
-    event.preventDefault()
-    const msgLength = messages.value.length
-    if (msgLength === 0)
-      return
-
-    if (arrowKeyIdx === -1)
-      arrowKeyIdx = 0
-    else
-      arrowKeyIdx++
-
-    const preMessage = messages.value[arrowKeyIdx]
-    if (preMessage)
-      prompt.value = preMessage.remark
-    else
-      arrowKeyIdx--
-  }
-}
-
-function handleEnter(event: KeyboardEvent) {
-  if (!isMobile.value) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-      handleSubmit()
-    }
-  } else {
-    if (event.key === 'Enter' && event.ctrlKey) {
-      event.preventDefault()
-      handleSubmit()
-    }
-  }
-  arrowKeyIdx = -1
-}
-
-function handleStop() {
-  if (loading.value) {
-    controller.abort()
-    loading.value = false
-  }
-}
-
-const searchOptions = computed(() => {
-  if (prompt.value.indexOf('/') === 0)
-    searchRemote()
-
-  return promptTemplateList.value
-})
-
-async function searchRemote() {
-  const resp = await api.searchPrompts<PageResponse>(1, 10, prompt.value.substring(1))
-  promptTemplateList.value.splice(0, promptTemplateList.value.length)
-  if (resp.success && resp.data.records) {
-    resp.data.records.forEach((item: Chat.Prompt) => {
-      promptTemplateList.value.push({
-        label: item.act,
-        value: item.prompt,
-      })
-    })
-  }
-}
-
-function getShow(value: string) {
-  if (value.indexOf('/') === 0)
-    return true
-
-  return false
-}
-
-const placeholder = computed(() => {
-  if (isMobile.value)
-    return t('chat.placeholderMobile')
-  return 'Shift + Enter = 换行 ；/ 开头显示提示词'
-})
-
-const buttonDisabled = computed(() => {
-  return loading.value || !prompt.value || prompt.value.trim() === ''
-})
 
 const footerClass = computed(() => {
   let classes = ['p-4']
@@ -497,7 +336,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (loading.value)
+  if (isChatting.value)
     controller.abort()
 })
 
@@ -538,121 +377,117 @@ onDeactivated(() => {
           </template>
 
           <template v-else>
-            <div v-for="(question, index) of messages" :key="index">
+            <div v-for="(qaMessage, index) of messages" :key="index">
+              <!-- 用户消息 start -->
+
               <!-- 多模态的请求消息，携带有附件 -->
-              <template v-if="question.attachmentUrls.length > 0">
+              <template v-if="qaMessage.attachmentUrls.length > 0">
                 <!-- 语音聊天 -->
                 <AudioMessage
-                  v-if="question.audioUrl" :inversion="true" :message-uuid="question.uuid"
-                  :date-time="question.createTime" :audio-play-state="question.audioPlayState"
-                  :duration="question.audioDuration" @delete="handleDelete(question.uuid, '', true)"
+                  v-if="qaMessage.contentType === CHAT_MESSAGE_CONTENT_TYPE.audio" :inversion="true"
+                  :conversation="currConv" :message-uuid="qaMessage.uuid" :date-time="qaMessage.createTime"
+                  :audio-play-state="qaMessage.audioPlayState" :duration="qaMessage.audioDuration"
+                  @delete="handleDelete(qaMessage.uuid, '', true)"
                 />
                 <!-- 文本聊天 -->
                 <Message
-                  v-else :date-time="question.createTime" :text="question.remark"
-                  :image-urls="question.attachmentUrls" type="text-image" :inversion="true" :error="question.error"
-                  :loading="false" @regenerate="onRegenerate(question.uuid)"
-                  @delete="handleDelete(question.uuid, '', true)"
+                  v-else :date-time="qaMessage.createTime" :text="qaMessage.remark"
+                  :image-urls="qaMessage.attachmentUrls" type="text-image" :inversion="true" :error="qaMessage.error"
+                  :loading="false" @regenerate="onRegenerate(qaMessage.uuid)"
+                  @delete="handleDelete(qaMessage.uuid, '', true)"
                 />
               </template>
               <!-- 非多模态的请求消息，没有附件 -->
-              <template v-if="question.attachmentUrls.length === 0">
+              <template v-if="qaMessage.attachmentUrls.length === 0">
                 <!-- 语音聊天 -->
                 <AudioMessage
-                  v-if="question.audioUrl" :inversion="true" :message-uuid="question.uuid"
-                  :date-time="question.createTime" :audio-play-state="question.audioPlayState"
-                  :duration="question.audioDuration" @delete="handleDelete(question.uuid, '', true)"
+                  v-if="qaMessage.contentType === CHAT_MESSAGE_CONTENT_TYPE.audio" :inversion="true"
+                  :conversation="currConv" :message-uuid="qaMessage.uuid" :date-time="qaMessage.createTime"
+                  :audio-play-state="qaMessage.audioPlayState" :duration="qaMessage.audioDuration"
+                  @delete="handleDelete(qaMessage.uuid, '', true)"
                 />
                 <!-- 文本聊天 -->
                 <Message
-                  v-else :date-time="question.createTime" :text="question.remark" type="text" :inversion="true"
-                  :error="question.error" :loading="false" @regenerate="onRegenerate(question.uuid)"
-                  @delete="handleDelete(question.uuid, '', true)"
+                  v-else :date-time="qaMessage.createTime" :text="qaMessage.remark" type="text" :inversion="true"
+                  :error="qaMessage.error" :loading="false" @regenerate="onRegenerate(qaMessage.uuid)"
+                  @delete="handleDelete(qaMessage.uuid, '', true)"
                 />
               </template>
 
+              <!-- 用户消息 end -->
+
+              <!-- LLM回复 start -->
+
               <!-- LLM的多条回复消息 -->
-              <template v-if="question.children.length > 1">
+              <template v-if="qaMessage.children.length > 1">
                 <NTabs
                   v-model:value="tabsActiveTab[index]" pane-wrapper-style="margin: -30px -30px"
                   pane-style="padding-left: 4px; box-sizing: border-box;" type="bar" placement="left" size="small"
                   animated
                 >
                   <NTabPane
-                    v-for="(answer, index) of question.children" :key="`tab_${answer.uuid}`"
+                    v-for="(answer, index) of qaMessage.children" :key="`tab_${answer.uuid}`"
                     :name="`tab_${answer.uuid}`" :tab="`答案${index + 1}`"
                   >
+                    <AudioMessage
+                      v-if="answer.contentType === CHAT_MESSAGE_CONTENT_TYPE.audio" :conversation="currConv"
+                      :duration="answer.audioDuration" :inversion="false" :message-uuid="answer.uuid"
+                      :date-time="answer.createTime" :audio-play-state="answer.audioPlayState" :loading="answer.loading"
+                      :ai-model-platform="answer.aiModelPlatform" @delete="handleDelete(qaMessage.uuid, answer.uuid)"
+                    />
                     <Message
-                      :show-avatar="false" :date-time="answer.createTime" :text="answer.remark" type="text"
-                      :inversion="false" :regenerate="true" :error="answer.error" :loading="answer.loading"
-                      :ai-model-platform="answer.aiModelPlatform" @regenerate="onRegenerate(question.uuid)"
-                      @delete="handleDelete(question.uuid, answer.uuid)"
+                      v-else :show-avatar="false" :date-time="answer.createTime" :text="answer.remark"
+                      type="text" :inversion="false" :regenerate="true" :error="answer.error" :loading="answer.loading"
+                      :ai-model-platform="answer.aiModelPlatform" @regenerate="onRegenerate(qaMessage.uuid)"
+                      @delete="handleDelete(qaMessage.uuid, answer.uuid)"
                     />
                   </NTabPane>
                 </NTabs>
               </template>
 
               <!-- LLM的单条回复消息 -->
-              <template v-if="question.children.length === 1">
+              <template v-if="qaMessage.children.length === 1">
+                <AudioMessage
+                  v-if="qaMessage.children[0].contentType === CHAT_MESSAGE_CONTENT_TYPE.audio"
+                  :conversation="currConv" :duration="qaMessage.children[0].audioDuration" :inversion="false"
+                  :message-uuid="qaMessage.children[0].uuid" :date-time="qaMessage.children[0].createTime"
+                  :audio-play-state="qaMessage.children[0].audioPlayState" :loading="qaMessage.children[0].loading"
+                  :ai-model-platform="qaMessage.children[0].aiModelPlatform"
+                  @delete="handleDelete(qaMessage.uuid, qaMessage.children[0].uuid)"
+                />
                 <Message
-                  :date-time="question.children[0].createTime" :text="question.children[0].remark" type="text"
-                  :inversion="question.children[0].inversion" :regenerate="true" :error="question.children[0].error"
-                  :loading="question.children[0].loading" :ai-model-platform="question.children[0].aiModelPlatform"
-                  @regenerate="onRegenerate(question.uuid)"
-                  @delete="handleDelete(question.uuid, question.children[0].uuid)"
+                  v-else :date-time="qaMessage.children[0].createTime" :text="qaMessage.children[0].remark"
+                  type="text" :inversion="qaMessage.children[0].inversion" :regenerate="true"
+                  :error="qaMessage.children[0].error" :loading="qaMessage.children[0].loading"
+                  :ai-model-platform="qaMessage.children[0].aiModelPlatform" @regenerate="onRegenerate(qaMessage.uuid)"
+                  @delete="handleDelete(qaMessage.uuid, qaMessage.children[0].uuid)"
                 />
               </template>
+
+              <!-- LLM回复 end -->
             </div>
           </template>
         </div>
-      </div>
-      <div class="sticky bottom-0 left-0 flex justify-center">
-        <NButton v-if="loading" size="tiny" @click="handleStop">
-          <template #icon>
-            <SvgIcon icon="ri:stop-circle-line" />
-          </template>
-          停止请求
-        </NButton>
+        <div class="sticky bottom-0 left-0 flex justify-center">
+          <NButton v-if="isChatting" size="tiny" @click="handleStop">
+            <template #icon>
+              <SvgIcon icon="ri:stop-circle-line" />
+            </template>
+            停止请求
+          </NButton>
+        </div>
       </div>
     </main>
     <footer :class="footerClass">
       <div class="w-full max-w-screen-xl m-auto border-t">
         <InputToolbar @images-change="imagesChange" />
-        <div class="flex items-center space-x-2">
-          <NAutoComplete v-model:value="prompt" class="grow" :options="searchOptions" :get-show="getShow">
-            <template #default="{ handleInput, handleBlur, handleFocus }">
-              <NInput
-                ref="inputRef" v-model:value="prompt" type="textarea" :placeholder="placeholder"
-                :autosize="{ minRows: 1, maxRows: isMobile ? 4 : 8 }" @input="handleInput" @focus="handleFocus"
-                @blur="handleBlur" @keyup.up="handleUp" @keyup.down="handleDown" @keypress="handleEnter"
-              />
-            </template>
-          </NAutoComplete>
-          <NButton class="flex-none" type="primary" :disabled="buttonDisabled" @click="handleSubmit">
-            <template #icon>
-              <span class="dark:text-black">
-                <SvgIcon icon="ri:send-plane-fill" />
-              </span>
-            </template>
-          </NButton>
-          <NButton class="flex-none" type="primary" @click="handleShowAudioRecorderModal">
-            <template #icon>
-              <span class="dark:text-black">
-                <SvgIcon icon="icon-park-outline:voice" />
-              </span>
-            </template>
-          </NButton>
-        </div>
+        <InputEditor
+          ref="inputEditorRef" :conversation-uuid="curConvUuid" :image-uuids="imageUuids"
+          @message-receiving="chatMessageReceiving" @message-complelted="messageComplelted"
+          @is-chatting="(chatting) => isChatting = chatting"
+        />
       </div>
     </footer>
-    <NModal :show="showAudioRecorderModal">
-      <NCard style="max-width: 600px" title="语音对话" size="huge" :bordered="false" role="dialog" aria-modal="true">
-        <AudioRecorder
-          @recorded="handleAudioRecorded" @submitted="handleAudioSubmitted"
-          @exit="showAudioRecorderModal = false"
-        />
-      </NCard>
-    </NModal>
   </div>
 </template>
 <!-- <style scoped lang="less">

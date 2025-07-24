@@ -2,13 +2,14 @@ declare namespace Chat {
 
 	interface ChatMessage {
 		uuid: string | '',
+		contentType: number // 2: text, 3: audio
 		createTime: string
 		remark: string
 		audioUuid: string
 		audioUrl: string
 		audioDuration: number // in seconds
 		messageRole?: number
-		children: ChatMessage[]
+		children: ChatMessage[] //AI回复的消息
 		aiModelPlatform?: string
 		attachmentUrls: string[]
 
@@ -46,6 +47,8 @@ declare namespace Chat {
 		loadedFirstPageMsg: boolean
 		minMsgUuid?: string | ''
 		mcpIds: string[]
+		answerContentType: number // 1: auto, 2: text, 3: audio
+		isAutoplayAnswer: boolean //聊天时音频类型的响应内容是否自动播放
 	}
 
 	interface ConvWithMessages {
@@ -72,6 +75,12 @@ declare namespace Chat {
 		text: string
 	}
 
+	interface AudioInfo {
+		url: string
+		uuid: string
+		duration: number // in seconds
+	}
+
 	interface MetaData {
 		question: {
 			tokens: number,
@@ -80,7 +89,8 @@ declare namespace Chat {
 		answer: {
 			tokens: number,
 			uuid: string
-		}
+		},
+		audioInfo: AudioInfo
 	}
 
 	interface ConvMsgListResp {

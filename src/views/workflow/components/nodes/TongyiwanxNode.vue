@@ -3,11 +3,11 @@ import { computed } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 import CommonNodeHeader from '../CommonNodeHeader.vue'
-import { tongyiwanxSizeOptions } from '@/utils/constant'
+import { TONGYI_WANX_SIZE_OPTIONS } from '@/utils/constant'
 
 const props = defineProps<NodeProps>()
 const sizeLabel = computed(() => {
-  return tongyiwanxSizeOptions.find(item => item.value === props.data.nodeConfig.size)?.label || ''
+  return TONGYI_WANX_SIZE_OPTIONS.find(item => item.value === props.data.nodeConfig.size)?.label || ''
 })
 </script>
 

@@ -3,14 +3,14 @@ import { computed } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 import CommonNodeHeader from '../CommonNodeHeader.vue'
-import { googleCountryOptions, googleLanguageOptions } from '@/utils/constant'
+import { GOOGLE_COUNTRY_OPTIONS, GOOGLE_LANGUAGE_OPTIONS } from '@/utils/constant'
 
 const props = defineProps<NodeProps>()
 const country = computed(() => {
-  return googleCountryOptions.find(item => item.value === props.data.nodeConfig.country)?.label || ''
+  return GOOGLE_COUNTRY_OPTIONS.find(item => item.value === props.data.nodeConfig.country)?.label || ''
 })
 const language = computed(() => {
-  return googleLanguageOptions.find(item => item.value === props.data.nodeConfig.language)?.label || ''
+  return GOOGLE_LANGUAGE_OPTIONS.find(item => item.value === props.data.nodeConfig.language)?.label || ''
 })
 </script>
 

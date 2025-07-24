@@ -7,7 +7,7 @@ import { QuestionCircle16Regular } from '@vicons/fluent'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAppStore, useAuthStore, useKbStore } from '@/store'
 import { knowledgeBaseEmptyInfo } from '@/utils/functions'
-import { tokenEstimator } from '@/utils/constant'
+import { TOKEN_ESTIMATOR } from '@/utils/constant'
 import { t } from '@/locales'
 import api from '@/api'
 
@@ -47,7 +47,7 @@ const changeShowModal = (selected: KnowledgeBase.Info = knowledgeBaseEmptyInfo()
     tmpKb.ingestModelName = appStore.llms.find(item => item.modelName === tmpKb.ingestModelName)?.modelName || ''
   }
   if (!tmpKb.ingestTokenEstimator)
-    tmpKb.ingestTokenEstimator = tokenEstimator[0].value
+    tmpKb.ingestTokenEstimator = TOKEN_ESTIMATOR[0].value
 }
 // table相关
 const createColumns = (): DataTableColumns<KnowledgeBase.Info> => {
@@ -310,7 +310,7 @@ watch(
                 <div>
                   Token计数器
                 </div>
-                <NSelect :value="tmpKb.ingestTokenEstimator" :options="tokenEstimator" :on-update:value="onTokenEstimatorChange" />
+                <NSelect :value="tmpKb.ingestTokenEstimator" :options="TOKEN_ESTIMATOR" :on-update:value="onTokenEstimatorChange" />
               </div>
             </div>
           </NCollapseItem>

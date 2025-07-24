@@ -4,7 +4,6 @@ import { NButton, useMessage } from 'naive-ui'
 import { MediaRecorder, deregister, register } from 'extendable-media-recorder'
 import { connect } from 'extendable-media-recorder-wav-encoder'
 import { format } from 'date-fns'
-import { useChatStore } from '@/store'
 import { SvgIcon } from '@/components/common'
 import api from '@/api'
 
@@ -22,7 +21,6 @@ const submitting = ref(false)
 const errorMsg = ref('')
 const mediaType = 'audio/wav'
 const ms = useMessage()
-const chatStore = useChatStore()
 const recordingDuration = ref(0)
 let mediaRecorder: any = null
 let port: any = null

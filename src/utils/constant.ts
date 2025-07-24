@@ -1,23 +1,41 @@
-export const tokenEstimator = [
+export const TOKEN_ESTIMATOR = [
   { label: 'Openai', value: 'openai' },
   { label: '通义千问', value: 'qwen' },
   { label: 'Huggingface', value: 'huggingface' },
 ]
-export const dalle3SizeOptions = [
+export const DALLE3_SIZE_OPTIONS = [
   { label: '方(1024x1024)', value: '1024x1024' },
   { label: '竖屏(1024x1792)', value: '1024x1792' },
   { label: '横屏(1792x1024)', value: '1792x1024' },
 ]
-export const dalle3QualityOptions = [
+export const DALLE3_QUALITY_OPTIONS = [
   { label: '标准', value: 'standard' },
   { label: '高清', value: 'hd' },
 ]
-export const tongyiwanxSizeOptions = [
+export const TONGYI_WANX_SIZE_OPTIONS = [
   { label: '方(1024x1024)', value: '1024*1024' },
   { label: '竖屏(720x1280)', value: '720*1280' },
   { label: '横屏(1280X720)', value: '1280*720' },
 ]
-export const googleLanguageOptions = [
+export const RESPONSE_SHOW_TYPE_OPTIONS = [
+  { label: '自动', value: 1 },
+  { label: '文本', value: 2 },
+  { label: '音频(自动播放)', value: 3 },
+  { label: '音频(不自动播放)', value: 4 },
+]
+export const CHAT_MESSAGE_CONTENT_TYPE = {
+  auto: 1, // 自动
+  text: 2, // 文本
+  audio: 3, // 音频
+}
+/**
+ * 音频合成位置：客户端(web)或服务端
+ */
+export const AUDIO_SYNTHESIZER_SIDE = {
+  client: 'client',
+  server: 'server',
+}
+export const GOOGLE_LANGUAGE_OPTIONS = [
   {
     language_code: 'af',
     language_name: 'Afrikaans',
@@ -644,7 +662,7 @@ export const googleLanguageOptions = [
   },
 ].map(x => ({ label: x.language_name, value: x.language_code }))
 
-export const googleCountryOptions = [
+export const GOOGLE_COUNTRY_OPTIONS = [
   {
     country_code: 'af',
     country_name: 'Afghanistan',

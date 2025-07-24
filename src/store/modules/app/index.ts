@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { AppState, Language, Theme } from './helper'
 import { getLocalSetting, setLocalSetting } from './helper'
+import { AUDIO_SYNTHESIZER_SIDE } from '@/utils/constant'
 import { store } from '@/store'
 
 export const useAppStore = defineStore('app-store', {
@@ -38,9 +39,16 @@ export const useAppStore = defineStore('app-store', {
         return state.imageModels.find(item => item.modelName === name)
       }
     },
+    audioSynthesizerSide(state: AppState) {
+      return state.sysConfigInfo.ttsSetting.synthesizer_side || AUDIO_SYNTHESIZER_SIDE.client
+    },
   },
 
   actions: {
+    setSysConfig(sysConfig: SysConfigInfo) {
+      this.sysConfigInfo = sysConfig
+      this.recordState()
+    },
     setSiderCollapsed(collapsed: boolean) {
       this.siderCollapsed = collapsed
       this.recordState()
