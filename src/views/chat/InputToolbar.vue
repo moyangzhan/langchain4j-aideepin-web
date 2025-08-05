@@ -1,8 +1,8 @@
 <script setup lang='ts'>
 import { computed, ref, watch } from 'vue'
-import { NButton, NCheckbox, NCheckboxGroup, NFlex, NList, NListItem, NModal, NUpload, useMessage } from 'naive-ui'
+import { NButton, NCheckbox, NCheckboxGroup, NFlex, NList, NListItem, NModal, NPopover, NSwitch, NUpload, useMessage } from 'naive-ui'
 import type { UploadFileInfo } from 'naive-ui'
-import { HoverButton, LLMSelector, SvgIcon } from '@/components/common'
+import { LLMSelector, SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAppStore, useAuthStore, useChatStore, useMcpStore } from '@/store'
 import { defaultConv } from '@/store/modules/chat/helper'
@@ -27,6 +27,8 @@ const uploadedUuidList = ref<string[]>([])
 const uploadedUrls = ref<string[]>([])
 const currConv = computed(() => chatStore.getCurConv || defaultConv())
 const canUploadImage = ref<boolean>(false)
+const isReasoner = ref<boolean>(false)
+const isThinkingClosable = ref<boolean>(false)
 const mcpModalShow = ref<boolean>(false)
 const tmpMcpIds = ref<string[]>([])
 
@@ -103,9 +105,24 @@ function toggleUsingContext() {
     ms.warning(t('chat.turnOffContext'))
 }
 
+async function toogleThinking() {
+  if (!isReasoner.value || !isThinkingClosable.value) {
+    console.log('该模型不支持对深度思考功能的开启或关闭')
+    return
+  }
+  currConv.value.isEnableThinking = !currConv.value.isEnableThinking
+  await api.convToggleThinking(currConv.value.uuid, currConv.value.isEnableThinking)
+  if (currConv.value.isEnableThinking)
+    ms.success('深度思考已开启')
+  else
+    ms.warning('深度思考已关闭')
+}
+
 watch(
   () => appStore.selectedLLM,
   (newVal) => {
+    isReasoner.value = newVal.isReasoner
+    isThinkingClosable.value = newVal.isThinkingClosable
     if (newVal.inputTypes?.includes('image'))
       canUploadImage.value = true
     else
@@ -123,31 +140,68 @@ watch(
       <div>
         <LLMSelector />
       </div>
-      <HoverButton
-        v-if="!isMobile"
-        :tooltip="currConv.understandContextEnable ? $t('chat.understandContextEnable') : $t('chat.understandContextDisable')"
-        @click="toggleUsingContext"
+      <div
+        class="rounded border hover:border-green-600 text-green-600 p-1"
+        :class="{ 'cursor-pointer': isReasoner && isThinkingClosable, 'cursor-not-allowed': !isReasoner || !isThinkingClosable }"
+        @click="toogleThinking"
       >
-        <span
-          class="text-xl"
-          :class="{ 'text-[#4b9e5f]': currConv.understandContextEnable, 'text-[#a8071a]': !currConv.understandContextEnable }"
-        >
-          <SvgIcon icon="ri:chat-history-line" />
-        </span>
-      </HoverButton>
-      <div>
+        <template v-if="isReasoner && isThinkingClosable">
+          深度思考
+          <NSwitch :value="currConv.isEnableThinking" size="small" />
+        </template>
+        <template v-if="isReasoner && !isThinkingClosable">
+          <NPopover trigger="hover">
+            <template #trigger>
+              <div>
+                深度思考
+                <NSwitch :value="true" size="small" disabled />
+              </div>
+            </template>
+            <span> 模型不支持关闭深度思考功能 </span>
+          </NPopover>
+        </template>
+        <template v-if="!isReasoner">
+          <NPopover trigger="hover">
+            <template #trigger>
+              <div>
+                深度思考
+                <NSwitch :value="false" size="small" disabled />
+              </div>
+            </template>
+            <span> 模型不支持深度思考功能 </span>
+          </NPopover>
+        </template>
+      </div>
+      <div class="rounded border hover:border-green-600  cursor-pointer p-2" @click="toggleUsingContext">
+        <NPopover trigger="hover">
+          <template #trigger>
+            <span
+              class="text-xl"
+              :class="{ 'text-[#4b9e5f]': currConv.understandContextEnable, 'text-[#a8071a]': !currConv.understandContextEnable }"
+            >
+              <SvgIcon icon="ri:chat-history-line" />
+            </span>
+          </template>
+          <span> {{ currConv.understandContextEnable ? $t('chat.understandContextEnable')
+            : $t('chat.understandContextDisable') }} </span>
+        </NPopover>
+      </div>
+      <div class="rounded border hover:border-green-600 hover:text-green-600 cursor-pointer pt-2 px-2">
         <NUpload
           :action="`/api/image/upload?token=${token}`" response-type="text" :disabled="!canUploadImage"
           @before-upload="beforeUpload" @finish="handleFinish"
         >
-          <HoverButton :tooltip="canUploadImage ? '上传图片以识别其内容' : '模型不支持图片识别'">
-            <span class="text-xl">
-              <SvgIcon icon="ri:image-line" />
-            </span>
-          </HoverButton>
+          <NPopover trigger="hover">
+            <template #trigger>
+              <span class="text-xl">
+                <SvgIcon icon="ri:image-line" />
+              </span>
+            </template>
+            <span> {{ canUploadImage ? '上传图片以识别其内容' : '模型不支持图片识别' }} </span>
+          </NPopover>
         </NUpload>
       </div>
-      <div class="flex-1 overflow-hidden">
+      <div class="flex-1 overflow-hidden rounded border hover:border-green-600 p-1 h-8">
         <span class="text-xs cursor-pointer text-green-600" @click="handleMcpModalShow">工具：</span>
         <template v-for="userMcp in mcpStore.myUserMcpList" :key="userMcp.uuid">
           <span v-if="currConv.mcpIds.includes(userMcp.mcpInfo.id)" class="text-xs mr-1">{{ userMcp.mcpInfo.title

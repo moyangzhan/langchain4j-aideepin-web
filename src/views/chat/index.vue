@@ -100,7 +100,10 @@ const fetchChatAPIOnce = async (regenerateQuestionUuid: string, childAudioPlaySt
     signal: controller.signal,
     startCallback(chunk) {
     },
-    messageRecived: (chunk) => {
+    thinkingDataReceived: (chunk) => {
+      // 处理思考数据
+    },
+    messageReceived: (chunk) => {
       const question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
       if (!question) {
         ms.error('找不到提问')
@@ -127,7 +130,7 @@ const fetchChatAPIOnce = async (regenerateQuestionUuid: string, childAudioPlaySt
         }, 0)
       }
     },
-    audioDataRecived(audioFrame) {
+    audioDataReceived(audioFrame) {
       // AudioMessage 监听pcmPart的变化并决定要不要自动播放
       if (appStore.audioSynthesizerSide !== AUDIO_SYNTHESIZER_SIDE.client && audioFrame)
         childAudioPlayState.audioFrame = audioFrame
@@ -192,6 +195,7 @@ async function onRegenerate(questionUuid: string) {
         uuid: answerUuid,
         contentType: answerContentType,
         createTime: new Date().toLocaleString(),
+        thinkingContent: '',
         remark: '',
         audioUuid: '',
         audioUrl: '',
@@ -436,8 +440,9 @@ onDeactivated(() => {
                       :ai-model-platform="answer.aiModelPlatform" @delete="handleDelete(qaMessage.uuid, answer.uuid)"
                     />
                     <Message
-                      v-else :show-avatar="false" :date-time="answer.createTime" :text="answer.remark"
-                      type="text" :inversion="false" :regenerate="true" :error="answer.error" :loading="answer.loading"
+                      v-else :show-avatar="false" :date-time="answer.createTime"
+                      :thinking-content="answer.thinkingContent" :text="answer.remark" type="text" :inversion="false"
+                      :regenerate="true" :error="answer.error" :loading="answer.loading"
                       :ai-model-platform="answer.aiModelPlatform" @regenerate="onRegenerate(qaMessage.uuid)"
                       @delete="handleDelete(qaMessage.uuid, answer.uuid)"
                     />
@@ -456,7 +461,8 @@ onDeactivated(() => {
                   @delete="handleDelete(qaMessage.uuid, qaMessage.children[0].uuid)"
                 />
                 <Message
-                  v-else :date-time="qaMessage.children[0].createTime" :text="qaMessage.children[0].remark"
+                  v-else :date-time="qaMessage.children[0].createTime"
+                  :thinking-content="qaMessage.children[0].thinkingContent" :text="qaMessage.children[0].remark"
                   type="text" :inversion="qaMessage.children[0].inversion" :regenerate="true"
                   :error="qaMessage.children[0].error" :loading="qaMessage.children[0].loading"
                   :ai-model-platform="qaMessage.children[0].aiModelPlatform" @regenerate="onRegenerate(qaMessage.uuid)"

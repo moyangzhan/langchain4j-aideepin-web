@@ -42,6 +42,8 @@ interface AiModelInfo {
   enable: boolean
   isFree: boolean
   inputTypes: string
+  isReasoner: boolean
+  isThinkingClosable: boolean
 
   //for NSelector
   value: string

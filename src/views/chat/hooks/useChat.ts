@@ -23,8 +23,8 @@ export function useChat() {
     chatStore.unshiftChild(convUuid, questionUuid, childMessage)
   }
 
-  const appendChunk = (convUuid: string, answerUuid: string, chunk: string) => {
-    chatStore.appendChunk(convUuid, answerUuid, chunk)
+  const appendChunk = (convUuid: string, answerUuid: string, chunk: string, thinking = false) => {
+    chatStore.appendChunk(convUuid, answerUuid, chunk, thinking)
   }
 
   const updateMessageSomeFields = (convUuid: string, messageUuid: string, chat: Partial<Chat.ChatMessage>) => {

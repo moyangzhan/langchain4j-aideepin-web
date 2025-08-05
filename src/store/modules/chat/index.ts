@@ -217,15 +217,22 @@ export const useChatStore = defineStore('chat-store', {
         this.chats[chatIndex].data.find(item => item.uuid === userMessageUuid)?.children.push(childMessage)
     },
 
-    appendChunk(convUuid: string, answerUuid: string, chunk: string) {
+    // Append a chunk of text to an answer message
+    appendChunk(convUuid: string, answerUuid: string, chunk: string, thinking = false) {
       const chatIndex = this.chats.findIndex(item => item.uuid === convUuid)
       if (chatIndex !== -1 && this.chats.length) {
         const answer = findMessageFromConv(this.chats[chatIndex], answerUuid)
         if (answer) {
-          answer.remark = answer.remark + chunk
-          if (!answer.audioPlayState)
-            answer.audioPlayState = emptyAudioPlayState()
-          answer.audioPlayState.text = answer.remark
+          answer.thinking = thinking
+          if (thinking) {
+            answer.thinkingContent = answer.thinkingContent + chunk
+          } else {
+            answer.remark = answer.remark + chunk
+            answer.loading = true
+            if (!answer.audioPlayState)
+              answer.audioPlayState = emptyAudioPlayState()
+            answer.audioPlayState.text = answer.remark
+          }
         }
       }
     },

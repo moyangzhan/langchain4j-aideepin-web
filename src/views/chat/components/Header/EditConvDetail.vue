@@ -110,6 +110,31 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
         :autosize="{ minRows: 1, maxRows: 10 }"
       />
     </div>
+    <div>
+      <div class="font-bold">
+        深度思考
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <NIcon style="margin-top: 0.2rem">
+              <QuestionCircle16Regular />
+            </NIcon>
+          </template>
+          <span>当选择的模型支持深度思考时，启用或关闭该功能<br></span>
+          <span>注意：部分模型如deepseek-reasoner不支持关闭该功能</span>
+        </NTooltip>
+      </div>
+      <NRadioGroup
+        :value="tmpConv.isEnableThinking" name="isEnableThinkingRadio" class="flex flex-col space-y-2"
+        size="small" @update:value="(checked) => tmpConv.isEnableThinking = checked"
+      >
+        <NRadio :value="false">
+          关闭
+        </NRadio>
+        <NRadio :value="true">
+          启用
+        </NRadio>
+      </NRadioGroup>
+    </div>
     <div class="flex flex-col space-y-2">
       <div class="flex space-x-2 font-bold">
         服务与工具(MCP)
@@ -150,8 +175,8 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
         </NTooltip>
       </div>
       <NRadioGroup
-        :value="tmpConv.answerContentType" name="answerTypeRadio"
-        class="flex flex-col space-y-2" size="small" @update:value="(checked) => tmpConv.answerContentType = checked"
+        :value="tmpConv.answerContentType" name="answerTypeRadio" class="flex flex-col space-y-2"
+        size="small" @update:value="(checked) => tmpConv.answerContentType = checked"
       >
         <NRadio :value="1">
           自动

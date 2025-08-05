@@ -160,7 +160,20 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
     startCallback(chunk) {
       emit('sseStarted', chattingMsg.value.uuid)
     },
-    messageRecived: (chunk) => {
+    thinkingDataReceived: (chunk) => {
+      // 处理思考数据
+      const answer = chattingMsg.value.children[0]
+      for (let i = 0; i < chunk.length; i++) {
+        appendChunk(
+          props.conversationUuid,
+          answer.uuid,
+          chunk[i],
+          true, // thinking is true
+        )
+        emit('messageReceiving', chattingMsg.value.uuid)
+      }
+    },
+    messageReceived: (chunk) => {
       try {
         const answer = chattingMsg.value.children[0]
         for (let i = 0; i < chunk.length; i++) {
@@ -168,12 +181,12 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
             props.conversationUuid,
             answer.uuid,
             chunk[i],
+            false, // thinking is false
           )
           emit('messageReceiving', chattingMsg.value.uuid)
         }
         // 使用浏览器的语音合成功能朗读文本
         const answerContentType = chatStore.answerContentType(conv, userAudioUuid)
-        console.log(`answerContentType: ${answerContentType}, conv?.answerType: ${conv?.answerContentType}, userAudioUuid: ${userAudioUuid},conv?.isAutoplayAnswer: ${conv.isAutoplayAnswer}`)
         const ttsPartText = chunk.replace('\n', '')
         if (ttsPartText && appStore.audioSynthesizerSide === AUDIO_SYNTHESIZER_SIDE.client && answerContentType === CHAT_MESSAGE_CONTENT_TYPE.audio && conv.isAutoplayAnswer) {
           // settimeout是防止执行太快导致 AudioMessage 中的 watch 没有触发
@@ -185,7 +198,7 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
         console.error(error)
       }
     },
-    audioDataRecived(audioFrame) {
+    audioDataReceived(audioFrame) {
       // AudioMessage 监听audioFrame的变化并自动播放
       if (!conv.isAutoplayAnswer || !audioFrame) {
         console.log('AudioMessage audioFrame is empty or autoplay is disabled')
@@ -201,16 +214,16 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
       if (chunk.includes('[META]')) {
         const meta = chunk.replace('[META]', '')
         const metaData: Chat.MetaData = JSON.parse(meta)
-        updateMessageSomeFields(props.conversationUuid, chattingMsg.value.uuid, { ...metaData.question, loading: false })
-        updateMessageSomeFields(props.conversationUuid, answer.uuid, { ...metaData.answer, loading: false })
+        updateMessageSomeFields(props.conversationUuid, chattingMsg.value.uuid, { ...metaData.question, thinking: false, loading: false })
+        updateMessageSomeFields(props.conversationUuid, answer.uuid, { ...metaData.answer, thinking: false, loading: false })
         if (metaData.audioInfo) {
           answer.audioPlayState.audioUrl = metaData.audioInfo.url
           answer.audioDuration = metaData.audioInfo.duration
           answer.audioUuid = metaData.audioInfo.uuid
         }
       } else {
-        updateMessageSomeFields(props.conversationUuid, chattingMsg.value.uuid, { loading: false })
-        updateMessageSomeFields(props.conversationUuid, answer.uuid, { loading: false })
+        updateMessageSomeFields(props.conversationUuid, chattingMsg.value.uuid, { thinking: false, loading: false })
+        updateMessageSomeFields(props.conversationUuid, answer.uuid, { thinking: false, loading: false })
       }
       emit('messageComplelted', chattingMsg.value.uuid)
       isChatting.value = false
@@ -219,7 +232,7 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
       ms.warning(error)
       isChatting.value = false
       const question = messages.value[messages.value.length - 1]
-      updateMessageSomeFields(props.conversationUuid, question.children[0].uuid, { remark: `系统提示：${error}`, loading: false })
+      updateMessageSomeFields(props.conversationUuid, question.children[0].uuid, { remark: `系统提示：${error}`, thinking: false, loading: false })
     },
   })
 }
@@ -259,6 +272,7 @@ async function createChatTask(userAudioUuid = '', userAudioUrl = '', audioDurati
       uuid: questionUuid,
       contentType: userAudioUuid ? CHAT_MESSAGE_CONTENT_TYPE.audio : CHAT_MESSAGE_CONTENT_TYPE.text,
       createTime: new Date().toLocaleString(),
+      thinkingContent: '',
       remark: message,
       audioUuid: userAudioUuid,
       audioUrl: userAudioUrl,
@@ -267,12 +281,13 @@ async function createChatTask(userAudioUuid = '', userAudioUrl = '', audioDurati
         uuid: answerUuid,
         contentType: answerContentType, // 2: text, 3: audio
         createTime: new Date().toLocaleString(),
+        thinkingContent: '', // 思考过程
         remark: '',
         audioUuid: '',
         audioUrl: '',
         audioDuration: 0,
         children: [],
-        loading: true,
+        loading: false,
         inversion: false,
         error: false,
         aiModelPlatform: appStore.selectedLLM.modelPlatform,

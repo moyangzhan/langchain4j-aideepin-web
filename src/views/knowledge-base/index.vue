@@ -82,7 +82,11 @@ async function handleSubmit() {
         qaRecord.answer = ''
         kbStore.updateRecord(currKbUuid, qaRecord.uuid, qaRecord)
       },
-      messageRecived: (chunk) => {
+      thinkingDataReceived: (chunk) => {
+        // 处理思考数据
+        console.log('Thinking data received:', chunk)
+      },
+      messageReceived: (chunk) => {
         try {
           kbStore.appendChunk(
             currKbUuid,

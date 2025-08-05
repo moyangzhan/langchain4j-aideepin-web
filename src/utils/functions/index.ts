@@ -224,6 +224,7 @@ export function emptyConv(): Chat.Conversation {
     mcpIds: [],
     answerContentType: CHAT_MESSAGE_CONTENT_TYPE.auto, // 1: auto, 2: text, 3: audio
     isAutoplayAnswer: false, // 聊天时音频类型的响应内容是否自动播放
+    isEnableThinking: false, // 是否启用思考过程
   }
 }
 
@@ -231,6 +232,7 @@ export function emptyChatMessage(): Chat.ChatMessage {
   return {
     uuid: '',
     createTime: '',
+    thinkingContent: '',
     remark: '',
     audioUuid: '',
     audioUrl: '',
@@ -239,6 +241,7 @@ export function emptyChatMessage(): Chat.ChatMessage {
     children: [{ // for reply
       uuid: '',
       createTime: '',
+      thinkingContent: '',
       remark: '',
       audioUuid: '',
       audioUrl: '',

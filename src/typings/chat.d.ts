@@ -4,6 +4,7 @@ declare namespace Chat {
 		uuid: string | '',
 		contentType: number // 2: text, 3: audio
 		createTime: string
+		thinkingContent: string //思考过程
 		remark: string
 		audioUuid: string
 		audioUrl: string
@@ -16,6 +17,7 @@ declare namespace Chat {
 		//Frontend only
 		inversion?: boolean
 		error?: boolean
+		thinking?: boolean //是否正在思考
 		loading?: boolean
 		audioPlayState: AudioPlayState
 	}
@@ -49,6 +51,7 @@ declare namespace Chat {
 		mcpIds: string[]
 		answerContentType: number // 1: auto, 2: text, 3: audio
 		isAutoplayAnswer: boolean //聊天时音频类型的响应内容是否自动播放
+		isEnableThinking: boolean //是否启用思考过程
 	}
 
 	interface ConvWithMessages {

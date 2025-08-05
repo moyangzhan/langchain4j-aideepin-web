@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import { computed, h, ref } from 'vue'
-import { NButton, NDropdown, NEmpty, NIcon, NImage, NSpace, NSpin, useDialog } from 'naive-ui'
+import { NButton, NCollapse, NCollapseItem, NDropdown, NEmpty, NIcon, NImage, NSpace, NSpin, useDialog } from 'naive-ui'
 import type { ImageRenderToolbarProps } from 'naive-ui'
 import { Delete24Regular } from '@vicons/fluent'
 import { Reload } from '@vicons/ionicons5'
@@ -26,12 +26,16 @@ const token = ref<string>(authStore.token)
 
 interface Props {
   dateTime?: string
+  thinkingContent?: string
   text?: string
   imageUrls?: string[]
   inversion?: boolean
   regenerate?: boolean
   showAvatar?: boolean
   error?: boolean
+  // 思考中
+  thinking?: boolean
+  // 最终答案的加载中
   loading?: boolean
   type: string // text,text-image,image
 
@@ -147,8 +151,22 @@ function renderToolbarOut2(imageUrl: string) {
       <div class="flex items-start gap-1 mt-2" :class="[inversion ? 'flex-row-reverse' : 'flex-row']">
         <!-- 消息框侧边下拉选择列表 -->
         <template v-if="type === 'text' || type === 'text-image'">
+          <NCollapse v-if="thinkingContent" :default-expanded-names="['thinking', 'finalAnswer']">
+            <NCollapseItem title="深度思考" name="thinking">
+              <TextComponent
+                ref="textRef" :inversion="inversion" :error="error" :text="thinkingContent"
+                :loading="thinking" :as-raw-text="asRawText"
+              />
+            </NCollapseItem>
+            <NCollapseItem title="最终答案" name="finalAnswer">
+              <TextComponent
+                ref="textRef" :inversion="inversion" :error="error" :text="text" :loading="loading"
+                :as-raw-text="asRawText"
+              />
+            </NCollapseItem>
+          </NCollapse>
           <TextComponent
-            ref="textRef" :inversion="inversion" :error="error" :text="text" :loading="loading"
+            v-else ref="textRef" :inversion="inversion" :error="error" :text="text" :loading="loading"
             :as-raw-text="asRawText"
           />
           <div class="flex flex-col">

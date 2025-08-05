@@ -31,7 +31,7 @@ function convAdd<T = any>(params: { title: string; remark: string; aiSystemMessa
   })
 }
 
-function convEdit<T = any>(params: { uuid: string; title: string; aiSystemMessage: string }) {
+function convEdit<T = any>(params: { uuid: string; title?: string; aiSystemMessage: string }) {
   return post<T>({
     url: `/conversation/edit/${params.uuid}`,
     data: {
@@ -45,6 +45,15 @@ function convToggleUsingContext<T = any>(uuid: string, usingContext: boolean) {
     url: `/conversation/edit/${uuid}`,
     data: {
       understandContextEnable: usingContext,
+    },
+  })
+}
+
+function convToggleThinking<T = any>(uuid: string, isEnableThinking: boolean) {
+  return post<T>({
+    url: `/conversation/edit/${uuid}`,
+    data: {
+      isEnableThinking,
     },
   })
 }
@@ -89,8 +98,9 @@ function commonSseProcess(
     options: any
     signal?: AbortSignal
     startCallback: (chunk: string) => void
-    messageRecived: (chunk: string, eventName: string) => void
-    audioDataRecived?: (chunk: string) => void
+    thinkingDataReceived: (chunk: string) => void
+    messageReceived: (chunk: string, eventName: string) => void
+    audioDataReceived?: (chunk: string) => void
     doneCallback: (chunk: string) => void
     errorCallback: (error: string) => void
   },
@@ -132,14 +142,17 @@ function commonSseProcess(
         params.doneCallback(eventMessage.data)
         return
       } else if (eventMessage.event === '[AUDIO]') {
-        params.audioDataRecived && params.audioDataRecived(eventMessage.data)
+        params.audioDataReceived && params.audioDataReceived(eventMessage.data)
+        return
+      } else if (eventMessage.event === '[THINKING]') {
+        params.thinkingDataReceived && params.thinkingDataReceived(eventMessage.data)
         return
       }
       if (eventMessage.data.indexOf('-_wrap_-') === 0)
         eventMessage.data = eventMessage.data.replace('-_wrap_-', '\n')
 
       // 会自动处理后端返回内容的首个空格，需在后端的返回内容前多加个空格，相关源码：https://github.com/Azure/fetch-event-source/blob/45ac3cfffd30b05b79fbf95c21e67d4ef59aa56a/src/parse.ts#L129-L133
-      params.messageRecived(eventMessage.data, eventMessage.event ? eventMessage.event : '')
+      params.messageReceived(eventMessage.data, eventMessage.event ? eventMessage.event : '')
     },
     onerror(error) {
       console.log(`sse error:${error}`)
@@ -154,8 +167,9 @@ function sseProcess(params: {
   options: { prompt?: string; conversationUuid?: string; parentMessageId?: string; regenerateQuestionUuid?: string; modelName?: string; imageUrls?: string[]; audioUuid?: string; audioDuration?: number }
   signal?: AbortSignal
   startCallback: (chunk: string) => void
-  messageRecived: (chunk: string, eventName?: string) => void
-  audioDataRecived?: (pcmPart: any) => void
+  messageReceived: (chunk: string, eventName?: string) => void
+  thinkingDataReceived: (chunk: string) => void
+  audioDataReceived?: (pcmPart: any) => void
   doneCallback: (chunk: string) => void
   errorCallback: (error: string) => void
 }) {
@@ -517,7 +531,8 @@ function knowledgeBaseQaSseAsk(params: {
   options: { qaRecordUuid: string }
   signal?: AbortSignal
   startCallback: (chunk: string) => void
-  messageRecived: (chunk: string, eventName?: string) => void
+  messageReceived: (chunk: string, eventName?: string) => void
+  thinkingDataReceived: (chunk: string) => void
   doneCallback: (chunk: string) => void
   errorCallback: (error: string) => void
 }) {
@@ -577,7 +592,8 @@ function aiSearchProcess(params: {
   options: { searchText: string; engineName: string; modelName: string; briefSearch: boolean }
   signal: AbortSignal
   startCallback: (chunk: string) => void
-  messageRecived: (chunk: string, eventName?: string) => void
+  messageReceived: (chunk: string, eventName?: string) => void
+  thinkingDataReceived: (chunk: string) => void
   doneCallback: (chunk: string) => void
   errorCallback: (error: string) => void
 }) {
@@ -645,7 +661,8 @@ function workflowRun(params: {
   options: { uuid: string; inputs: Workflow.UserInput[] }
   signal?: AbortSignal
   startCallback: (chunk: string) => void
-  messageRecived: (chunk: string, eventName: string) => void
+  messageReceived: (chunk: string, eventName: string) => void
+  thinkingDataReceived: (chunk: string) => void
   doneCallback: (chunk: string) => void
   errorCallback: (error: string) => void
 }) {
@@ -748,6 +765,7 @@ export default {
   convAddByPreset,
   convEdit,
   convToggleUsingContext,
+  convToggleThinking,
   convDel,
   searchPresetConvs,
   listConvPresetRels,

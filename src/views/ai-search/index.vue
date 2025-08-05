@@ -77,7 +77,7 @@ async function handleSubmit() {
         tmpRecord.answer = ''
         aiSearchStore.updateRecord(tmpRecord)
       },
-      messageRecived: (chunk, eventName) => {
+      messageReceived: (chunk, eventName) => {
         console.log(chunk)
 
         if (eventName === '[SOURCE_LINKS]') {
@@ -93,6 +93,10 @@ async function handleSubmit() {
           )
         }
         scrollToBottomIfAtBottom()
+      },
+      thinkingDataReceived: (chunk) => {
+        // Handle thinking data if needed
+        console.log('Thinking data received:', chunk)
       },
       doneCallback: (chunk) => {
         if (chunk.includes('[META]')) {

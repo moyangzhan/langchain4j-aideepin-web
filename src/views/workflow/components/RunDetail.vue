@@ -141,7 +141,11 @@ async function run() {
           [wfRuntime],
         )
       },
-      messageRecived: (chunk, event) => {
+      thinkingDataReceived: (chunk) => {
+        // 处理思考数据
+        console.log('Thinking data received:', chunk)
+      },
+      messageReceived: (chunk, event) => {
         const eventName = event || ''
         try {
           if (eventName.includes('[NODE_RUN_')) {
