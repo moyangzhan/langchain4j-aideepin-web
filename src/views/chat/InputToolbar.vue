@@ -2,8 +2,8 @@
 import { computed, ref, watch } from 'vue'
 import { NButton, NCheckbox, NCheckboxGroup, NFlex, NList, NListItem, NModal, NPopover, NSwitch, NUpload, useMessage } from 'naive-ui'
 import type { UploadFileInfo } from 'naive-ui'
+import ConvKnowledgeSelector from './ConvKnowledgeSelector.vue'
 import { LLMSelector, SvgIcon } from '@/components/common'
-import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAppStore, useAuthStore, useChatStore, useMcpStore } from '@/store'
 import { defaultConv } from '@/store/modules/chat/helper'
 import { router } from '@/router'
@@ -19,7 +19,6 @@ const appStore = useAppStore()
 const authStore = useAuthStore()
 const chatStore = useChatStore()
 const mcpStore = useMcpStore()
-const { isMobile } = useBasicLayout()
 const token = ref<string>(authStore.token)
 const ms = useMessage()
 const uploadedFileInfoList = ref<UploadFileInfo[]>([])
@@ -30,7 +29,10 @@ const canUploadImage = ref<boolean>(false)
 const isReasoner = ref<boolean>(false)
 const isThinkingClosable = ref<boolean>(false)
 const mcpModalShow = ref<boolean>(false)
+const knowledgeModalShow = ref<boolean>(false)
 const tmpMcpIds = ref<string[]>([])
+const tmpConvKbs = ref<Chat.ConvKnowledge[]>([])
+const tmpConvKbIds = ref<string[]>([])
 
 async function beforeUpload(data: { file: UploadFileInfo; fileList: UploadFileInfo[] }) {
   const file = data.file.file
@@ -79,10 +81,20 @@ function handleMcpModalShow() {
   tmpMcpIds.value = [...currConv.value.mcpIds]
 }
 
+function handleKnowledgeModalShow() {
+  knowledgeModalShow.value = true
+  tmpConvKbs.value = [...currConv.value.convKnowledgeList]
+  tmpConvKbIds.value = currConv.value.convKnowledgeList.map(kb => kb.id)
+}
+
+function handleKnowledgeSave() {
+  knowledgeModalShow.value = false
+}
+
 async function handleSaveMcps() {
   try {
     currConv.value.mcpIds = tmpMcpIds.value
-    await api.convEdit(currConv.value)
+    await api.convEdit(currConv.value.uuid, { mcpIds: currConv.value.mcpIds })
     chatStore.updateConv(currConv.value.uuid, currConv.value)
   } catch (error) {
     console.error('handleSaveMcps error', error)
@@ -201,6 +213,16 @@ watch(
           </NPopover>
         </NUpload>
       </div>
+      <div
+        class="overflow-hidden rounded border hover:border-green-600 p-1 h-8 cursor-pointer"
+        @click="handleKnowledgeModalShow"
+      >
+        <span class="text-xs text-green-600">知识库：</span>
+        <template v-for="knolwedge in currConv.convKnowledgeList" :key="knolwedge.uuid">
+          <span class="text-xs mr-1">{{ knolwedge.title }}</span>
+        </template>
+        <span v-if="currConv.convKnowledgeList.length === 0" class="text-xs mr-1">无</span>
+      </div>
       <div class="flex-1 overflow-hidden rounded border hover:border-green-600 p-1 h-8">
         <span class="text-xs cursor-pointer text-green-600" @click="handleMcpModalShow">工具：</span>
         <template v-for="userMcp in mcpStore.myUserMcpList" :key="userMcp.uuid">
@@ -221,6 +243,12 @@ watch(
         </div>
       </NListItem>
     </NList>
+    <NModal
+      v-model:show="knowledgeModalShow" display-directive="show" style="width: 90%; max-width: 800px"
+      preset="card" title="配置会话使用的知识库"
+    >
+      <ConvKnowledgeSelector :tmp-save="false" :conversation="currConv" @submitted="handleKnowledgeSave" />
+    </NModal>
     <NModal v-model:show="mcpModalShow" style="width: 90%; max-width: 640px" preset="card" title="配置会话使用的服务与工具">
       <NCheckboxGroup v-model:value="tmpMcpIds" class="my-2 flex flex-wrap space-x-2">
         <NCheckbox

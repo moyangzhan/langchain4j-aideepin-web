@@ -39,6 +39,17 @@ declare namespace Chat {
 		presetConvId: string
 	}
 
+	//会话关联的知识库信息
+	interface ConvKnowledge {
+		id: string
+		uuid: string
+		title: string
+		isMine: boolean
+		isPublic: boolean
+		kbInfo: KnowledgeBase.Info
+		isEnable: boolean //该知识库是否可用
+	}
+
 	interface Conversation {
 		title: string
 		uuid: string
@@ -49,6 +60,8 @@ declare namespace Chat {
 		loadedFirstPageMsg: boolean
 		minMsgUuid?: string | ''
 		mcpIds: string[]
+		kbIds: string[] // 关联的知识库ID
+		convKnowledgeList: ConvKnowledge[] //关联的知识库包装信息
 		answerContentType: number // 1: auto, 2: text, 3: audio
 		isAutoplayAnswer: boolean //聊天时音频类型的响应内容是否自动播放
 		isEnableThinking: boolean //是否启用思考过程

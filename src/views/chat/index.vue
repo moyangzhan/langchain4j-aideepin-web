@@ -102,6 +102,7 @@ const fetchChatAPIOnce = async (regenerateQuestionUuid: string, childAudioPlaySt
     },
     thinkingDataReceived: (chunk) => {
       // 处理思考数据
+      console.log('Thinking data received:', chunk)
     },
     messageReceived: (chunk) => {
       const question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)

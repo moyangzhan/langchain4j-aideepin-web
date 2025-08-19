@@ -141,9 +141,7 @@ const createColumns = (): DataTableColumns<KnowledgeBase.Info> => {
 const columns = createColumns()
 
 async function onHandlePageChange(currentPage: number) {
-  loading.value = true
   search(currentPage)
-  loading.value = false
 }
 
 async function onKeyUpSearch(event: KeyboardEvent) {
@@ -154,10 +152,21 @@ async function onKeyUpSearch(event: KeyboardEvent) {
 }
 
 async function search(currentPage: number) {
-  const resp = await api.knowledgeBaseSearchMine<KnowledgeBase.InfoListResp>(searchValue.value, currentPage, paginationReactive.pageSize)
-  infoList.value = resp.data.records
-  paginationReactive.page = currentPage
-  paginationReactive.itemCount = resp.data.total
+  if (loading.value) {
+    ms.warning('正在加载，请稍候', {
+      duration: 2000,
+    })
+    return
+  }
+  loading.value = true
+  try {
+    const resp = await api.knowledgeBaseSearchMine<KnowledgeBase.InfoListResp>(searchValue.value, currentPage, paginationReactive.pageSize)
+    infoList.value = resp.data.records
+    paginationReactive.page = currentPage
+    paginationReactive.itemCount = resp.data.total
+  } finally {
+    loading.value = false
+  }
 }
 
 async function saveOrUpdateKb() {
@@ -310,7 +319,10 @@ watch(
                 <div>
                   Token计数器
                 </div>
-                <NSelect :value="tmpKb.ingestTokenEstimator" :options="TOKEN_ESTIMATOR" :on-update:value="onTokenEstimatorChange" />
+                <NSelect
+                  :value="tmpKb.ingestTokenEstimator" :options="TOKEN_ESTIMATOR"
+                  :on-update:value="onTokenEstimatorChange"
+                />
               </div>
             </div>
           </NCollapseItem>

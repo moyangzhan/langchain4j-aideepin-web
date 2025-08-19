@@ -162,6 +162,7 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
     },
     thinkingDataReceived: (chunk) => {
       // 处理思考数据
+      console.log('Thinking data received:', chunk)
       const answer = chattingMsg.value.children[0]
       for (let i = 0; i < chunk.length; i++) {
         appendChunk(

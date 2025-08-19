@@ -31,9 +31,9 @@ function convAdd<T = any>(params: { title: string; remark: string; aiSystemMessa
   })
 }
 
-function convEdit<T = any>(params: { uuid: string; title?: string; aiSystemMessage: string }) {
+function convEdit<T = any>(uuid: string, params: Partial<Chat.Conversation>) {
   return post<T>({
-    url: `/conversation/edit/${params.uuid}`,
+    url: `/conversation/edit/${uuid}`,
     data: {
       ...params,
     },
