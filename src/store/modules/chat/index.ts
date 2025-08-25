@@ -58,6 +58,31 @@ export const useChatStore = defineStore('chat-store', {
         return CHAT_MESSAGE_CONTENT_TYPE.text
       }
     },
+
+    getReferences(state: Chat.ChatState) {
+      return (msgUuid: string) => {
+        const references = state.msgToEmbeddingRef.get(msgUuid)
+        if (references)
+          return references
+        return []
+      }
+    },
+    getGraphRef(state: Chat.ChatState) {
+      return (msgUuid: string) => {
+        const graphRef = state.msgToGraphRef.get(msgUuid)
+        if (graphRef)
+          return graphRef
+        return null
+      }
+    },
+    isLoadingGraphRef(state: Chat.ChatState) {
+      return (msgUuid: string) => {
+        const loading = state.loadingGraphRef.get(msgUuid)
+        if (loading)
+          return loading
+        return false
+      }
+    },
   },
 
   actions: {
@@ -330,6 +355,18 @@ export const useChatStore = defineStore('chat-store', {
             childMessage.audioPlayState = audioPlayState
         }
       }
+    },
+
+    setMsgReferences(msgUuid: string, references: KnowledgeBase.QaRecordReference[]) {
+      this.msgToEmbeddingRef.set(msgUuid, !references ? [] : references)
+    },
+
+    setMsgGraphRef(msgUuid: string, graphRef: KnowledgeBase.QaRecordGraphRef) {
+      this.msgToGraphRef.set(msgUuid, graphRef)
+    },
+
+    setLoadingGraphRef(qaRecordUuid: string, loading: boolean) {
+      this.loadingGraphRef.set(qaRecordUuid, loading)
     },
 
   },

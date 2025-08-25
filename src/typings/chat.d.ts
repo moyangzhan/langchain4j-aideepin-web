@@ -13,6 +13,8 @@ declare namespace Chat {
 		children: ChatMessage[] //AI回复的消息
 		aiModelPlatform?: string
 		attachmentUrls: string[]
+		isRefEmbedding: boolean //是否是引用资料
+		isRefGraph: boolean //是否是引用图谱
 
 		//Frontend only
 		inversion?: boolean
@@ -79,6 +81,9 @@ declare namespace Chat {
 		chats: ConvWithMessages[]
 		loadingMsgs: Set<string>
 		presetConvs: ConversationPreset[]
+		msgToEmbeddingRef: Map<string, KnowledgeBase.QaRecordReference[]>
+    msgToGraphRef: Map<string, KnowledgeBase.QaRecordGraphRef>
+    loadingGraphRef: Map<string, boolean>
 	}
 
 	interface ConversationRequest {

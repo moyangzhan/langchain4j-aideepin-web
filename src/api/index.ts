@@ -433,6 +433,18 @@ function messageTextByAudio<T = any>(audioUuid: string) {
   })
 }
 
+function messageEmbeddingRef<T = any>(msgUuid: string) {
+  return get<T>({
+    url: `/conversation/message/embedding-ref/${msgUuid}`,
+  })
+}
+
+function messageGraphRef<T = any>(msgUuid: string) {
+  return get<T>({
+    url: `/conversation/message/graph-ref/${msgUuid}`,
+  })
+}
+
 function knowledgeBaseSearchMine<T>(keyword: string, currentPage: number, pageSize: number, includeOthersPublic?: boolean) {
   const search = keyword === undefined ? '' : `keyword=${keyword}&`
   const includePublic = includeOthersPublic ? '&includeOthersPublic=true' : ''
@@ -521,6 +533,12 @@ function knowledgeBaseGraph<T = any>(kbItemUuid: string, maxVertextId: number, m
   })
 }
 
+function knowledgeBaseEmbeddingRef<T = any>(recordUuid: string) {
+  return get<T>({
+    url: `/knowledge-base/qa/embedding-ref/${recordUuid}`,
+  })
+}
+
 function knowledgeBaseGraphRef<T = any>(recordUuid: string) {
   return get<T>({
     url: `/knowledge-base/qa/graph-ref/${recordUuid}`,
@@ -561,12 +579,6 @@ function knowledgeBaseQaRecordDel<T = any>(uuid: string) {
 function knowledgeBaseQaRecordClear<T = any>() {
   return post<T>({
     url: '/knowledge-base/qa/clear',
-  })
-}
-
-function knowledgeBaseRecordReference<T = any>(recordUuid: string) {
-  return get<T>({
-    url: `/knowledge-base/qa/reference/${recordUuid}`,
   })
 }
 
@@ -801,6 +813,8 @@ export default {
   drawCommentAdd,
   messageDel,
   messageTextByAudio,
+  messageEmbeddingRef,
+  messageGraphRef,
   knowledgeBaseInfo,
   knowledgeBaseStar,
   knowledgeBaseSearchMine,
@@ -819,7 +833,7 @@ export default {
   knowledgeBaseQaRecordAdd,
   knowledgeBaseQaRecordDel,
   knowledgeBaseQaRecordClear,
-  knowledgeBaseRecordReference,
+  knowledgeBaseEmbeddingRef,
   knowledgeBaseGraphRef,
   knowledgeBaseStarListMine,
   loadSearchEngines,

@@ -283,6 +283,7 @@ watch(() => props.audioPlayState.audioFrame, (audioFrame) => {
           </NDropdown>
         </div>
       </div>
+      <slot /><!-- 消息框底部插槽 -->
     </div>
   </div>
 </template>

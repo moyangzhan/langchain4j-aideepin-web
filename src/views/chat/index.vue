@@ -2,7 +2,7 @@
 import type { Ref } from 'vue'
 import { computed, nextTick, onActivated, onDeactivated, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { NButton, NIcon, NTabPane, NTabs, useDialog, useLoadingBar, useMessage } from 'naive-ui'
+import { NButton, NCollapse, NCollapseItem, NIcon, NModal, NTabPane, NTabs, useDialog, useLoadingBar, useMessage } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { v4 as uuidv4 } from 'uuid'
 import { AudioMessage, Message } from './components'
@@ -13,6 +13,7 @@ import HeaderComponent from './components/Header/index.vue'
 import PcHeader from './components/Header/pc.vue'
 import InputToolbar from './InputToolbar.vue'
 import InputEditor from './InputEditor.vue'
+import RefGraph from './RefGraph.vue'
 import LoginTip from '@/views/user/LoginTip.vue'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAppStore, useAuthStore, useChatStore } from '@/store'
@@ -47,7 +48,13 @@ const currConv = computed(() => chatStore.getCurConv || defaultConv())
 const imageUuids = ref<string[]>([])
 const isChatting = ref<boolean>(false)
 const loadingMsgs = ref<boolean>(false)
+const loaddingEmbeddingRef = ref<boolean>(false)
 const inputRef = ref<Ref | null>(null)
+const showRefEmbeddingModal = ref<boolean>(false)
+const showRefEmbeddingMsgUuid = ref<string>('')
+const embeddingRefs = ref<KnowledgeBase.QaRecordReference[]>([])
+const showRefGraphModal = ref<boolean>(false)
+const showRefGraphMsgUuid = ref<string>('')
 
 let prevScrollTop: number
 useCopyCode()
@@ -57,6 +64,12 @@ messages.value.forEach((item: { loading?: boolean; uuid: string }) => {
   if (item.loading)
     updateMessageSomeFields(curConvUuid, item.uuid, { loading: false })
 })
+
+function sseStarted() {
+  nextTick(() => {
+    scrollToBottom()
+  })
+}
 
 function chatMessageReceiving(questionUuid: string) {
   nextTick(() => {
@@ -76,6 +89,31 @@ function handleStop() {
     isChatting.value = false
   }
   inputEditorRef.value?.handleStop()
+}
+
+// 打开引用
+async function handleEmbeddingRefClick(qaRecordUuid: string) {
+  showRefEmbeddingModal.value = true
+  showRefEmbeddingMsgUuid.value = qaRecordUuid
+  embeddingRefs.value = []
+  embeddingRefs.value = chatStore.getReferences(qaRecordUuid)
+  if (embeddingRefs.value.length === 0) {
+    loaddingEmbeddingRef.value = true
+    try {
+      const { data } = await api.messageEmbeddingRef(qaRecordUuid)
+      chatStore.setMsgReferences(qaRecordUuid, data)
+
+      // 显示最后一次点击的引用
+      embeddingRefs.value = chatStore.getReferences(showRefEmbeddingMsgUuid.value)
+    } finally {
+      loaddingEmbeddingRef.value = false
+    }
+  }
+}
+
+async function handleGraphClick(msgUuid: string) {
+  showRefGraphModal.value = true
+  showRefGraphMsgUuid.value = msgUuid
 }
 
 const fetchChatAPIOnce = async (regenerateQuestionUuid: string, childAudioPlayState: AudioPlayState) => {
@@ -206,6 +244,8 @@ async function onRegenerate(questionUuid: string) {
         error: false,
         loading: true,
         attachmentUrls: [],
+        isRefEmbedding: false,
+        isRefGraph: false,
         audioPlayState,
       },
     )
@@ -439,14 +479,44 @@ onDeactivated(() => {
                       :duration="answer.audioDuration" :inversion="false" :message-uuid="answer.uuid"
                       :date-time="answer.createTime" :audio-play-state="answer.audioPlayState" :loading="answer.loading"
                       :ai-model-platform="answer.aiModelPlatform" @delete="handleDelete(qaMessage.uuid, answer.uuid)"
-                    />
+                    >
+                      <div class="flex items-center justify-end space-x-2 mt-2">
+                        <NButton
+                          v-if="!!answer && !answer.loading && answer.isRefEmbedding" size="tiny" text type="primary"
+                          @click="handleEmbeddingRefClick(answer.uuid)"
+                        >
+                          引用
+                        </NButton>
+                        <NButton
+                          v-if="!!answer && !answer.loading && answer.isRefGraph" size="tiny" text type="primary"
+                          @click="handleGraphClick(answer.uuid)"
+                        >
+                          图谱
+                        </NButton>
+                      </div>
+                    </AudioMessage>
                     <Message
                       v-else :show-avatar="false" :date-time="answer.createTime"
                       :thinking-content="answer.thinkingContent" :text="answer.remark" type="text" :inversion="false"
                       :regenerate="true" :error="answer.error" :loading="answer.loading"
                       :ai-model-platform="answer.aiModelPlatform" @regenerate="onRegenerate(qaMessage.uuid)"
                       @delete="handleDelete(qaMessage.uuid, answer.uuid)"
-                    />
+                    >
+                      <div class="flex items-center justify-end space-x-2 mt-2">
+                        <NButton
+                          v-if="!!answer && !answer.loading && answer.isRefEmbedding" size="tiny" text type="primary"
+                          @click="handleEmbeddingRefClick(answer.uuid)"
+                        >
+                          引用
+                        </NButton>
+                        <NButton
+                          v-if="!!answer && !answer.loading && qaMessage.isRefGraph" size="tiny" text type="primary"
+                          @click="handleGraphClick(answer.uuid)"
+                        >
+                          图谱
+                        </NButton>
+                      </div>
+                    </Message>
                   </NTabPane>
                 </NTabs>
               </template>
@@ -460,7 +530,22 @@ onDeactivated(() => {
                   :audio-play-state="qaMessage.children[0].audioPlayState" :loading="qaMessage.children[0].loading"
                   :ai-model-platform="qaMessage.children[0].aiModelPlatform"
                   @delete="handleDelete(qaMessage.uuid, qaMessage.children[0].uuid)"
-                />
+                >
+                  <div class="flex items-center justify-end space-x-2 mt-2">
+                    <NButton
+                      v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefEmbedding" size="tiny" text type="primary"
+                      @click="handleEmbeddingRefClick(qaMessage.children[0].uuid)"
+                    >
+                      引用
+                    </NButton>
+                    <NButton
+                      v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefGraph" size="tiny" text type="primary"
+                      @click="handleGraphClick(qaMessage.children[0].uuid)"
+                    >
+                      图谱
+                    </NButton>
+                  </div>
+                </AudioMessage>
                 <Message
                   v-else :date-time="qaMessage.children[0].createTime"
                   :thinking-content="qaMessage.children[0].thinkingContent" :text="qaMessage.children[0].remark"
@@ -468,7 +553,22 @@ onDeactivated(() => {
                   :error="qaMessage.children[0].error" :loading="qaMessage.children[0].loading"
                   :ai-model-platform="qaMessage.children[0].aiModelPlatform" @regenerate="onRegenerate(qaMessage.uuid)"
                   @delete="handleDelete(qaMessage.uuid, qaMessage.children[0].uuid)"
-                />
+                >
+                  <div class="flex items-center space-x-4 mt-2">
+                    <NButton
+                      v-if="!qaMessage.children[0].loading && qaMessage.children[0].isRefEmbedding" size="tiny" text type="primary"
+                      @click="handleEmbeddingRefClick(qaMessage.children[0].uuid)"
+                    >
+                      引用
+                    </NButton>
+                    <NButton
+                      v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefGraph" size="tiny" text type="primary"
+                      @click="handleGraphClick(qaMessage.children[0].uuid)"
+                    >
+                      图谱
+                    </NButton>
+                  </div>
+                </Message>
               </template>
 
               <!-- LLM回复 end -->
@@ -489,12 +589,34 @@ onDeactivated(() => {
       <div class="w-full max-w-screen-xl m-auto border-t">
         <InputToolbar @images-change="imagesChange" />
         <InputEditor
-          ref="inputEditorRef" :conversation-uuid="curConvUuid" :image-uuids="imageUuids"
+          ref="inputEditorRef" :conversation-uuid="curConvUuid" :image-uuids="imageUuids" @sse-started="sseStarted"
           @message-receiving="chatMessageReceiving" @message-complelted="messageComplelted"
           @is-chatting="(chatting) => isChatting = chatting"
         />
       </div>
     </footer>
+
+    <NModal v-model:show="showRefEmbeddingModal" style="max-width: 80%;" preset="card" title="引用资料">
+      <div v-show="embeddingRefs.length === 0" class="flex items-center justify-center h-64">
+        <span v-show="!loaddingEmbeddingRef">无数据</span>
+        <SvgIcon v-show="loaddingEmbeddingRef" icon="line-md:loading-loop" class="text-2xl text-green-800 w-12 h-12" />
+      </div>
+      <NCollapse v-show="embeddingRefs.length > 0" :default-expanded-names="['refer_0']">
+        <NCollapseItem
+          v-for="(reference, idx) of embeddingRefs" :key="reference.id" :title="`引用${idx + 1}`"
+          :name="`refer_${idx}`"
+        >
+          {{ reference.text }}
+        </NCollapseItem>
+      </NCollapse>
+    </NModal>
+
+    <NModal
+      v-model:show="showRefGraphModal" display-directive="show" style="max-width: 80%;" preset="card"
+      title="引用图谱"
+    >
+      <RefGraph :msg-uuid="showRefGraphMsgUuid" />
+    </NModal>
   </div>
 </template>
 <!-- <style scoped lang="less">

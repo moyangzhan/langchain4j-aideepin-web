@@ -220,7 +220,7 @@ async function handleReferenceClick(qaRecordUuid: string) {
   references.value = []
   references.value = kbStore.getReferences(qaRecordUuid)
   if (references.value.length === 0) {
-    const { data } = await api.knowledgeBaseRecordReference(qaRecordUuid)
+    const { data } = await api.knowledgeBaseEmbeddingRef(qaRecordUuid)
     kbStore.setQaRecordReferences(qaRecordUuid, data)
 
     // 显示最后一次点击的引用
