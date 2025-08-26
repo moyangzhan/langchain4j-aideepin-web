@@ -252,11 +252,15 @@ export function emptyChatMessage(): Chat.ChatMessage {
       children: [],
       aiModelPlatform: '',
       attachmentUrls: [],
+      isRefEmbedding: false,
+      isRefGraph: false,
       audioPlayState: emptyAudioPlayState(),
       contentType: CHAT_MESSAGE_CONTENT_TYPE.text, // 2: text, 3: audio
     }], // for reply
     aiModelPlatform: '',
     attachmentUrls: [],
+    isRefEmbedding: false,
+    isRefGraph: false,
     audioPlayState: emptyAudioPlayState(),
     contentType: CHAT_MESSAGE_CONTENT_TYPE.text, // 2: text, 3: audio
   }
