@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { computed, h, ref } from 'vue'
+import { computed, h, ref, watch } from 'vue'
 import { NButton, NCollapse, NCollapseItem, NDropdown, NEmpty, NIcon, NImage, NSpace, NSpin, useDialog } from 'naive-ui'
 import type { ImageRenderToolbarProps } from 'naive-ui'
 import { Delete24Regular } from '@vicons/fluent'
@@ -58,6 +58,8 @@ const asRawText = ref(props.inversion)
 
 const messageRef = ref<HTMLElement>()
 
+const expandedNames = ref<string[]>(['finalAnswer'])
+
 const options = computed(() => {
   const common = [
     {
@@ -82,6 +84,15 @@ const options = computed(() => {
 
   return common
 })
+
+function itemHeadClick(data: { name: string | number; expanded: boolean; event: MouseEvent }) {
+  const idx = expandedNames.value.findIndex(name => name === data.name.toString())
+  if (idx === -1 && data.expanded)
+    expandedNames.value.push(data.name.toString())
+
+  if (idx !== -1 && !data.expanded)
+    expandedNames.value.splice(idx, 1)
+}
 
 function handleSelect(key: 'copyText' | 'delete' | 'toggleRenderType') {
   switch (key) {
@@ -133,6 +144,13 @@ function renderToolbarOut2(imageUrl: string) {
     ]
   }
 }
+
+watch(() => props.thinking, (thinking) => {
+  if (thinking)
+    expandedNames.value = ['thinking']
+  else
+    expandedNames.value = ['thinking', 'finalAnswer']
+})
 </script>
 
 <template>
@@ -151,7 +169,10 @@ function renderToolbarOut2(imageUrl: string) {
       <div class="flex items-start gap-1 mt-2" :class="[inversion ? 'flex-row-reverse' : 'flex-row']">
         <!-- 消息框侧边下拉选择列表 -->
         <template v-if="type === 'text' || type === 'text-image'">
-          <NCollapse v-if="thinkingContent" :default-expanded-names="['thinking', 'finalAnswer']">
+          <NCollapse
+            v-if="thinkingContent" :default-expanded-names="['finalAnswer']" :expanded-names="expandedNames"
+            @item-header-click="itemHeadClick"
+          >
             <NCollapseItem title="深度思考" name="thinking">
               <TextComponent
                 ref="textRef" :inversion="inversion" :error="error" :text="thinkingContent"

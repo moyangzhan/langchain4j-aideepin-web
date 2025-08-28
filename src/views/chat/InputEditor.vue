@@ -160,6 +160,11 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
     startCallback(chunk) {
       emit('sseStarted', chattingMsg.value.uuid)
     },
+    stateChanged: (state) => {
+      console.log('State changed:', state)
+      if (state)
+        chattingMsg.value.state = new Map(Object.entries(JSON.parse(state)))
+    },
     thinkingDataReceived: (chunk) => {
       // 处理思考数据
       console.log('Thinking data received:', chunk)
@@ -173,6 +178,8 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
         )
         emit('messageReceiving', chattingMsg.value.uuid)
       }
+      // 推理阶段无需显示状态
+      chattingMsg.value.state = new Map<string, string>()
     },
     messageReceived: (chunk) => {
       try {
@@ -198,6 +205,8 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
       } catch (error) {
         console.error(error)
       }
+      // 回复阶段无需显示状态
+      chattingMsg.value.state = new Map<string, string>()
     },
     audioDataReceived(audioFrame) {
       // AudioMessage 监听audioFrame的变化并自动播放
@@ -209,6 +218,9 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
       setTimeout(() => {
         chattingMsg.value.children[0].audioPlayState.audioFrame = audioFrame
       }, 0)
+
+      // 回复阶段无需显示状态
+      chattingMsg.value.state = new Map<string, string>()
     },
     doneCallback: (chunk) => {
       const answer = chattingMsg.value.children[0]
@@ -228,12 +240,14 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
       }
       emit('messageComplelted', chattingMsg.value.uuid)
       isChatting.value = false
+      chattingMsg.value.state = new Map<string, string>()
     },
     errorCallback: (error) => {
       ms.warning(error)
       isChatting.value = false
       const question = messages.value[messages.value.length - 1]
       updateMessageSomeFields(props.conversationUuid, question.children[0].uuid, { remark: `系统提示：${error}`, thinking: false, loading: false })
+      chattingMsg.value.state = new Map<string, string>()
     },
   })
 }

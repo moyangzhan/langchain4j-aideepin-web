@@ -22,6 +22,7 @@ declare namespace Chat {
 		thinking?: boolean //是否正在思考
 		loading?: boolean
 		audioPlayState: AudioPlayState
+		state?: Map<string, string> //消息状态描述
 	}
 
 	interface ConversationPreset {

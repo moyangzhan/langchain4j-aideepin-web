@@ -101,6 +101,7 @@ function commonSseProcess(
     thinkingDataReceived: (chunk: string) => void
     messageReceived: (chunk: string, eventName: string) => void
     audioDataReceived?: (chunk: string) => void
+    stateChanged?: (state: string) => void
     doneCallback: (chunk: string) => void
     errorCallback: (error: string) => void
   },
@@ -147,6 +148,9 @@ function commonSseProcess(
       } else if (eventMessage.event === '[THINKING]') {
         params.thinkingDataReceived && params.thinkingDataReceived(eventMessage.data)
         return
+      } else if (eventMessage.event === '[STATE_CHANGED]') {
+        params.stateChanged && params.stateChanged(eventMessage.data)
+        return
       }
       if (eventMessage.data.indexOf('-_wrap_-') === 0)
         eventMessage.data = eventMessage.data.replace('-_wrap_-', '\n')
@@ -170,6 +174,7 @@ function sseProcess(params: {
   messageReceived: (chunk: string, eventName?: string) => void
   thinkingDataReceived: (chunk: string) => void
   audioDataReceived?: (pcmPart: any) => void
+  stateChanged?: (state: string) => void
   doneCallback: (chunk: string) => void
   errorCallback: (error: string) => void
 }) {

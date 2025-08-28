@@ -138,9 +138,34 @@ const fetchChatAPIOnce = async (regenerateQuestionUuid: string, childAudioPlaySt
     signal: controller.signal,
     startCallback(chunk) {
     },
+    stateChanged: (state) => {
+      const question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
+      if (!question)
+        return
+
+      question.state = new Map(Object.entries(JSON.parse(state)))
+    },
     thinkingDataReceived: (chunk) => {
-      // 处理思考数据
-      console.log('Thinking data received:', chunk)
+      const question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
+      if (!question) {
+        ms.error('找不到提问')
+        return
+      }
+      try {
+        for (let i = 0; i < chunk.length; i++) {
+          appendChunk(
+            convUuid,
+            question.children[0].uuid,
+            chunk[i],
+            true, // thinking is true
+          )
+          chatMessageReceiving(question.uuid)
+        }
+      } catch (error) {
+        console.error(error)
+      }
+      // 推理阶段无需显示状态
+      question.state = new Map<string, string>()
     },
     messageReceived: (chunk) => {
       const question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
@@ -184,7 +209,7 @@ const fetchChatAPIOnce = async (regenerateQuestionUuid: string, childAudioPlaySt
       if (chunk.includes('[META]')) {
         const meta = chunk.replace('[META]', '')
         const metaData: Chat.MetaData = JSON.parse(meta)
-        updateMessageSomeFields(convUuid, question.uuid, { ...metaData.question, loading: false })
+        updateMessageSomeFields(convUuid, question.uuid, { ...metaData.question, loading: false, state: new Map<string, string>() })
         // 保留临时answer的uuid以方便自动选中最新答案
         updateMessageSomeFields(convUuid, answer.uuid, { ...metaData.answer, uuid: answer.uuid, loading: false })
         if (metaData.audioInfo) {
@@ -462,7 +487,6 @@ onDeactivated(() => {
               <!-- 用户消息 end -->
 
               <!-- LLM回复 start -->
-
               <!-- LLM的多条回复消息 -->
               <template v-if="qaMessage.children.length > 1">
                 <NTabs
@@ -480,10 +504,10 @@ onDeactivated(() => {
                       :date-time="answer.createTime" :audio-play-state="answer.audioPlayState" :loading="answer.loading"
                       :ai-model-platform="answer.aiModelPlatform" @delete="handleDelete(qaMessage.uuid, answer.uuid)"
                     >
-                      <div class="flex items-center justify-end space-x-2 mt-2">
+                      <div class="flex items-center space-x-2 mt-2">
                         <NButton
-                          v-if="!!answer && !answer.loading && answer.isRefEmbedding" size="tiny" text type="primary"
-                          @click="handleEmbeddingRefClick(answer.uuid)"
+                          v-if="!!answer && !answer.loading && answer.isRefEmbedding" size="tiny" text
+                          type="primary" @click="handleEmbeddingRefClick(answer.uuid)"
                         >
                           引用
                         </NButton>
@@ -496,22 +520,22 @@ onDeactivated(() => {
                       </div>
                     </AudioMessage>
                     <Message
-                      v-else :show-avatar="false" :date-time="answer.createTime"
+                      v-else :show-avatar="false" :date-time="answer.createTime" :thinking="answer.thinking"
                       :thinking-content="answer.thinkingContent" :text="answer.remark" type="text" :inversion="false"
                       :regenerate="true" :error="answer.error" :loading="answer.loading"
                       :ai-model-platform="answer.aiModelPlatform" @regenerate="onRegenerate(qaMessage.uuid)"
                       @delete="handleDelete(qaMessage.uuid, answer.uuid)"
                     >
-                      <div class="flex items-center justify-end space-x-2 mt-2">
+                      <div class="flex items-center space-x-2 mt-2">
                         <NButton
-                          v-if="!!answer && !answer.loading && answer.isRefEmbedding" size="tiny" text type="primary"
-                          @click="handleEmbeddingRefClick(answer.uuid)"
+                          v-if="!!answer && !answer.loading && answer.isRefEmbedding" size="tiny" text
+                          type="primary" @click="handleEmbeddingRefClick(answer.uuid)"
                         >
                           引用
                         </NButton>
                         <NButton
-                          v-if="!!answer && !answer.loading && qaMessage.isRefGraph" size="tiny" text type="primary"
-                          @click="handleGraphClick(answer.uuid)"
+                          v-if="!!answer && !answer.loading && qaMessage.isRefGraph" size="tiny" text
+                          type="primary" @click="handleGraphClick(answer.uuid)"
                         >
                           图谱
                         </NButton>
@@ -531,23 +555,23 @@ onDeactivated(() => {
                   :ai-model-platform="qaMessage.children[0].aiModelPlatform"
                   @delete="handleDelete(qaMessage.uuid, qaMessage.children[0].uuid)"
                 >
-                  <div class="flex items-center justify-end space-x-2 mt-2">
+                  <div class="flex items-center space-x-2 mt-2">
                     <NButton
-                      v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefEmbedding" size="tiny" text type="primary"
-                      @click="handleEmbeddingRefClick(qaMessage.children[0].uuid)"
+                      v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefEmbedding"
+                      size="tiny" text type="primary" @click="handleEmbeddingRefClick(qaMessage.children[0].uuid)"
                     >
                       引用
                     </NButton>
                     <NButton
-                      v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefGraph" size="tiny" text type="primary"
-                      @click="handleGraphClick(qaMessage.children[0].uuid)"
+                      v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefGraph"
+                      size="tiny" text type="primary" @click="handleGraphClick(qaMessage.children[0].uuid)"
                     >
                       图谱
                     </NButton>
                   </div>
                 </AudioMessage>
                 <Message
-                  v-else :date-time="qaMessage.children[0].createTime"
+                  v-else :date-time="qaMessage.children[0].createTime" :thinking="qaMessage.children[0].thinking"
                   :thinking-content="qaMessage.children[0].thinkingContent" :text="qaMessage.children[0].remark"
                   type="text" :inversion="qaMessage.children[0].inversion" :regenerate="true"
                   :error="qaMessage.children[0].error" :loading="qaMessage.children[0].loading"
@@ -556,14 +580,14 @@ onDeactivated(() => {
                 >
                   <div class="flex items-center space-x-4 mt-2">
                     <NButton
-                      v-if="!qaMessage.children[0].loading && qaMessage.children[0].isRefEmbedding" size="tiny" text type="primary"
-                      @click="handleEmbeddingRefClick(qaMessage.children[0].uuid)"
+                      v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefEmbedding"
+                      size="tiny" text type="primary" @click="handleEmbeddingRefClick(qaMessage.children[0].uuid)"
                     >
                       引用
                     </NButton>
                     <NButton
-                      v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefGraph" size="tiny" text type="primary"
-                      @click="handleGraphClick(qaMessage.children[0].uuid)"
+                      v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefGraph"
+                      size="tiny" text type="primary" @click="handleGraphClick(qaMessage.children[0].uuid)"
                     >
                       图谱
                     </NButton>
@@ -572,6 +596,14 @@ onDeactivated(() => {
               </template>
 
               <!-- LLM回复 end -->
+
+              <!-- 状态栏 -->
+              <div
+                v-if="qaMessage.state && qaMessage.state.get('remark')"
+                class="my-2 text-sm bg-gray-200 px-2 py-1 rounded-md"
+              >
+                {{ qaMessage.state.get('remark') }}
+              </div>
             </div>
           </template>
         </div>
@@ -589,8 +621,8 @@ onDeactivated(() => {
       <div class="w-full max-w-screen-xl m-auto border-t">
         <InputToolbar @images-change="imagesChange" />
         <InputEditor
-          ref="inputEditorRef" :conversation-uuid="curConvUuid" :image-uuids="imageUuids" @sse-started="sseStarted"
-          @message-receiving="chatMessageReceiving" @message-complelted="messageComplelted"
+          ref="inputEditorRef" :conversation-uuid="curConvUuid" :image-uuids="imageUuids"
+          @sse-started="sseStarted" @message-receiving="chatMessageReceiving" @message-complelted="messageComplelted"
           @is-chatting="(chatting) => isChatting = chatting"
         />
       </div>

@@ -20,7 +20,7 @@ let cy: any = null
 
 function getAndRenderGraph() {
   graphRef.value = chatStore.getGraphRef(props.msgUuid)
-  if (!graphRef.value)
+  if (!graphRef.value || (graphRef.value.vertices.length === 0 && graphRef.value.edges.length === 0))
     loadGraph()
   else
     parseAndRender(graphRef.value)

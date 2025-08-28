@@ -1,10 +1,11 @@
 <script setup lang='ts'>
 import { ref } from 'vue'
-import { NButton, useMessage } from 'naive-ui'
+import { NButton, useMessage, useThemeVars } from 'naive-ui'
 import { MediaRecorder, deregister, register } from 'extendable-media-recorder'
 import { connect } from 'extendable-media-recorder-wav-encoder'
 import { format } from 'date-fns'
 import { SvgIcon } from '@/components/common'
+import AudioWaveIcon from '@/icons/AudioWave.vue'
 import api from '@/api'
 
 const emit = defineEmits<Emit>()
@@ -14,6 +15,7 @@ interface Emit {
   (e: 'exit'): void
 }
 
+const themeVars = useThemeVars()
 const audioChunks = ref<Blob[]>([])
 const audioUrl = ref('')
 const recording = ref(false)
@@ -137,15 +139,12 @@ function toggleRecording() {
 </script>
 
 <template>
-  <div class="flex flex-col items-center space-y-2">
+  <div class="flex flex-col items-center space-y-3">
     <SvgIcon
       v-if="!recording" class="text-6xl cursor-pointer custom-hover" icon="pepicons-pop:microphone-circle-filled"
       @click="toggleRecording"
     />
-    <SvgIcon
-      v-if="recording" class="text-6xl cursor-pointer custom-hover" icon="hugeicons:voice"
-      @click="toggleRecording"
-    />
+    <AudioWaveIcon v-if="recording" class="cursor-pointer" placeholder="对话中" @click="toggleRecording" />
     <div v-if="!recording" class="text-sm text-gray-500">
       点击开始对话
     </div>
@@ -158,11 +157,11 @@ function toggleRecording() {
     <div v-if="audioUrl" class="py-2">
       <audio ref="audio" :src="audioUrl" controls />
     </div>
-    <div v-if="!recording" class="flex items-center space-x-2 mt-4 justify-items-end">
-      <NButton class="mt-2" :loading="submitting" :disabled="submitting" @click="exit">
+    <div v-if="!recording" class="flex items-center space-x-2 justify-items-end pt-4">
+      <NButton ghost class="mt-6" :loading="submitting" :disabled="submitting" @click="exit">
         取消
       </NButton>
-      <NButton v-if="audioUrl" class="mt-2" :loading="submitting" :disabled="!audioUrl || submitting" @click="submit">
+      <NButton v-if="audioUrl" ghost class="mt-6" :loading="submitting" :disabled="!audioUrl || submitting" @click="submit">
         发送
       </NButton>
     </div>
@@ -170,7 +169,11 @@ function toggleRecording() {
 </template>
 
 <style lang="less" scoped>
-.custom-hover:hover {
-  color: #7fe7c4;
+.custom-hover {
+  color: v-bind('themeVars.primaryColor');
+
+  :hover {
+    color: v-bind('themeVars.primaryColorHover');
+  }
 }
 </style>
