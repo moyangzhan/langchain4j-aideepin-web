@@ -42,6 +42,12 @@ export const useAppStore = defineStore('app-store', {
     audioSynthesizerSide(state: AppState) {
       return state.sysConfigInfo.ttsSetting.synthesizer_side || AUDIO_SYNTHESIZER_SIDE.client
     },
+    ttsSetting(state: AppState) {
+      return state.sysConfigInfo.ttsSetting
+    },
+    availableVoices(state: AppState) {
+      return state.sysConfigInfo.availableVoices || []
+    },
   },
 
   actions: {

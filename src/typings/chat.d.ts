@@ -53,6 +53,16 @@ declare namespace Chat {
 		isEnable: boolean //该知识库是否可用
 	}
 
+	interface ConfigVoice {
+		param_name: string // 用于API请求的参数名称
+		model: string
+		platform: string
+	}
+
+	interface AudioConfig {
+		voice: ConfigVoice
+	}
+
 	interface Conversation {
 		title: string
 		uuid: string
@@ -68,6 +78,7 @@ declare namespace Chat {
 		answerContentType: number // 1: auto, 2: text, 3: audio
 		isAutoplayAnswer: boolean //聊天时音频类型的响应内容是否自动播放
 		isEnableThinking: boolean //是否启用思考过程
+		audioConfig: AudioConfig //语音配置
 	}
 
 	interface ConvWithMessages {

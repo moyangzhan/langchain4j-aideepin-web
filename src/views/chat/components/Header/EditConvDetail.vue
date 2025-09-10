@@ -4,7 +4,7 @@ import { NButton, NCheckbox, NCheckboxGroup, NFlex, NIcon, NInput, NPopconfirm, 
 import { QuestionCircle16Regular } from '@vicons/fluent'
 import ConvKnowledgeSelector from '@/views/chat/ConvKnowledgeSelector.vue'
 import { useScroll } from '@/views/chat/hooks/useScroll'
-import { useChatStore, useMcpStore } from '@/store'
+import { useAppStore, useChatStore, useMcpStore } from '@/store'
 import { router } from '@/router'
 import { debounce } from '@/utils/functions/debounce'
 import { emptyConv } from '@/utils/functions'
@@ -18,6 +18,7 @@ interface Emit {
 }
 const props = withDefaults(defineProps<Props>(), {})
 const emit = defineEmits<Emit>()
+const appStore = useAppStore()
 const chatStore = useChatStore()
 const mcpStore = useMcpStore()
 const { scrollRef } = useScroll()
@@ -82,6 +83,12 @@ function handleRemoveKnowledge(knowledgeId: string) {
 function handleKnowledgeSelectedChanged(knowledgeIds: string[], knowledgeList: Chat.ConvKnowledge[]) {
   tmpConv.value.kbIds = knowledgeIds
   tmpConv.value.convKnowledgeList = knowledgeList
+}
+
+function handleUpdateVoice(name: string) {
+  tmpConv.value.audioConfig.voice.param_name = name
+  tmpConv.value.audioConfig.voice.model = appStore.ttsSetting.model_name || ''
+  tmpConv.value.audioConfig.voice.platform = appStore.ttsSetting.platform || ''
 }
 
 function handleDelete(uuid: string, event?: MouseEvent | TouchEvent) {
@@ -168,11 +175,8 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
             </NButton>
           </div>
           <div v-if="!knowledgeModalShow">
-            <div v-if="tmpConv.convKnowledgeList.length === 0">
+            <div v-if="tmpConv.convKnowledgeList.length === 0" class="pl-6">
               暂无数据
-              <NButton type="primary" size="tiny" text tag="a" @click="knowledgeModalShow = !knowledgeModalShow">
-                点击添加
-              </NButton>
             </div>
             <NTag
               v-for="convKnowledge in tmpConv.convKnowledgeList" :key="convKnowledge.uuid" closable class="mr-2"
@@ -260,6 +264,29 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
             :checked="tmpConv.isAutoplayAnswer" label="是"
             @update:checked="(checked) => tmpConv.isAutoplayAnswer = checked"
           />
+        </div>
+        <div v-if="appStore.availableVoices.length > 0" class="flex flex-col space-y-2">
+          <div class="flex space-x-2 font-bold">
+            音色选择
+            <NTooltip trigger="hover">
+              <template #trigger>
+                <NIcon style="margin-top: 0.2rem">
+                  <QuestionCircle16Regular />
+                </NIcon>
+              </template>
+              <span>
+                指定AI语音回复时所使用的音色
+              </span>
+            </NTooltip>
+          </div>
+          <NRadioGroup
+            :value="tmpConv.audioConfig.voice.param_name" name="audioConfigRadio" class="flex flex-col space-y-2"
+            size="small" @update:value="handleUpdateVoice"
+          >
+            <NRadio v-for="voice in appStore.availableVoices" :key="voice.param_name" :value="voice.param_name" :title="voice.remark">
+              {{ voice.name }}
+            </NRadio>
+          </NRadioGroup>
         </div>
       </div>
     </div>

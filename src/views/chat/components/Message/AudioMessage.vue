@@ -10,6 +10,7 @@ import { AUDIO_SYNTHESIZER_SIDE } from '@/utils/constant'
 import { t } from '@/locales'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { emptyAudioPlayState } from '@/utils/functions'
+import AudioQueue from '@/utils/AudioQueue'
 import api from '@/api'
 
 const props = withDefaults(defineProps<Props>(), {
@@ -43,8 +44,7 @@ const textRef = ref<HTMLElement>()
 const asRawText = ref(props.inversion)
 const messageRef = ref<HTMLElement>()
 const token = ref<string>(authStore.token)
-const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-const audioChunks: ArrayBuffer[] = [] // 存储音频数据块
+let audioQueue: AudioQueue | null = null
 
 let synthesis: SpeechSynthesis | null = null
 if ('speechSynthesis' in window)
@@ -126,6 +126,7 @@ async function speekAudioFrame(audioFrame: string) {
   if (!audioFrame)
     console.warn('audioFrame is empty')
 
+  console.log('Received audio frame of length:', audioFrame.length)
   const binaryString = window.atob(audioFrame) // 使用window.atob()进行Base64解码
   const binaryLen = binaryString.length
   const bytes = new Uint8Array(binaryLen)
@@ -133,37 +134,13 @@ async function speekAudioFrame(audioFrame: string) {
     const ascii = binaryString.charCodeAt(i)
     bytes[i] = ascii
   }
-  audioChunks.push(bytes.buffer) // 存入缓冲区
-  if (props.audioPlayState.playing)
-    return // 如果正在播放则不启动播放
-  playAudioStream() // 若未播放则启动播放
-}
+  if (!audioQueue)
+    audioQueue = new AudioQueue(new (window.AudioContext || (window as any).webkitAudioContext)())
 
-async function playAudioStream() {
-  if (audioChunks.length === 0)
-    return
-  const chunk = audioChunks.shift()
+  audioQueue.addChunk(bytes.buffer)
   const ap = props.audioPlayState
-  if (chunk) {
+  if (!ap.playing)
     ap.playing = true
-    try {
-      const buffer = await audioContext.decodeAudioData(chunk)
-      const source = audioContext.createBufferSource()
-      source.buffer = buffer
-      source.connect(audioContext.destination)
-      source.start()
-      source.onended = () => {
-        ap.playing = false
-        if (audioChunks.length > 0)
-          playAudioStream() // 播放下一段
-      }
-    } catch (error) {
-      console.error('Error decoding audio data:', error)
-      ap.playing = false
-    }
-  } else {
-    console.warn('No audio data to play')
-  }
 }
 
 function playDurationCount() {
@@ -232,6 +209,14 @@ watch(() => props.audioPlayState.audioFrame, (audioFrame) => {
   if (!audioFrame || !props.loading)
     return
   speekAudioFrame(audioFrame)
+})
+
+watch(() => props.loading, (loading) => {
+  const ap = props.audioPlayState
+  if (!loading) {
+    ap.playing = false
+    audioQueue?.complete()
+  }
 })
 
 // watch(() => props.loading, (loadding) => {

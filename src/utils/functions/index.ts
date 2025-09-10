@@ -94,6 +94,8 @@ export function emptyAiModel() {
     enable: false,
     isFree: false,
     inputTypes: 'text',
+    isReasoner: false,
+    isThinkingClosable: false,
 
     // for NSelector
     value: '',
@@ -227,6 +229,13 @@ export function emptyConv(): Chat.Conversation {
     answerContentType: CHAT_MESSAGE_CONTENT_TYPE.auto, // 1: auto, 2: text, 3: audio
     isAutoplayAnswer: false, // 聊天时音频类型的响应内容是否自动播放
     isEnableThinking: false, // 是否启用思考过程
+    audioConfig: {
+      voice: {
+        param_name: '',
+        model: '',
+        platform: '',
+      },
+    }, // 语音配置
   }
 }
 
@@ -409,5 +418,6 @@ export function emptySysConfigInfo(): SysConfigInfo {
   return {
     asrSetting: emptyAsrSetting(),
     ttsSetting: emptyTtsSetting(),
+    availableVoices: [],
   }
 }

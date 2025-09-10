@@ -95,7 +95,15 @@ interface AsrSetting {
   max_file_size: number // Maximum file size in bytes
 }
 
+interface ModelVoice {
+  name: string
+  remark: string
+  param_name: string
+  lang: string
+}
+
 interface SysConfigInfo {
   ttsSetting: TtsSetting
   asrSetting: AsrSetting
+  availableVoices: ModelVoice[]
 }
