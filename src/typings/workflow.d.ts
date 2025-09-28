@@ -180,12 +180,14 @@ declare namespace Workflow {
   }
 
   interface NodeConfigAnswer implements NodeConfig {
+    model_platform: string
     model_name: string
     prompt: string
   }
 
   //Classifier node
   interface NodeConfigClassifier implements NodeConfig {
+    model_platform: string
     model_name: string
     categories: NodeConfigClassifierCategory[]
   }
@@ -235,11 +237,13 @@ declare namespace Workflow {
   }
 
   interface NodeConfigKeywordExtractor implements NodeConfig {
+    model_platform: string
     model_name: string
     top_n: number
   }
 
   interface NodeConfigFaqExtractor implements NodeConfig {
+    model_platform: string
     model_name: string
     top_n: number
   }

@@ -19,9 +19,20 @@ export const useAppStore = defineStore('app-store', {
         return state.llms.find(item => item.modelId === modelId)
       }
     },
+    getLLMById(state: AppState) {
+      return (id: string) => {
+        return state.llms.find(item => item.modelId === id)
+      }
+    },
     getLLMByName(state: AppState) {
       return (name: string) => {
         return state.llms.find(item => item.modelName === name)
+      }
+    },
+    getLLMByPlatformAndName(state: AppState) {
+      return (platform: string, name: string) => {
+        // 兼容只有 name 的情况
+        return state.llms.find(item => (!platform || item.modelPlatform === platform) && item.modelName === name)
       }
     },
     getFirstLLM(state: AppState) {
@@ -78,7 +89,7 @@ export const useAppStore = defineStore('app-store', {
       this.selectedSearchEngine = selected
     },
     setSelectedLLM(selected: string) {
-      const selectedModel = this.llms.find(item => item.modelName === selected)
+      const selectedModel = this.llms.find(item => item.modelId === selected)
       if (selectedModel)
         this.selectedLLM = selectedModel
 
@@ -108,8 +119,8 @@ export const useAppStore = defineStore('app-store', {
       llms.forEach((item) => {
         item.disabled = !item.enable
         item.label = item.modelTitle || item.modelName
-        item.key = item.modelName
-        item.value = item.modelName
+        item.key = item.modelId
+        item.value = item.modelId
       })
       this.llms = llms
       if (this.selectedLLM.modelId === 'default') {

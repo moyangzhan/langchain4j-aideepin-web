@@ -168,7 +168,7 @@ function commonSseProcess(
 }
 
 function sseProcess(params: {
-  options: { prompt?: string; conversationUuid?: string; parentMessageId?: string; regenerateQuestionUuid?: string; modelName?: string; imageUrls?: string[]; audioUuid?: string; audioDuration?: number }
+  options: { prompt?: string; conversationUuid?: string; parentMessageId?: string; regenerateQuestionUuid?: string; modelName?: String; modelPlatform?: string; imageUrls?: string[]; audioUuid?: string; audioDuration?: number }
   signal?: AbortSignal
   startCallback: (chunk: string) => void
   messageReceived: (chunk: string, eventName?: string) => void

@@ -371,7 +371,7 @@ export const useWfStore = defineStore('wf-store', {
     appendInputToRuntimeNode(wfRuntimeUuid: string, runtimeNodeUuid: string, inputJson: string) {
       const runtimeNode = this.getRuntimeNode(wfRuntimeUuid, runtimeNodeUuid)
       if (runtimeNode) {
-        // inputJson: {"name": "input1", "content":{"value": "input1", type: 1}}
+        // inputJson: {"input":{"value": "default input", type: 1},"input2", {"value": "input22", type: 1}}
         const obj = JSON.parse(inputJson)
         runtimeNode.input[obj.name] = obj.content
       }
@@ -385,9 +385,12 @@ export const useWfStore = defineStore('wf-store', {
     },
     appendChunkToRuntimeNode(wfRuntimeUuid: string, runtimeNodeUuid: string, chunk: string) {
       const runtimeNode = this.getRuntimeNode(wfRuntimeUuid, runtimeNodeUuid)
-      // runtimeNode.output 格式： {output:'default output', 'output_name1': 'output_content1'}
-      if (runtimeNode)
-        runtimeNode.output.output = runtimeNode.output.output + chunk
+      // runtimeNode.output 格式： {"output": {value:"default output", type: 1}, "output2": {"value": "output22", type: 1}}
+      if (runtimeNode) {
+        if (!runtimeNode.output.output)
+          runtimeNode.output.output = { value: '', type: 1 }
+        runtimeNode.output.output.value = runtimeNode.output.output.value + chunk
+      }
     },
     deleteWfRuntime(wfUuid: string, wfRuntimeUuid: string) {
       const wfRuntimes = this.wfUuidToWfRuntimes.get(wfUuid)

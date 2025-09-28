@@ -11,9 +11,9 @@ interface Props {
 const props = defineProps<Props>()
 const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigKeywordExtractor
 
-function llmSelected(modelName: string) {
-  console.log('nodeConfig.modelName', nodeConfig.model_name, modelName)
-  nodeConfig.model_name = modelName
+function llmSelected(aiModel: AiModelInfo) {
+  nodeConfig.model_name = aiModel.modelName
+  nodeConfig.model_platform = aiModel.modelPlatform
 }
 </script>
 
@@ -26,7 +26,10 @@ function llmSelected(modelName: string) {
         模型
       </div>
       <div>
-        <WfLLMSelector :model-name="nodeConfig.model_name" @llm-selected="llmSelected" />
+        <WfLLMSelector
+          :model-platform="nodeConfig.model_platform" :model-name="nodeConfig.model_name"
+          @llm-selected="llmSelected"
+        />
       </div>
     </div>
     <div class="mt-6">

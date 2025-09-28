@@ -87,7 +87,7 @@ export function aiSearchEmptyRecord() {
 export function emptyAiModel() {
   return {
     // from api
-    modelId: 'default',
+    modelId: '',
     modelName: '',
     modelTitle: '',
     modelPlatform: '',

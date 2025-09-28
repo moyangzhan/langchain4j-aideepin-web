@@ -151,6 +151,7 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
       prompt: message,
       conversationUuid: props.conversationUuid,
       regenerateQuestionUuid: '',
+      modelPlatform: appStore.selectedLLM.modelPlatform,
       modelName: appStore.selectedLLM.modelName,
       imageUrls: props.imageUuids,
       audioUuid: userAudioUuid,

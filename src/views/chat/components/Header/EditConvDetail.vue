@@ -265,7 +265,7 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
             @update:checked="(checked) => tmpConv.isAutoplayAnswer = checked"
           />
         </div>
-        <div v-if="appStore.availableVoices.length > 0" class="flex flex-col space-y-2">
+        <div class="flex flex-col space-y-2">
           <div class="flex space-x-2 font-bold">
             音色选择
             <NTooltip trigger="hover">
@@ -279,14 +279,23 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
               </span>
             </NTooltip>
           </div>
+          <div v-if="appStore.ttsSetting.synthesizer_side === 'client'">
+            当前音色来自于浏览器，无需指定
+          </div>
           <NRadioGroup
-            :value="tmpConv.audioConfig.voice.param_name" name="audioConfigRadio" class="flex flex-col space-y-2"
-            size="small" @update:value="handleUpdateVoice"
+            v-else-if="appStore.availableVoices.length > 0" :value="tmpConv.audioConfig.voice.param_name"
+            name="audioConfigRadio" class="flex flex-col space-y-2" size="small" @update:value="handleUpdateVoice"
           >
-            <NRadio v-for="voice in appStore.availableVoices" :key="voice.param_name" :value="voice.param_name" :title="voice.remark">
+            <NRadio
+              v-for="voice in appStore.availableVoices" :key="voice.param_name" :value="voice.param_name"
+              :title="voice.remark"
+            >
               {{ voice.name }}
             </NRadio>
           </NRadioGroup>
+          <div v-else>
+            系统没有可用的音色
+          </div>
         </div>
       </div>
     </div>

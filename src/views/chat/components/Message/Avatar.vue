@@ -93,6 +93,7 @@ const avatar = computed(() => userStore.userInfo.avatar)
     v-else-if="name"
     round
     bordered
+    :size="imageSize ? imageSize : 32"
     :style="{
       color: 'gray',
       border: 'solid 1px gray',

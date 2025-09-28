@@ -130,6 +130,7 @@ const fetchChatAPIOnce = async (regenerateQuestionUuid: string, childAudioPlaySt
       prompt: '',
       conversationUuid: convUuid,
       regenerateQuestionUuid,
+      modelPlatform: appStore.selectedLLM.modelPlatform,
       modelName: appStore.selectedLLM.modelName,
       imageUrls: imageUuids.value,
       audioUuid: '',

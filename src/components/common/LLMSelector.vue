@@ -20,7 +20,7 @@ function renderOption({ node, option }: { node: VNode; option: DropdownOption | 
 }
 function renderLabel(option: DropdownOption) {
   const val = option.value as string
-  const modelPlatform = appStore.getLLMByName(val)?.modelPlatform
+  const modelPlatform = appStore.getLLMById(val)?.modelPlatform
   return [
     h('div', { class: 'flex items-center' }, {
       default: () => [

@@ -8,12 +8,14 @@ import AvatarComponent from '@/views/chat/components/Message/Avatar.vue'
 import { emptyAiModel } from '@/utils/functions'
 
 interface Props {
+  modelPlatform: string
   modelName: string
 }
 interface Emit {
-  (e: 'llmSelected', modelName: string): void
+  (e: 'llmSelected', aiModel: AiModelInfo): void
 }
 const props = withDefaults(defineProps<Props>(), {
+  modelPlatform: '',
   modelName: () => emptyAiModel().modelName,
 })
 const emit = defineEmits<Emit>()
@@ -23,7 +25,7 @@ function renderLabel(option: SelectOption): VNodeChild {
   if (option.type === 'group')
     return option.label as string
   const val = option.value as string
-  const modelPlatform = appStore.getLLMByName(val)?.modelPlatform
+  const modelPlatform = appStore.getLLMById(val)?.modelPlatform
   return [
     h('div', { class: 'flex items-center' }, {
       default: () => [
@@ -46,16 +48,18 @@ function renderLabel(option: SelectOption): VNodeChild {
   ]
 }
 
-const selectedModelName = ref<string>(props.modelName)
-console.log('selectedModelName', selectedModelName.value)
-function handleSelect(modelName: string) {
-  emit('llmSelected', modelName)
+const modelId = appStore.getLLMByPlatformAndName(props.modelPlatform, props.modelName)?.modelId || ''
+const selectedModelId = ref<string>(modelId)
+console.log('selectedModelId', selectedModelId.value)
+function handleSelect(modelId: string) {
+  const aiModel = appStore.getLLMById(modelId)
+  emit('llmSelected', aiModel || emptyAiModel())
 }
 </script>
 
 <template>
   <NSelect
-    v-model:value="selectedModelName" placement="top-start" trigger="click" :show-arrow="true"
+    v-model:value="selectedModelId" placement="top-start" trigger="click" :show-arrow="true"
     :options="appStore.llms" :render-label="renderLabel" @update:value="handleSelect"
   />
 </template>

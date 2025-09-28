@@ -15,8 +15,9 @@ interface Props {
 const props = defineProps<Props>()
 const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigClassifier
 
-function onLlmSelected(modelName: string) {
-  nodeConfig.model_name = modelName
+function onLlmSelected(aiModel: AiModelInfo) {
+  nodeConfig.model_name = aiModel.modelName
+  nodeConfig.model_platform = aiModel.modelPlatform
 }
 
 function onCategoryTargetSelected(category: Workflow.NodeConfigClassifierCategory, nodeUuid: string) {
@@ -65,7 +66,7 @@ function onDeleteCategory(category: Workflow.NodeConfigClassifierCategory) {
         模型
       </div>
       <div>
-        <WfLLMSelector :model-name="nodeConfig.model_name" @llm-selected="onLlmSelected" />
+        <WfLLMSelector :model-platform="nodeConfig.model_platform" :model-name="nodeConfig.model_name" @llm-selected="onLlmSelected" />
       </div>
     </div>
     <div class="mt-6 flex flex-col">
