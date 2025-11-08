@@ -50,6 +50,7 @@ AIDEEPIN
     * 语音提问-文字回复
     * 语音提问-语音回复
   * AI的音色可选
+* 长期记忆
 
 ## 接入的平台/模型：
 
@@ -69,13 +70,13 @@ AIDEEPIN
 
 ### Node
 
-`node` 需要 `^16 || ^18 || ^19` 版本（`node >= 14` 需要安装 [fetch polyfill](https://github.com/developit/unfetch#usage-as-a-polyfill)），使用 [nvm](https://github.com/nvm-sh/nvm) 可管理本地多个 `node` 版本
+`node` v20+
 
-```shell
-node -v
-```
+推荐使用使用 [nvm](https://github.com/nvm-sh/nvm) 管理本地多个 `node` 版本
 
 ### PNPM
+
+pnpm v9+
 
 如果你没有安装过 `pnpm`
 
