@@ -82,6 +82,9 @@ export const useKbStore = defineStore('kb-store', {
     setPublicKbInfos(infos: KnowledgeBase.Info[]) {
       this.publicKbInfos = infos
     },
+    appendMyNewKbInfo(kbInfo: KnowledgeBase.Info) {
+      this.myKbInfos.unshift(kbInfo)
+    },
     appendRecord(kbUuid: string, record: KnowledgeBase.QaRecordInfo) {
       let existRecords = this.kbUuidToQaRecords.get(kbUuid)
       if (!existRecords)

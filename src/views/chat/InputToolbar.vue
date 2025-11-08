@@ -148,7 +148,7 @@ watch(
 
 <template>
   <div class="flex flex-col space-x-2 input-tool-bar">
-    <div class="flex flex-row space-x-2 items-center">
+    <div class="flex flex-row space-x-2 items-center py-1.5">
       <div>
         <LLMSelector />
       </div>
@@ -184,11 +184,10 @@ watch(
           </NPopover>
         </template>
       </div>
-      <div class="rounded border hover:border-green-600  cursor-pointer p-2" @click="toggleUsingContext">
+      <div class="rounded border hover:border-green-600 cursor-pointer p-2" @click="toggleUsingContext">
         <NPopover trigger="hover">
           <template #trigger>
             <span
-              class="text-xl"
               :class="{ 'text-[#4b9e5f]': currConv.understandContextEnable, 'text-[#a8071a]': !currConv.understandContextEnable }"
             >
               <SvgIcon icon="ri:chat-history-line" />
@@ -205,7 +204,7 @@ watch(
         >
           <NPopover trigger="hover">
             <template #trigger>
-              <span class="text-xl">
+              <span>
                 <SvgIcon icon="ri:image-line" />
               </span>
             </template>

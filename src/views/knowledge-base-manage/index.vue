@@ -173,12 +173,13 @@ async function saveOrUpdateKb() {
   try {
     submitting.value = true
     const res = await api.knowledgeBaseSaveOrUpdate<KnowledgeBase.Info>(tmpKb)
-    if (tmpKb.id) {
+    if (tmpKb.id && tmpKb.id !== '0') {
       const hit = infoList.value.find(item => item.id === tmpKb.id)
       if (hit)
         Object.assign(hit, res.data)
     } else {
       infoList.value.push(res.data)
+      kbStore.appendMyNewKbInfo(res.data)
     }
     Object.assign(tmpKb, res.data)
 
@@ -234,6 +235,9 @@ watch(
     <NBreadcrumb separator=">">
       <NBreadcrumbItem href="/">
         首页
+      </NBreadcrumbItem>
+      <NBreadcrumbItem :href="`#/qa/${kbStore.activeKbUuid}`">
+        知识库
       </NBreadcrumbItem>
       <NBreadcrumbItem :clickable="false">
         我的知识库

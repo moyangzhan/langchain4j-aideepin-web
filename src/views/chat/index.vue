@@ -434,7 +434,7 @@ onDeactivated(() => {
     <main class="flex-1 overflow-hidden">
       <div ref="scrollRef" class="h-full overflow-hidden overflow-y-auto" @scroll="handleScroll">
         <div
-          id="image-wrapper" class="w-full max-w-screen-xl m-auto dark:bg-[#101014]"
+          class="w-full max-w-screen-xl m-auto dark:bg-[#101014]"
           :class="[isMobile ? 'p-2' : 'p-4']"
         >
           <template v-if="!authStore.token">
@@ -448,7 +448,7 @@ onDeactivated(() => {
           </template>
 
           <template v-else>
-            <div v-for="(qaMessage, index) of messages" :key="index">
+            <div v-for="(qaMessage, index) of messages" :key="index" class="pb-3">
               <!-- 用户消息 start -->
 
               <!-- 多模态的请求消息，携带有附件 -->
