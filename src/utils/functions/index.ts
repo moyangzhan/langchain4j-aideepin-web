@@ -96,6 +96,7 @@ export function emptyAiModel() {
     inputTypes: 'text',
     isReasoner: false,
     isThinkingClosable: false,
+    properties: {} as object,
 
     // for NSelector
     value: '',
