@@ -17,7 +17,6 @@ export const createColumns = (showEmbeddingListFn: Function, showGraphFn: Functi
     {
       title: '摘要',
       key: 'brief',
-      width: 250,
       render(row) {
         return row.brief.substring(0, 50)
       },
@@ -75,7 +74,7 @@ export const createColumns = (showEmbeddingListFn: Function, showGraphFn: Functi
     {
       title: '附件',
       key: 'sourceFileName',
-      width: 100,
+      width: 150,
       render(row) {
         const soureFile = !!row.sourceFileUuid
         if (soureFile) {
@@ -102,10 +101,12 @@ export const createColumns = (showEmbeddingListFn: Function, showGraphFn: Functi
     {
       title: '创建时间',
       key: 'createTime',
+      width: 180,
     },
     {
       title: '更新时间',
       key: 'updateTime',
+      width: 180,
     },
     {
       title: t('common.action'),
