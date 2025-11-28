@@ -207,7 +207,9 @@ function onHandleCheckedRowKeys(keys: Array<string | number>, rows: object[], me
     if (item)
       itemMap.set(item.uuid, item)
   })
-  checkedItems.value = Array.from(itemMap.values())
+  checkedItems.value = Array.from(itemMap.entries())
+    .filter(([key]) => checkedItemRowKeys.value.includes(key))
+    .map(([, value]) => value)
 }
 
 function removeCheckedItem(item: KnowledgeBase.Item) {
