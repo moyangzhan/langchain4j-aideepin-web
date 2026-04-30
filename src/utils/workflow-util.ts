@@ -32,8 +32,8 @@ export function createNewNode(
     createFaqExtractor(newWfNode)
   else if (component.name === 'KnowledgeRetrieval')
     createKnowledgeRetrieval(newWfNode)
-  else if (component.name === 'Dalle3')
-    createDalle3(newWfNode)
+  else if (component.name === 'OpenAiImage')
+    createOpenAiImage(newWfNode)
   else if (component.name === 'Tongyiwanx')
     createTongyiwanx(newWfNode)
   else if (component.name === 'Google')
@@ -272,7 +272,7 @@ function createKnowledgeRetrieval(node: Workflow.WorkflowNode) {
   }
 }
 
-function createDalle3(node: Workflow.WorkflowNode) {
+function createOpenAiImage(node: Workflow.WorkflowNode) {
   node.nodeConfig = {
     prompt: '',
     size: '1024x1024',
@@ -396,7 +396,7 @@ export function getIconByComponentName(name: string) {
       return 'oui:logstash-if'
     case 'template':
       return 'carbon:prompt-template'
-    case 'dalle3':
+    case 'openaiimage':
       return 'solar:pallete-2-linear'
     case 'tongyiwanx':
       return 'solar:pallete-2-linear'
@@ -435,7 +435,7 @@ export function getIconClassByComponentName(name: string) {
       return 'text-yellow-900'
     case 'template':
       return 'text-sky-800'
-    case 'dalle3':
+    case 'openaiimage':
       return 'text-fuchsia-700'
     case 'tongyiwanx':
       return 'text-fuchsia-700'

@@ -3,14 +3,15 @@ export const TOKEN_ESTIMATOR = [
   { label: '通义千问', value: 'qwen' },
   { label: 'Huggingface', value: 'huggingface' },
 ]
-export const DALLE3_SIZE_OPTIONS = [
+export const OPENAI_IMAGE_SIZE_OPTIONS = [
   { label: '方(1024x1024)', value: '1024x1024' },
-  { label: '竖屏(1024x1792)', value: '1024x1792' },
-  { label: '横屏(1792x1024)', value: '1792x1024' },
+  { label: '竖屏(1024x1536)', value: '1024x1536' },
+  { label: '横屏(1536x1024)', value: '1536x1024' },
 ]
-export const DALLE3_QUALITY_OPTIONS = [
-  { label: '标准', value: 'standard' },
-  { label: '高清', value: 'hd' },
+export const OPENAI_IMAGE_QUALITY_OPTIONS = [
+  { label: '低', value: 'low' },
+  { label: '中', value: 'medium' },
+  { label: '高', value: 'high' },
 ]
 export const TONGYI_WANX_SIZE_OPTIONS = [
   { label: '方(1024x1024)', value: '1024*1024' },

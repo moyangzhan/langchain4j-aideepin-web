@@ -32,7 +32,7 @@ const currWorkflowInfo = computed(() => {
     </template>
     <template v-if="authStore.token && currWorkflowInfo.uuid">
       <WfRuntimeList
-        v-show="selectedViewType === 'instanceList'" :workflow="currWorkflowInfo"
+        :workflow="currWorkflowInfo"
         :show="selectedViewType === 'instanceList'"
       />
       <WorkflowDefine v-show="selectedViewType === 'workflowDefine'" :workflow="currWorkflowInfo" />

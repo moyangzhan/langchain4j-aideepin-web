@@ -1,10 +1,10 @@
 <script setup lang='ts'>
-import { nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
-import { NButton, NLayout, NLayoutContent, NLayoutSider, NModal, useMessage } from 'naive-ui'
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { NButton, NLayout, NLayoutContent, NLayoutSider, NModal, NTooltip, useMessage } from 'naive-ui'
 import type { Edge, Node, NodeChange } from '@vue-flow/core'
 import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
-import { AnswerNode, ClassifierNode, Dalle3Node, DocumentExtractorNode, EndNode, FaqExtractorNode, GoogleNode, HttpRequestNode, HumanFeedbackNode, KeywordExtractorNode, KnowledgeRetrievalNode, MailSendNode, SpecialNode, StartNode, SwitcherNode, TemplateNode, TongyiwanxNode } from './components/nodes'
+import { AnswerNode, ClassifierNode, DocumentExtractorNode, EndNode, FaqExtractorNode, GoogleNode, HttpRequestNode, HumanFeedbackNode, KeywordExtractorNode, KnowledgeRetrievalNode, MailSendNode, OpenAiImageNode, SpecialNode, StartNode, SwitcherNode, TemplateNode, TongyiwanxNode } from './components/nodes'
 import SpecialEdge from './components/edges/SpecialEdge.vue'
 import CustomEdge from './components/edges/CustomEdge.vue'
 import CustomEdge2 from './components/edges/CustomEdge2.vue'
@@ -30,6 +30,15 @@ const hidePropertyPanel = ref<boolean>(true)
 const selectedWfNode = ref<Workflow.WorkflowNode>()
 const wfStore = useWfStore()
 const userStore = useUserStore()
+
+const saveDisabledTip = computed(() => {
+  if (userStore.userInfo.uuid !== props.workflow.userUuid)
+    return '只有工作流的创建者才能保存'
+  if (submitting.value)
+    return '正在保存中...'
+  return ''
+})
+
 const { onInit, fitView, onConnect, onNodeClick, onEdgeClick, onNodesChange, onEdgesChange, onNodeDragStop, addSelectedNodes, project } = useVueFlow()
 
 const uw = wfStore.wfUuidToUIWorkflow.get(props.workflow.uuid) || { nodes: [] as Array<Node>, edges: [] as Array<Edge> }
@@ -276,8 +285,8 @@ onUnmounted(() => {
                   <template #node-documentextractor="nodeProps">
                     <DocumentExtractorNode v-bind="nodeProps" :workflow="workflow" />
                   </template>
-                  <template #node-dalle3="nodeProps">
-                    <Dalle3Node v-bind="nodeProps" :workflow="workflow" />
+                  <template #node-openaiimage="nodeProps">
+                    <OpenAiImageNode v-bind="nodeProps" :workflow="workflow" />
                   </template>
                   <template #node-tongyiwanx="nodeProps">
                     <TongyiwanxNode v-bind="nodeProps" :workflow="workflow" />
@@ -330,8 +339,19 @@ onUnmounted(() => {
                   >
                     运 行
                   </NButton>
+                  <NTooltip v-if="saveDisabledTip" :disabled="!saveDisabledTip">
+                    <template #trigger>
+                      <NButton
+                        :disabled="!!saveDisabledTip" :loading="submitting"
+                        type="info" class="shadow-lg" @click="onSave"
+                      >
+                        保 存
+                      </NButton>
+                    </template>
+                    {{ saveDisabledTip }}
+                  </NTooltip>
                   <NButton
-                    :disabled="submitting || userStore.userInfo.uuid !== workflow.userUuid" :loading="submitting"
+                    v-else :loading="submitting"
                     type="info" class="shadow-lg" @click="onSave"
                   >
                     保 存

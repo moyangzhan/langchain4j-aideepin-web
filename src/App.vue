@@ -4,7 +4,7 @@ import type { MenuOption } from 'naive-ui'
 import type { Component } from 'vue'
 import { defineAsyncComponent, h, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { AppsOutline, ChatboxEllipsesOutline, ColorPaletteOutline, ImagesOutline, LibraryOutline, PersonCircleOutline, SearchOutline, SettingsOutline } from '@vicons/ionicons5'
+import { AppsOutline, ChatboxEllipsesOutline, ColorPaletteOutline, ImagesOutline, LibraryOutline, PersonCircleOutline, SettingsOutline } from '@vicons/ionicons5'
 import { ToolKit } from '@vicons/carbon'
 import { Prompt as PromptIcon } from '@vicons/tabler'
 import { NaiveProvider, PromptStore } from '@/components/common'
@@ -141,20 +141,21 @@ const menuOptions: MenuOption[] = [
         { default: () => '工具' },
       ),
   },
-  {
-    key: 'menu-aisearch',
-    icon: renderIcon(SearchOutline),
-    label: () =>
-      h(
-        RouterLink,
-        {
-          to: {
-            name: 'AiSearch',
-          },
-        },
-        { default: () => '搜索' },
-      ),
-  },
+  // TODO: 网络搜索 RAG 功能已由聊天中模型原生 web search 替代，下个版本将删除该功能及所有相关代码
+  // {
+  //   key: 'menu-aisearch',
+  //   icon: renderIcon(SearchOutline),
+  //   label: () =>
+  //     h(
+  //       RouterLink,
+  //       {
+  //         to: {
+  //           name: 'AiSearch',
+  //         },
+  //       },
+  //       { default: () => '搜索' },
+  //     ),
+  // },
 ]
 function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) })

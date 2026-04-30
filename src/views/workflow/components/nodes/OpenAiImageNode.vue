@@ -3,14 +3,14 @@ import { computed } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 import CommonNodeHeader from '../CommonNodeHeader.vue'
-import { DALLE3_QUALITY_OPTIONS, DALLE3_SIZE_OPTIONS } from '@/utils/constant'
+import { OPENAI_IMAGE_QUALITY_OPTIONS, OPENAI_IMAGE_SIZE_OPTIONS } from '@/utils/constant'
 
 const props = defineProps<NodeProps>()
 const sizeLabel = computed(() => {
-  return DALLE3_SIZE_OPTIONS.find(item => item.value === props.data.nodeConfig.size)?.label || ''
+  return OPENAI_IMAGE_SIZE_OPTIONS.find(item => item.value === props.data.nodeConfig.size)?.label || ''
 })
 const qualityLabel = computed(() => {
-  return DALLE3_QUALITY_OPTIONS.find(item => item.value === props.data.nodeConfig.quality)?.label || ''
+  return OPENAI_IMAGE_QUALITY_OPTIONS.find(item => item.value === props.data.nodeConfig.quality)?.label || ''
 })
 </script>
 

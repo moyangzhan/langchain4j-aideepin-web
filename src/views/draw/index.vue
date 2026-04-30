@@ -3,8 +3,7 @@ import { computed, nextTick, onActivated, ref, watch } from 'vue'
 import { useLoadingBar, useMessage } from 'naive-ui'
 import DisplayStyleInChat from './components/DisplayStyleInChat.vue'
 import DisplayStyleInGallery from './components/DisplayStyleInGallery.vue'
-import Dalle2Editor from './components/dalle2/Dalle2Editor.vue'
-import Dalle3Editor from './components/dalle3/Dalle3Editor.vue'
+import GptImageEditor from './components/gpt-image/GptImageEditor.vue'
 import Wanx from './components/wanx/index.vue'
 import Siliconflow from './components/siliconflow/index.vue'
 import Header from './components/Header.vue'
@@ -125,8 +124,7 @@ onActivated(async () => {
     </main>
     <footer :class="footerClass">
       <div class="w-full max-w-screen-xl m-auto">
-        <Dalle2Editor v-show="appStore.selectedImageModel.modelName === 'dall-e-2'" @submitted="submitted" />
-        <Dalle3Editor v-show="appStore.selectedImageModel.modelName === 'dall-e-3'" @submitted="submitted" />
+        <GptImageEditor v-show="appStore.selectedImageModel.modelPlatform === 'openai'" @submitted="submitted" />
         <Wanx v-show="appStore.selectedImageModel.modelName.indexOf('wanx') > -1" @submitted="submitted" />
         <Siliconflow v-show="appStore.selectedImageModel.modelPlatform === 'siliconflow'" @submitted="submitted" />
       </div>

@@ -371,20 +371,6 @@ function imageGenerate<T = any>(params: ImageGenerationParams) {
   })
 }
 
-function imageEdit<T = any>(originalImage: string, maskImage: string, prompt: string, size: string, number: number) {
-  return post<T>({
-    url: '/draw/edit',
-    data: { modelName: 'dall-e-2', originalImage, maskImage, prompt, size, number },
-  })
-}
-
-function imageVariation<T = any>(originalImage: string, size: string, number: number) {
-  return post<T>({
-    url: '/draw/variation',
-    data: { modelName: 'dall-e-2', originalImage, size, number },
-  })
-}
-
 /**
  * 删除作图任务
  * @param uuid 作图任务uuid
@@ -815,8 +801,6 @@ export default {
   drawFileDel,
   drawStarOrUnStar,
   imageGenerate,
-  imageEdit,
-  imageVariation,
   drawDel,
   drawSetPublic,
   drawPublicImage,

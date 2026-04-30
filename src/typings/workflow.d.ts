@@ -255,7 +255,7 @@ declare namespace Workflow {
     top_n: number
   }
 
-  interface NodeConfigDalle3 implements NodeConfig {
+  interface NodeConfigOpenAiImage implements NodeConfig {
     prompt: string
     size: string
     quality: string

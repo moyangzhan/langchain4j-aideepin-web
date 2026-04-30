@@ -76,7 +76,18 @@ function handlerRemove({ file }: { file: UploadFileInfo }) {
   emit('imagesChange', uploadedUrls.value)
 }
 
+// DeepSeek 深度思考模式与工具调用不兼容（langchain4j #3461: partialArguments cannot be null）
+// TODO: 升级 langchain4j 后移除此 workaround，恢复工具调用支持
+const isDeepSeekThinking = computed(() => {
+  const modelName = appStore.selectedLLM?.modelName?.toLowerCase() || ''
+  return currConv.value.isEnableThinking && isReasoner.value && modelName.includes('deepseek')
+})
+
 function handleMcpModalShow() {
+  if (isDeepSeekThinking.value) {
+    ms.warning('DeepSeek 深度思考模式下不支持工具调用，请先关闭深度思考')
+    return
+  }
   mcpModalShow.value = true
   tmpMcpIds.value = [...currConv.value.mcpIds]
 }
@@ -124,15 +135,27 @@ async function toogleThinking() {
   }
   currConv.value.isEnableThinking = !currConv.value.isEnableThinking
   await api.convToggleThinking(currConv.value.uuid, currConv.value.isEnableThinking)
-  if (currConv.value.isEnableThinking)
-    ms.success('深度思考已开启')
-  else
+  if (currConv.value.isEnableThinking) {
+    // DeepSeek 深度思考模式与工具调用不兼容（langchain4j #3461, TODO: 升级后移除）
+    if (isDeepSeekThinking.value && currConv.value.mcpIds.length > 0) {
+      currConv.value.mcpIds = []
+      await api.convEdit(currConv.value.uuid, { mcpIds: [] })
+      ms.warning('深度思考已开启，工具调用已自动关闭')
+    } else {
+      ms.success('深度思考已开启')
+    }
+  } else {
     ms.warning('深度思考已关闭')
+  }
 }
 
 async function toogleWebSearch() {
   if (!appStore.selectedLLM.isSupportWebSearch) {
     console.log('该模型不支持联网搜索功能的开启或关闭')
+    return
+  }
+  if (isDeepSeekThinking.value) {
+    ms.warning('DeepSeek 深度思考模式下不支持联网搜索，请先关闭深度思考')
     return
   }
   currConv.value.isEnableWebSearch = !currConv.value.isEnableWebSearch
@@ -163,6 +186,25 @@ watch(
     immediate: true,
   },
 )
+
+watch(isDeepSeekThinking, async (newVal) => {
+  if (newVal) {
+    if (currConv.value.mcpIds.length > 0) {
+      currConv.value.mcpIds = []
+      await api.convEdit(currConv.value.uuid, { mcpIds: [] })
+      ms.warning('深度思考已开启，工具调用已自动关闭')
+    }
+    if (currConv.value.isEnableWebSearch) {
+      currConv.value.isEnableWebSearch = false
+      try {
+        await api.convEdit(currConv.value.uuid, { isEnableWebSearch: false })
+      } catch (err) {
+        console.error('auto disable webSearch error', err)
+      }
+      ms.warning('深度思考已开启，联网搜索已自动关闭')
+    }
+  }
+}, { immediate: true })
 </script>
 
 <template>
@@ -262,8 +304,8 @@ watch(
         </template>
         <span v-if="currConv.convKnowledgeList.length === 0" class="text-xs mr-1">无</span>
       </div>
-      <div class="flex-1 overflow-hidden rounded border hover:border-green-600 p-1 h-8">
-        <span class="text-xs cursor-pointer text-green-600" @click="handleMcpModalShow">工具：</span>
+      <div class="flex-1 overflow-hidden rounded border hover:border-green-600 cursor-pointer p-1 h-8" @click="handleMcpModalShow">
+        <span class="text-xs text-green-600">工具：</span>
         <template v-for="userMcp in mcpStore.myUserMcpList" :key="userMcp.uuid">
           <span v-if="currConv.mcpIds.includes(userMcp.mcpInfo.id)" class="text-xs mr-1">{{ userMcp.mcpInfo.title
           }}</span>

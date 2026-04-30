@@ -116,17 +116,6 @@ defineExpose({ gotoBottom })
               @set-public="handleSetPublic" @delete="handleDelDraw(draw)"
             />
             <Message
-              v-if="draw.interactingMethod === 2" :draw="draw"
-              :image-urls="[draw.originalImageUrl, draw.maskImageUrl]" :inversion="true"
-              type="text-image" @delete="handleDelDraw(draw)" @set-public="handleSetPublic"
-              @open-detail="openDraw(draw)"
-            />
-            <Message
-              v-if="draw.interactingMethod === 3" :draw="draw" :image-urls="[draw.originalImageUrl]"
-              :inversion="true" type="image" @delete="handleDelDraw(draw)" @set-public="handleSetPublic"
-              @open-detail="openDraw(draw)"
-            />
-            <Message
               v-if="draw.interactingMethod === 4" :draw="draw"
               :image-urls="[draw.dynamicParams.base_image_url, draw.dynamicParams.ref_image_url]" :inversion="true"
               type="text-image" @delete="handleDelDraw(draw)" @set-public="handleSetPublic"

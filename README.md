@@ -40,7 +40,6 @@ AIDEEPIN
 * 基于大模型的知识库（RAG）
   * 向量搜索
   * 图搜索
-* 基于大模型的网络搜索（RAG）
 * AI工作流
 * MCP服务市场
 * ASR & TTS
@@ -56,9 +55,8 @@ AIDEEPIN
 
 * DeepSeek
 * OpenAI
-  * ChatGPT 3.5
-  * DALL-E 2
-  * DALL-E 3
+  * gpt-5-mini
+  * gpt-image-2
 * 灵积
   * 通义千问
   * 通义万相

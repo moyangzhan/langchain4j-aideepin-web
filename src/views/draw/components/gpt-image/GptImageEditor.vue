@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { NCol, NRadio, NRadioGroup, NRow, NSpace, useMessage } from 'naive-ui'
 import SearchInput from '@/views/draw/components/SearchInput.vue'
 import { checkProcess } from '@/views/draw/helper'
-import { useDrawStore } from '@/store'
+import { useAppStore, useDrawStore } from '@/store'
 import api from '@/api'
 import { emptyDraw } from '@/utils/functions'
 
@@ -11,24 +11,26 @@ interface Emit {
   (e: 'submitted'): void
 }
 const emit = defineEmits<Emit>()
+const appStore = useAppStore()
 const drawStore = useDrawStore()
 const ms = useMessage()
 const selectedImageSize = ref<string>('1024x1024')
-const selectedImageQuality = ref<string>('standard')
-const imageSizes = ['1024x1024', '1024x1792', '1792x1024']
-const imageQulities = ['standard', 'hq']
+const selectedImageQuality = ref<string>('medium')
+const imageSizes = ['auto', '1024x1024', '1024x1536', '1536x1024']
+const imageQulities = ['auto', 'low', 'medium', 'high']
 
 async function handleSubmit(prompt: string) {
   console.log(`GenerateImage submit:${prompt}`)
   try {
-    const resp = await api.imageGenerate<CreateImageResult>({ interactingMethod: 1, modelName: 'dall-e-3', prompt, size: selectedImageSize.value, number: 1, quality: selectedImageQuality.value })
+    const modelName = appStore.selectedImageModel.modelName
+    const resp = await api.imageGenerate<CreateImageResult>({ interactingMethod: 1, modelName, prompt, size: selectedImageSize.value, number: 1, quality: selectedImageQuality.value })
     const uuid = resp.data.uuid
     drawStore.setLoadingUuid(uuid)
 
     const draw = emptyDraw()
     draw.uuid = uuid
     draw.prompt = prompt
-    draw.aiModelName = 'dall-e-3'
+    draw.aiModelName = modelName
     drawStore.pushOne(draw)
 
     emit('submitted')
