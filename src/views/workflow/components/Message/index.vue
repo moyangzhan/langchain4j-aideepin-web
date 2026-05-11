@@ -116,7 +116,7 @@ function openFileInNewTab(filelUrl: string) {
           <TextComponent :inversion="inversion" :error="true" :text="errorMsg" :loading="false" :as-raw-text="true" />
         </div>
         <div v-else-if="Object.keys(ioObject).length === 0" class="flex items-start gap-1 mt-2">
-          <TextComponent :inversion="inversion" :error="true" text="无内容" :loading="loading" :as-raw-text="true" />
+          <TextComponent :inversion="inversion" :error="true" :text="t('common.noContent')" :loading="loading" :as-raw-text="true" />
         </div>
         <TextComponent
           v-else-if="txt" :inversion="inversion" :error="false" :text="txt" :loading="loading"

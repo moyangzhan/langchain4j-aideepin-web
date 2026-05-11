@@ -3,6 +3,7 @@ import { NInput, NInputNumber, NRadio, NRadioGroup } from 'naive-ui'
 import NodePropertyInput from '../NodePropertyInput.vue'
 import ReferComment from '../ReferComment.vue'
 import ReferTooltip from '../ReferTooltip.vue'
+import { t } from '@/locales'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -32,15 +33,15 @@ const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigMailSend
     </div>
     <div v-show="nodeConfig.sender_type === 2">
       <div class="flex flex-col space-y-2 text-sm border border-gray-200 rounded-md p-2 bg-gray-100 mt-2">
-        <div>SMTP服务器</div>
+        <div>{{ t('workflow.smtpServer') }}</div>
         <NInput v-model:value="nodeConfig.smtp.host" placeholder="eg: smtp.exmail.qq.com" />
-        <div>SMTP端口</div>
+        <div>{{ t('workflow.smtpPort') }}</div>
         <NInputNumber v-model:value="nodeConfig.smtp.port" />
-        <div>发送人名称</div>
+        <div>{{ t('workflow.senderName') }}</div>
         <NInput v-model:value="nodeConfig.sender.name" />
-        <div>发送人邮箱</div>
+        <div>{{ t('workflow.senderEmail') }}</div>
         <NInput v-model:value="nodeConfig.sender.mail" />
-        <div>发送人密码</div>
+        <div>{{ t('workflow.senderPassword') }}</div>
         <NInput v-model:value="nodeConfig.sender.password" type="password" show-password-on="mousedown" />
       </div>
     </div>
@@ -49,7 +50,7 @@ const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigMailSend
         接收人邮箱<ReferTooltip /><span class="text-red-500 text-base">*</span>
       </div>
       <div>
-        <NInput v-model:value="nodeConfig.to_mails" placeholder="多个邮箱以逗号隔开" />
+        <NInput v-model:value="nodeConfig.to_mails" :placeholder="t('workflow.recipientEmailPlaceholder')" />
       </div>
     </div>
     <div class="mt-6">
@@ -57,7 +58,7 @@ const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigMailSend
         抄送人邮箱<ReferTooltip />
       </div>
       <div>
-        <NInput v-model:value="nodeConfig.cc_mails" placeholder="多个邮箱以逗号隔开" />
+        <NInput v-model:value="nodeConfig.cc_mails" :placeholder="t('workflow.recipientEmailPlaceholder')" />
       </div>
     </div>
     <div class="mt-6">

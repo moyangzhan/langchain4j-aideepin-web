@@ -11,6 +11,7 @@ import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useAppStore, useAuthStore, useDrawStore } from '@/store'
 import api from '@/api'
 import { debounce } from '@/utils/functions/debounce'
+import { t } from '@/locales'
 import { changeFileUrlToUuid } from '@/utils/functions'
 
 const appStore = useAppStore()
@@ -42,7 +43,7 @@ async function loadNextPage(callback: Function) {
       drawStore.unshiftDraws(data.draws)
     } else {
       loadedAll.value = true
-      ms.warning('没有更多了', {
+      ms.warning(t('common.noMore'), {
         duration: 3000,
       })
     }

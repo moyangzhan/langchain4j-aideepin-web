@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia'
 import { NTabPane, NTabs } from 'naive-ui'
 import SubList from './SubList.vue'
 import { useAuthStore, useKbStore } from '@/store'
+import { t } from '@/locales'
 import api from '@/api'
 
 const route = useRoute()
@@ -89,10 +90,10 @@ onMounted(() => {
 
 <template>
   <NTabs v-model:value="selectedKbType" tab-class="h-10" pane-class="h-full" type="line" justify-content="space-evenly">
-    <NTabPane name="mine" tab="我的" size="small">
+    <NTabPane name="mine" :tab="t('common.mine')" size="small">
       <SubList :list="myKbInfos" :active-kb-uuid="activeKbUuid" />
     </NTabPane>
-    <NTabPane name="public" tab="公开">
+    <NTabPane name="public" :tab="t('common.public')">
       <SubList :list="publicKbInfos" :active-kb-uuid="activeKbUuid" />
     </NTabPane>
   </NTabs>

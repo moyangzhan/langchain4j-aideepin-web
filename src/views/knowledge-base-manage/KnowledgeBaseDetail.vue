@@ -154,11 +154,11 @@ function changeIndexModal() {
  */
 async function textIndexing() {
   if (checkedItemRowKeys.value.length === 0) {
-    ms.warning('至少选中一行')
+    ms.warning(t('knowledgeBase.selectAtLeastOneRow'))
     return
   }
   if (indexTypeSelected.value.length === 0) {
-    ms.warning('至少选中一种索引类型')
+    ms.warning(t('knowledgeBase.selectAtLeastOneIndexType'))
     return
   }
   if (loading.value) {
@@ -170,7 +170,7 @@ async function textIndexing() {
   try {
     await api.knowledgeBaseItemsIndexing(checkedItemRowKeys.value, indexTypeSelected.value)
     indexingCheck()
-    ms.success('索引任务后台执行中')
+    ms.success(t('knowledgeBase.indexTaskRunning'))
     search(1)
   } catch (error: any) {
     ms.error(error.message ?? 'error')
@@ -261,15 +261,15 @@ function onUploadFinish({
 }) {
   const respData = JSON.parse((event?.target as XMLHttpRequest).response)
   if (!respData) {
-    ms.error('上传失败，响应数据格式错误')
+    ms.error(t('knowledgeBase.uploadFailedResponseError'))
     return
   }
   const { success, message } = respData
   console.log('onUploadFinish', success, message)
   if (success)
-    ms.success('上传成功')
+    ms.success(t('common.uploadSuccess'))
   else
-    ms.error(message || '上传失败')
+    ms.error(message || t('common.uploadFailed'))
 
   return file
 }
@@ -305,8 +305,8 @@ async function saveOrUpdate() {
 
 function deleteKbItem(row: KnowledgeBase.Item) {
   dialog.warning({
-    title: '删除提示',
-    content: '删除后无法恢复',
+    title: t('knowledgeBase.deleteConfirmTitle'),
+    content: t('common.deleteNotRecover'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: () => {
@@ -357,7 +357,7 @@ watch(
     </NBreadcrumb>
     <NCard
       style="margin-top: 12px"
-      :title="`知识库: ${curKnowledgeBase.title}(${curKnowledgeBase.isPublic ? '公开' : '私有'})`" hoverable
+      :title="`${t('knowledgeBase.knowledgeBase')}: ${curKnowledgeBase.title}(${curKnowledgeBase.isPublic ? t('common.public') : t('common.private')})`" hoverable
     >
       <template #header-extra>
         <NIcon v-if="curKnowledgeBase.isPublic" :component="Cloud32Regular" />
@@ -365,7 +365,7 @@ watch(
       </template>
       {{ curKnowledgeBase.remark }}
     </NCard>
-    <NCard style="margin-top: 12px" title="已生成的知识点" hoverable>
+    <NCard style="margin-top: 12px" :title="t('knowledgeBase.generatedKnowledge')" hoverable>
       <div class="flex gap-3 mb-4" :class="[isMobile ? 'flex-col' : 'flex-row justify-between']">
         <div class="flex items-left gap-2">
           <NButton type="primary" size="small" @click="changeEditModal()">
@@ -398,7 +398,7 @@ watch(
 
   <NModal
     v-model:show="showItemEditModal" :style="`width: 90%; min-height:500px; max-height: ${modalMainHeight}px`" preset="card"
-    title="知识点-新增|编辑"
+    :title="t('knowledgeBase.knowledgeItemAddEdit')"
   >
     <NSpace vertical>
       {{ t('store.title') }}
@@ -416,8 +416,8 @@ watch(
   </NModal>
 
   <!-- Upload files -->
-  <NModal v-model:show="showUploadModal" style="width: 90%;  min-height: 700px;" preset="card" title="知识点-上传">
-    <NCard style="margin-top: 12px" title="上传文档以生成知识点" hoverable>
+  <NModal v-model:show="showUploadModal" style="width: 90%;  min-height: 700px;" preset="card" :title="t('knowledgeBase.knowledgeItemUpload')">
+    <NCard style="margin-top: 12px" :title="t('knowledgeBase.uploadDocToGenerate')" hoverable>
       <NSpace vertical>
         <NUpload
           ref="uploadRef" multiple :default-file-list="fileList" directory-dnd
@@ -449,21 +449,21 @@ watch(
     </NCard>
   </NModal>
 
-  <NModal v-model:show="showEmbeddingListModal" style="width: 90%; " preset="card" title="嵌入列表">
+  <NModal v-model:show="showEmbeddingListModal" style="width: 90%; " preset="card" :title="t('knowledgeBase.embeddingList')">
     <ItemEmbeddingList :kb-item-uuid="kbItemUuidForEmbeddingList" />
   </NModal>
-  <NModal v-model:show="showGraphModal" style="width: 90%;" display-directive="show" preset="card" title="图谱">
+  <NModal v-model:show="showGraphModal" style="width: 90%;" display-directive="show" preset="card" :title="t('knowledgeBase.graphLabel')">
     <ItemGraph :kb-item-uuid="kbItemUuidForGraph" />
   </NModal>
-  <NModal v-model:show="showIndexModal" style="width: 90%; max-width:550px" preset="card" title="选择索引类型">
+  <NModal v-model:show="showIndexModal" style="width: 90%; max-width:550px" preset="card" :title="t('knowledgeBase.selectIndexType')">
     <NFlex vertical>
-      <NAlert title="说明" type="info">
+      <NAlert :title="t('common.tip')" type="info">
         对文档进行<span style="font-weight: bold">图谱化</span>时会使用到大语言模型，需要消耗一定量的Token
       </NAlert>
       <NCheckboxGroup v-model:value="indexTypeSelected" class="my-2">
         <NFlex vertical>
-          <NCheckbox value="embedding" label="向量化" />
-          <NCheckbox value="graphical" label="图谱化" />
+          <NCheckbox value="embedding" :label="t('knowledgeBase.vectorize')" />
+          <NCheckbox value="graphical" :label="t('knowledgeBase.graphitize')" />
         </NFlex>
       </NCheckboxGroup>
       <div class="flex flex-wrap space-x-2">
@@ -485,7 +485,7 @@ watch(
       </NButton>
     </NFlex>
   </NModal>
-  <NModal v-model:show="showFileContentModal" style="width: 90%; " preset="card" :title="`文件预览: ${previewFileName}`">
+  <NModal v-model:show="showFileContentModal" style="width: 90%; " preset="card" :title="`${t('workflow.filePreviewTitle')}${previewFileName}`">
     <div style="text-align: center;max-height:700px;overflow-y: auto">
       <div v-if="previewFileUrl && previewMimeType === 'text/plain'">
         {{ previewFileContent }}
@@ -494,7 +494,7 @@ watch(
         v-if="previewFileUrl && previewMimeType !== 'text/plain' && previewMimeType !== 'application/pdf'"
         :data="previewFileUrl" width="100%" height="90%" :type="previewMimeType"
       >
-        <p>您的浏览器不支持嵌入该文档，请点击下载查看</p>
+        <p>{{ t('workflow.browserNotSupportEmbed') }}</p>
       </object>
     </div>
     <template #footer>

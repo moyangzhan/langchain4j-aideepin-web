@@ -56,7 +56,7 @@ async function loadMoreMessage(callback?: Function) {
 
     if (data.records.length < pageSize) {
       loadedAll.value = true
-      ms.warning('没有更多了', {
+      ms.warning(t('common.noMore'), {
         duration: 3000,
       })
     }
@@ -90,7 +90,7 @@ function handleDelete(instUuid: string) {
     return
   dialog.warning({
     title: t('chat.deleteMessage'),
-    content: '输入与输出会一起删除，继续执行？',
+    content: t('workflow.inputAndOutputDeleteConfirm'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: () => {
@@ -207,7 +207,7 @@ onActivated(async () => {
               :error-msg="wfRuntime.statusRemark" :inversion="false" :loading="wfRuntime.loading"
             >
               <NButton v-if="!wfRuntime.loading" size="tiny" text @click="onShowRuntimeDetail(wfRuntime.uuid)">
-                执行详情
+                {{ t('workflow.runDetail') }}
               </NButton>
             </Message>
           </div>
@@ -218,7 +218,7 @@ onActivated(async () => {
   <footer v-show="show" :class="footerClass">
     <RunDetail :workflow="workflow" @run-done="runDone" @run-error="runError" />
   </footer>
-  <NModal v-model:show="showDetailModal" title="执行详情" style="width: 90%; max-width: 900px;" preset="card">
+  <NModal v-model:show="showDetailModal" :title="t('workflow.runDetail')" style="width: 90%; max-width: 900px;" preset="card">
     <RuntimeNodes :workflow="workflow" :nodes="detailNodes" :error-msg="detailErrorMsg" class="max-h-[750px] overflow-y-auto" />
   </NModal>
 </template>

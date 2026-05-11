@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { NCard, NCol, NRow, NSpace, NStatistic, NTabPane, NTabs } from 'naive-ui'
+import { t } from '@/locales'
 
 interface Props {
   userConfig: User.Config
@@ -11,13 +12,13 @@ const props = defineProps<Props>()
 <template>
   <NSpace vertical>
     <NTabs type="bar" placement="left" animated>
-      <NTabPane name="Paid" tab="付费模型">
+      <NTabPane name="Paid" :tab="t('setting.paidModel')">
         <div>
-          <NCard title="文本聊天">
+          <NCard :title="t('setting.textChat')">
             <NRow>
               <NCol :span="8">
                 <NStatistic
-                  label="今日请求数"
+                  :label="t('setting.todayRequestCount')"
                   :value="props.userConfig?.quotaCost.paidRequestTimes.todayRequestTimes ?? '-'"
                 >
                   <template #suffix>
@@ -26,7 +27,7 @@ const props = defineProps<Props>()
                 </NStatistic>
               </NCol>
               <NCol :span="12">
-                <NStatistic label="今日消耗token数" :value="props.userConfig?.quotaCost.paidTokenCost.todayTokenCost ?? '-'">
+                <NStatistic :label="t('setting.todayTokenCost')" :value="props.userConfig?.quotaCost.paidTokenCost.todayTokenCost ?? '-'">
                   <template #suffix>
                     / {{ props.userConfig?.userQuota.tokenByDay ?? "-" }}
                   </template>
@@ -36,7 +37,7 @@ const props = defineProps<Props>()
             <NRow>
               <NCol :span="8">
                 <NStatistic
-                  label="本月请求数"
+                  :label="t('setting.monthRequestCount')"
                   :value="props.userConfig?.quotaCost.paidRequestTimes.monthRequestTimes ?? '-'"
                 >
                   <template #suffix>
@@ -45,7 +46,7 @@ const props = defineProps<Props>()
                 </NStatistic>
               </NCol>
               <NCol :span="12">
-                <NStatistic label="本月消耗token数" :value="props.userConfig?.quotaCost.paidTokenCost.monthTokenCost ?? '-'">
+                <NStatistic :label="t('setting.monthTokenCost')" :value="props.userConfig?.quotaCost.paidTokenCost.monthTokenCost ?? '-'">
                   <template #suffix>
                     / {{ props.userConfig?.userQuota.tokenByMonth ?? "-" }}
                   </template>
@@ -54,10 +55,10 @@ const props = defineProps<Props>()
             </NRow>
           </NCard>
 
-          <NCard title="图片生成">
+          <NCard :title="t('setting.imageGenerate')">
             <NRow>
               <NCol :span="8">
-                <NStatistic label="今日绘图数量" :value="props.userConfig?.quotaCost.paidDrawTimes.todayDrawTimes ?? '-'">
+                <NStatistic :label="t('setting.todayDrawCount')" :value="props.userConfig?.quotaCost.paidDrawTimes.todayDrawTimes ?? '-'">
                   <template #suffix>
                     / {{ props.userConfig?.userQuota.drawByDay ?? "-" }}
                   </template>
@@ -66,7 +67,7 @@ const props = defineProps<Props>()
             </NRow>
             <NRow>
               <NCol :span="8">
-                <NStatistic label="本月绘图数量" :value="props.userConfig?.quotaCost.paidDrawTimes.monthDrawTimes ?? '-'">
+                <NStatistic :label="t('setting.monthDrawCount')" :value="props.userConfig?.quotaCost.paidDrawTimes.monthDrawTimes ?? '-'">
                   <template #suffix>
                     / {{ props.userConfig?.userQuota.drawByMonth ?? "-" }}
                   </template>
@@ -76,41 +77,41 @@ const props = defineProps<Props>()
           </NCard>
         </div>
       </NTabPane>
-      <NTabPane name="Free" tab="免费模型">
+      <NTabPane name="Free" :tab="t('setting.freeModel')">
         <div>
-          <NCard title="文本聊天">
+          <NCard :title="t('setting.textChat')">
             <NRow>
               <NCol :span="8">
                 <NStatistic
-                  label="今日请求数"
+                  :label="t('setting.todayRequestCount')"
                   :value="props.userConfig?.quotaCost.freeRequestTimes.todayRequestTimes ?? '-'"
                 />
               </NCol>
               <NCol :span="12">
-                <NStatistic label="今日消耗token数" :value="props.userConfig?.quotaCost.freeTokenCost.todayTokenCost ?? '-'" />
+                <NStatistic :label="t('setting.todayTokenCost')" :value="props.userConfig?.quotaCost.freeTokenCost.todayTokenCost ?? '-'" />
               </NCol>
             </NRow>
             <NRow>
               <NCol :span="8">
                 <NStatistic
-                  label="本月请求数"
+                  :label="t('setting.monthRequestCount')"
                   :value="props.userConfig?.quotaCost.freeRequestTimes.monthRequestTimes ?? '-'"
                 />
               </NCol>
               <NCol :span="12">
-                <NStatistic label="本月消耗token数" :value="props.userConfig?.quotaCost.freeTokenCost.monthTokenCost ?? '-'" />
+                <NStatistic :label="t('setting.monthTokenCost')" :value="props.userConfig?.quotaCost.freeTokenCost.monthTokenCost ?? '-'" />
               </NCol>
             </NRow>
           </NCard>
-          <NCard title="图片生成">
+          <NCard :title="t('setting.imageGenerate')">
             <NRow>
               <NCol :span="8">
-                <NStatistic label="今日绘图数量" :value="props.userConfig?.quotaCost.freeDrawTimes.todayDrawTimes ?? '-'" />
+                <NStatistic :label="t('setting.todayDrawCount')" :value="props.userConfig?.quotaCost.freeDrawTimes.todayDrawTimes ?? '-'" />
               </NCol>
             </NRow>
             <NRow>
               <NCol :span="8">
-                <NStatistic label="本月绘图数量" :value="props.userConfig?.quotaCost.freeDrawTimes.monthDrawTimes ?? '-'" />
+                <NStatistic :label="t('setting.monthDrawCount')" :value="props.userConfig?.quotaCost.freeDrawTimes.monthDrawTimes ?? '-'" />
               </NCol>
             </NRow>
           </NCard>

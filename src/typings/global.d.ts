@@ -108,4 +108,5 @@ interface SysConfigInfo {
   ttsSetting: TtsSetting
   asrSetting: AsrSetting
   availableVoices: ModelVoice[]
+  defaultLocale: string
 }

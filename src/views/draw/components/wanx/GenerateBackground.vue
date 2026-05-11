@@ -6,6 +6,7 @@ import { QuestionCircle16Regular } from '@vicons/fluent'
 import SearchInput from '@/views/draw/components/SearchInput.vue'
 import { checkProcess } from '@/views/draw/helper'
 import { useAppStore, useAuthStore, useDrawStore } from '@/store'
+import { t } from '@/locales'
 import api from '@/api'
 import { emptyDraw } from '@/utils/functions'
 
@@ -33,7 +34,7 @@ async function beforeUpload(data: { file: UploadFileInfo; fileList: UploadFileIn
   if (!authStore.checkLoginOrShow())
     return false
   if (data.file.file?.type !== 'image/png') {
-    ms.error('只能上传png格式的图片文件，请重新上传')
+    ms.error(t('draw.onlyPngFormat'))
     return false
   }
   return true
@@ -85,11 +86,11 @@ function removeRefImage({ file }: { file: UploadFileInfo }) {
 
 async function handleSubmit(prompt: string) {
   if (!baseImage.value.url) {
-    ms.error('请上传主图')
+    ms.error(t('draw.pleaseUploadMainImage'))
     return
   }
   if (!refImage.value.url && !prompt) {
-    ms.error('请上传引导图或填写提示词')
+    ms.error(t('draw.pleaseUploadGuideOrPrompt'))
     return
   }
   try {
@@ -132,11 +133,11 @@ async function handleSubmit(prompt: string) {
 
 <template>
   <div>
-    <NAlert v-if="!isProd" title="提示" type="error">
-      1. 如果开启了阿里云OSS存储，需要确保图片的访问权限为公共读。<br>
-      2. 如果开启了本地存储，需要确保上传的主图及引导图可公网访问，本地开发时本功能不可用。<br>
-      3. OSS开启方式：管理后台=》系统配置=》存储位置<br>
-      原因：【通义万相-背景生成】模型需要通过公网获取主体图片及引导图片，因此请确保主体图片及引导图片均为公网可访问的图片链接。
+    <NAlert v-if="!isProd" :title="t('common.tip')" type="error">
+      {{ t('draw.ossNote1') }}<br>
+      {{ t('draw.ossNote2') }}<br>
+      {{ t('draw.ossNote3') }}<br>
+      {{ t('draw.ossReason') }}
     </NAlert>
     <NSpace vertical>
       <NSwitch v-model:value="showTip">

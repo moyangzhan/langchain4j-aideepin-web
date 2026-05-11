@@ -5,6 +5,7 @@ import type { VNode } from 'vue'
 import type { DropdownGroupOption, DropdownOption } from 'naive-ui'
 import AvatarComponent from '@/views/chat/components/Message/Avatar.vue'
 import { useAppStore } from '@/store'
+import { t } from '@/locales'
 
 const appStore = useAppStore()
 
@@ -12,7 +13,7 @@ function renderOption({ node, option }: { node: VNode; option: DropdownOption | 
   if (option.enable && option.isFree) {
     return h(NTooltip, { placement: 'left' }, {
       trigger: () => node,
-      default: () => 'Token额度无限',
+      default: () => t('setting.tokenQuotaUnlimited'),
     })
   } else {
     return node

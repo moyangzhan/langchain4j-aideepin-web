@@ -4,6 +4,7 @@ import { NTab, NTabPane, NTabs } from 'naive-ui'
 import GenerateImage from './GenerateImage.vue'
 import GenerateBackground from './GenerateBackground.vue'
 import { useAppStore } from '@/store'
+import { t } from '@/locales'
 
 interface Emit {
   (e: 'submitted'): void
@@ -15,8 +16,8 @@ interface TabObj {
 }
 const emit = defineEmits<Emit>()
 const tabObjs = ref<TabObj[]>([
-  { name: 'tab_generate_image', defaultTab: '文生图', tab: '文生图 ↓' },
-  { name: 'tab_change_background', defaultTab: '背景生成', tab: '背景生成' },
+  { name: 'tab_generate_image', defaultTab: t('draw.textToImage'), tab: `${t('draw.textToImage')} ↓` },
+  { name: 'tab_change_background', defaultTab: t('draw.backgroundGenerate'), tab: t('draw.backgroundGenerate') },
 ])
 const appStore = useAppStore()
 const interactingMethod = ref<string>(tabObjs.value[0].name)

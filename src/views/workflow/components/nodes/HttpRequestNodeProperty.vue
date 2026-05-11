@@ -3,6 +3,7 @@ import { NButton, NCollapse, NCollapseItem, NInput, NInputNumber, NSelect, NSwit
 import JsonEditorVue from 'json-editor-vue'
 import NodePropertyInput from '../NodePropertyInput.vue'
 import { SvgIcon } from '@/components/common'
+import { t } from '@/locales'
 
 const props = defineProps<Props>()
 enum Mode {
@@ -132,7 +133,7 @@ function onAddFormUrlEncodedBody() {
               <tr>
                 <th>Key</th>
                 <th>Value</th>
-                <th>操作</th>
+                <th>{{ t('common.operate') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -168,7 +169,7 @@ function onAddFormUrlEncodedBody() {
               <tr>
                 <th>Key</th>
                 <th>Value</th>
-                <th>操作</th>
+                <th>{{ t('common.operate') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -218,7 +219,7 @@ function onAddFormUrlEncodedBody() {
               <tr>
                 <th>Key</th>
                 <th>Value</th>
-                <th>操作</th>
+                <th>{{ t('common.operate') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -248,7 +249,7 @@ function onAddFormUrlEncodedBody() {
               <tr>
                 <th>Key</th>
                 <th>Value</th>
-                <th>操作</th>
+                <th>{{ t('common.operate') }}</th>
               </tr>
             </thead>
             <tbody>

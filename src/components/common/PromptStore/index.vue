@@ -148,7 +148,7 @@ const importPromptTemplate = async (from = 'online') => {
     setResp(1, resp.data)
   } catch (error) {
     console.error(error)
-    message.error('JSON 格式错误，请检查 JSON 格式')
+    message.error(t('store.jsonFormatError'))
   }
   if (from === 'local')
     showModal.value = !showModal.value
@@ -297,7 +297,7 @@ watch(
           <NInputGroup>
             <NInput v-model:value="searchValue" style="width: 100%" @keyup="search" />
             <NButton ghost @click="clickSearch">
-              搜索
+              {{ t('common.search') }}
             </NButton>
           </NInputGroup>
         </div>
@@ -345,7 +345,7 @@ watch(
       <NButton block type="primary" :disabled="inputStatus" @click="() => { importPromptTemplate('local') }">
         {{ t('common.import') }}
       </NButton>
-      <NAlert title="示例">
+      <NAlert :title="t('store.example')">
         <template #icon>
           <NIcon>
             <Note24Regular />

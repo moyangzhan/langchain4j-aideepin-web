@@ -4,6 +4,7 @@ import { NImage, NImageGroup } from 'naive-ui'
 import { SvgIcon } from '@/components/common'
 import { getIconByComponentName, getIconClassByComponentName } from '@/utils/workflow-util'
 import { useAuthStore, useWfStore } from '@/store'
+import { t } from '@/locales'
 import { getRealFileUrl } from '@/utils/functions'
 import TextComponent from '@/views/chat/components/Message/Text.vue'
 
@@ -24,10 +25,10 @@ const prologue = computed(() => {
 <template>
   <div>
     <div v-if="errorMsg" class="py-2 text-red-500">
-      错误：{{ errorMsg }}
+      {{ t('workflow.errorLabel') }}{{ errorMsg }}
     </div>
     <div v-else-if="nodes.length === 0" class="text-center py-2 text-neutral-400">
-      无内容
+      {{ t('common.noContent') }}
     </div>
     <div v-show="prologue" class="p-2">
       {{ prologue }}
@@ -43,7 +44,7 @@ const prologue = computed(() => {
           :icon="getIconByComponentName(node.wfComponent.name)"
         />
         <div class="text-base">
-          {{ node.nodeTitle || '找不到节点标题' }}
+          {{ node.nodeTitle || t('workflow.nodeTitleNotFound') }}
         </div>
       </div>
       <div class="flex flex-col space-y-2">
@@ -55,7 +56,7 @@ const prologue = computed(() => {
             {{ name }}
           </div>
           <div>
-            {{ content.value || '无内容' }}
+            {{ content.value || t('common.noContent') }}
           </div>
         </div>
         <div class="text-base border-b border-gray-200 py-1">
@@ -75,7 +76,7 @@ const prologue = computed(() => {
               {{ name }}
             </div>
             <div>
-              <TextComponent :inversion="false" :text="content.value || '无内容'" :as-raw-text="false" />
+              <TextComponent :inversion="false" :text="content.value || t('common.noContent')" :as-raw-text="false" />
             </div>
           </template>
         </div>

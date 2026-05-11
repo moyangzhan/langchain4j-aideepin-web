@@ -82,6 +82,19 @@ export const useAppStore = defineStore('app-store', {
         this.recordState()
       }
     },
+    initLocale(defaultLocale: string) {
+      if (!this.language) {
+        this.language = (defaultLocale || 'zh-CN') as Language
+        this.recordState()
+      }
+    },
+    applyUserLocale(userLocale: string) {
+      const effective = (userLocale || this.language || 'zh-CN') as Language
+      if (this.language !== effective) {
+        this.language = effective
+        this.recordState()
+      }
+    },
     recordState() {
       setLocalSetting(this.$state)
     },

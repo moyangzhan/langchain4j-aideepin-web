@@ -62,7 +62,7 @@ const menuOptions: MenuOption[] = [
             },
           },
         },
-        { default: () => '聊天' },
+        { default: () => t('menu.chat') },
       ),
   },
   {
@@ -76,7 +76,7 @@ const menuOptions: MenuOption[] = [
             name: 'Draw',
           },
         },
-        { default: () => '绘画' },
+        { default: () => t('menu.draw') },
       ),
   },
   {
@@ -90,7 +90,7 @@ const menuOptions: MenuOption[] = [
             name: 'Gallery',
           },
         },
-        { default: () => '画廊' },
+        { default: () => t('menu.gallery') },
       ),
   },
   {
@@ -107,7 +107,7 @@ const menuOptions: MenuOption[] = [
             },
           },
         },
-        { default: () => '知识库' },
+        { default: () => t('menu.knowledgeBase') },
       ),
   },
   {
@@ -124,7 +124,7 @@ const menuOptions: MenuOption[] = [
             },
           },
         },
-        { default: () => '应用' },
+        { default: () => t('menu.workflow') },
       ),
   },
   {
@@ -138,7 +138,7 @@ const menuOptions: MenuOption[] = [
             name: 'Mcp',
           },
         },
-        { default: () => '工具' },
+        { default: () => t('menu.mcp') },
       ),
   },
   // TODO: 网络搜索 RAG 功能已由聊天中模型原生 web search 替代，下个版本将删除该功能及所有相关代码
@@ -190,6 +190,7 @@ onMounted(async () => {
   appStore.setSearchEngines(engines.data)
   const sysConfig = await api.getSysConfig<SysConfigInfo>()
   appStore.setSysConfig(sysConfig.data)
+  appStore.initLocale(sysConfig.data.defaultLocale)
 })
 </script>
 
@@ -228,7 +229,7 @@ onMounted(async () => {
                   </NIcon>
                 </NButton>
               </template>
-              登录
+              {{ t('common.login') }}
             </NTooltip>
           </NSpace>
         </NLayoutSider>

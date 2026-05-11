@@ -117,8 +117,8 @@ async function handleSubmit() {
       },
       errorCallback: (error) => {
         sseRequesting.value = false
-        ms.warning(`系统提示：${error}`)
-        qaRecord.answer = `系统提示：${error}`
+        ms.warning(`${t('common.systemTip')}${error}`)
+        qaRecord.answer = `${t('common.systemTip')}${error}`
         qaRecord.loading = false
         qaRecord.error = true
         kbStore.updateRecord(currKbUuid, qaRecord.uuid, qaRecord)
@@ -148,7 +148,7 @@ async function loadMoreMessage(callback?: Function) {
 
     if (data.records.length < pageSize) {
       loadedAll.value = true
-      ms.warning('没有更多了', {
+      ms.warning(t('common.noMore'), {
         duration: 3000,
       })
     }
@@ -182,7 +182,7 @@ function handleDelete(qaRecordUuid: string) {
     return
   dialog.warning({
     title: t('chat.deleteMessage'),
-    content: '提问及对应的答案会一起删除，继续执行？',
+    content: t('knowledgeBase.questionAndAnswer'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: () => {
@@ -381,13 +381,13 @@ onActivated(async () => {
       </div>
     </footer>
 
-    <NModal v-model:show="showReferenceModal" style="max-width: 80%;" preset="card" title="引用资料">
+    <NModal v-model:show="showReferenceModal" style="max-width: 80%;" preset="card" :title="t('chat.referenceMaterial')">
       <div v-show="references.length === 0">
         无
       </div>
       <NCollapse v-show="references.length > 0" :default-expanded-names="['refer_0']">
         <NCollapseItem
-          v-for="(reference, idx) of references" :key="reference.id" :title="`引用${idx + 1}`"
+          v-for="(reference, idx) of references" :key="reference.embeddingId" :title="`引用${idx + 1}`"
           :name="`refer_${idx}`"
         >
           {{ reference.text }}
@@ -395,7 +395,7 @@ onActivated(async () => {
       </NCollapse>
     </NModal>
 
-    <NModal v-model:show="showRefGraphModal" display-directive="show" style="max-width: 80%;" preset="card" title="引用图谱">
+    <NModal v-model:show="showRefGraphModal" display-directive="show" style="max-width: 80%;" preset="card" :title="t('chat.referenceGraph')">
       <RefGraph :qa-record-uuid="showRefGraphRecordUuid" />
     </NModal>
   </div>

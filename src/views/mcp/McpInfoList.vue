@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { NButton, NPagination, useLoadingBar, useMessage } from 'naive-ui'
 import { useMcpStore } from '@/store'
 import api from '@/api'
+import { t } from '@/locales'
 import { debounce } from '@/utils/functions/debounce'
 
 const emit = defineEmits<Emit>()
@@ -29,7 +30,7 @@ async function loadMcpPage(page: number) {
   mcpStore.setLoading(true)
   try {
     if (page > 1000) {
-      ms.warning('超过最大页数限制', {
+      ms.warning(t('mcp.maxPageLimit'), {
         duration: 3000,
       })
       return
@@ -94,8 +95,8 @@ onMounted(() => {
             详情
           </NButton>
           <NButton size="tiny" quaternary type="primary" @click="onShowConfigModal(mcpInfo)">
-            <span v-if="mcpInfo.configured">配置</span>
-            <span v-if="!mcpInfo.configured">启用</span>
+            <span v-if="mcpInfo.configured">{{ t('mcp.configLabel') }}</span>
+            <span v-if="!mcpInfo.configured">{{ t('mcp.statusEnable') }}</span>
           </NButton>
         </div>
       </div>

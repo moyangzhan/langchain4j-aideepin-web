@@ -6,6 +6,7 @@ import type { SelectGroupOption, SelectOption } from 'naive-ui'
 import { emptyWorkflowInfo } from '@/utils/functions'
 import { getIconByComponentName, getIconClassByComponentName } from '@/utils/workflow-util'
 import { SvgIcon } from '@/components/common'
+import { t } from '@/locales'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -30,14 +31,14 @@ const selectedVar = ref<string>('')
 
 const userInputGroup = {
   type: 'group',
-  label: '用户的输入',
+  label: t('workflow.userInput'),
   key: 'userInput',
   children: [] as Array<{ label: string; value: string }>,
 }
 
 const componentOutputGroup = {
   type: 'group',
-  label: '节点的输出',
+  label: t('workflow.nodeOutput'),
   key: 'componentOutput',
   children: [] as Array<{ label: string; value: string }>,
 }

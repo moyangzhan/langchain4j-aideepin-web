@@ -5,6 +5,7 @@ import type { DataTableColumns, DataTableRowData, DataTableRowKey } from 'naive-
 import { defaultConv } from '@/store/modules/chat/helper'
 import { useChatStore, useUserStore } from '@/store'
 import api from '@/api'
+import { t } from '@/locales'
 
 interface Props {
   conversation: Chat.Conversation
@@ -41,16 +42,16 @@ const createColumns = (): DataTableColumns<KnowledgeBase.Info> => {
       type: 'selection',
     },
     {
-      title: '标题',
+      title: t('chat.convKnowledgeTitle'),
       key: 'title',
       width: 200,
     },
     {
-      title: '描述',
+      title: t('chat.convKnowledgeDescription'),
       key: 'remark',
     },
     {
-      title: '属性',
+      title: t('chat.convKnowledgeAttribute'),
       key: 'remark',
       render(row) {
         return h('div', { class: 'flex items-center space-x-1' }, {
@@ -60,7 +61,7 @@ const createColumns = (): DataTableColumns<KnowledgeBase.Info> => {
               tertiary: true,
               size: 'small',
             },
-            { default: () => row.ownerName === userStore.userInfo?.name ? '我的' : row.ownerName },
+            { default: () => row.ownerName === userStore.userInfo?.name ? t('common.mine') : row.ownerName },
           ),
           h(
             NTag,
@@ -68,7 +69,7 @@ const createColumns = (): DataTableColumns<KnowledgeBase.Info> => {
               tertiary: true,
               size: 'small',
             },
-            { default: () => row.isPublic ? '公开' : '私有' },
+            { default: () => row.isPublic ? t('common.public') : t('common.private') },
           ),
           ],
         })
@@ -103,7 +104,7 @@ async function onKeyUpSearch(event: KeyboardEvent) {
 
 async function search(currentPage: number) {
   if (loading.value) {
-    ms.warning('正在加载，请稍候', {
+    ms.warning(t('common.loadingPleaseWait'), {
       duration: 2000,
     })
     return
@@ -142,7 +143,7 @@ async function handleSubmit() {
       kbIds: tmpKnowledgeIds.value,
     })
     chatStore.updateConv(props.conversation.uuid, { kbIds: tmpKnowledgeIds.value, convKnowledgeList: tmpConvKnowledgeList.value })
-    ms.success('相关知识库已保存', {
+    ms.success(t('chat.convKnowledgeSaved'), {
       duration: 3000,
     })
   } catch (error) {
@@ -171,14 +172,14 @@ watch(() => props.conversation.kbIds, (newVal) => {
         {{ convKnowledge.title }}
       </NTag>
       <div v-if="tmpConvKnowledgeList.length === 0">
-        无选中数据
+        {{ t('chat.noSelectedData') }}
       </div>
     </div>
     <div>
       <div class="flex justify-between">
-        <NInput v-model:value="searchValue" class="mr-2" placeholder="请输入标题关键词" clearable @keyup="onKeyUpSearch" />
+        <NInput v-model:value="searchValue" class="mr-2" :placeholder="t('chat.searchTitlePlaceholder')" clearable @keyup="onKeyUpSearch" />
         <NButton type="primary" ghost @click="search(1)">
-          搜索
+          {{ t('common.search') }}
         </NButton>
       </div>
       <NDataTable
@@ -188,7 +189,7 @@ watch(() => props.conversation.kbIds, (newVal) => {
       />
       <div v-if="!tmpSave" class="flex justify-end mt-4">
         <NButton type="primary" @click="handleSubmit">
-          保存
+          {{ t('common.save') }}
         </NButton>
       </div>
     </div>

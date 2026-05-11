@@ -6,6 +6,7 @@ import WfVariableSelector from '../WfVariableSelector.vue'
 import OperatorSelector from '../OperatorSelector.vue'
 import shouzhitishi from '@/assets/shouzhitishi.svg'
 import { createNewEdge, deleteEdgesBySourceHandle, updateEdgeBySourceHandle } from '@/utils/workflow-util'
+import { t } from '@/locales'
 import { SvgIcon } from '@/components/common'
 import { useWfStore } from '@/store'
 
@@ -55,7 +56,7 @@ function onAddCondition(wfCase: Workflow.NodeConfigSwitcherCase) {
 
 function onDelCondition(wfCase: Workflow.NodeConfigSwitcherCase, wfCondition: Workflow.NodeConfigSwitcherCaseCondition) {
   if (wfCase.conditions.length === 1) {
-    ms.warning('至少保留一个条件')
+    ms.warning(t('workflow.keepAtLeastOneCondition'))
     return
   }
   const idx = wfCase.conditions.findIndex(item => item.uuid === wfCondition.uuid)
@@ -87,7 +88,7 @@ function onAddCase() {
 
 function onDelCase(nodeCase: Workflow.NodeConfigSwitcherCase) {
   if (nodeConfig.cases.length === 1) {
-    ms.warning('至少保留一个分支情况')
+    ms.warning(t('workflow.keepAtLeastOneBranch'))
     return
   }
   const idx = nodeConfig.cases.findIndex(item => item.uuid === nodeCase.uuid)
@@ -124,7 +125,7 @@ function onDelCase(nodeCase: Workflow.NodeConfigSwitcherCase) {
                 size="small" style="cursor: pointer;" class="rounded text-blue-400"
                 type="info" round @click="wfCase.operator = wfCase.operator === 'and' ? 'or' : 'and'"
               >
-                {{ wfCase.operator === 'and' ? '与' : '或' }}
+                {{ wfCase.operator === 'and' ? t('workflow.conditionAnd') : t('workflow.conditionOr') }}
                 <template #avatar>
                   <SvgIcon icon="mage:reload-reverse" />
                 </template>
@@ -200,7 +201,7 @@ function onDelCase(nodeCase: Workflow.NodeConfigSwitcherCase) {
     </NCollapse>
     <br>
     <NButton class="mt-2" dashed @click="onAddCase">
-      <span class="font-bold">+新增情况</span>
+      <span class="font-bold">{{ t('workflow.newCase') }}</span>
     </NButton>
   </div>
 </template>

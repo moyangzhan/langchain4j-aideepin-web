@@ -67,7 +67,7 @@ function handleDeleted() {
 function handleDelDraw(item: Chat.Draw) {
   dialog.warning({
     title: `删除绘图【${item.prompt.substring(0, 11)}】?`,
-    content: '删除内容: 1: 提示词; 2: 该提示词生成的所有图片',
+    content: t('draw.deleteDrawContent'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: async () => {
@@ -83,7 +83,7 @@ async function handleSetPublic(uuid: string, isPublic: boolean) {
     calcImageUrls(ret.data)
     drawStore.setPublic(uuid, isPublic)
     galleryStore.setPublic(ret.data)
-    ms.warning(`该绘图任务已经${isPublic ? '可以公开访问' : '关闭外部访问权限'}`)
+    ms.warning(t('draw.publicAccessChanged', { status: isPublic ? t('draw.publicAccessEnabled') : t('draw.publicAccessDisabled') }))
   }
 }
 function handleDelOneImage(uuid: string, fileUrl: string) {

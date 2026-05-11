@@ -5,6 +5,7 @@ import { useAuthStore, useChatStore } from '@/store'
 import { emptyConv } from '@/utils/functions'
 import EditConvDetail from '@/views/chat/components/Header/EditConvDetail.vue'
 import api from '@/api'
+import { t } from '@/locales'
 
 const authStore = useAuthStore()
 const authStoreRef = ref<AuthState>(authStore)
@@ -98,10 +99,10 @@ defineExpose({ toggleModal })
 <template>
   <NModal v-model:show="showModal" style="min-width:200px; width: 60%;" preset="card">
     <NTabs type="line" justify-content="space-evenly" animated>
-      <NTabPane name="newConv" tab="新的角色">
+      <NTabPane name="newConv" :tab="t('chat.newChatButton')">
         <EditConvDetail :conversation="tmpConv" @submitted="handleSubmitted" />
       </NTabPane>
-      <NTabPane name="presetConv" tab="预设角色">
+      <NTabPane name="presetConv" :tab="t('chat.presetRole')">
         <NScrollbar class="max-h-96">
           <NList hoverable bordered>
             <NListItem v-for="presetConv in chatStore.presetConvs" :key="presetConv.id">
@@ -111,12 +112,12 @@ defineExpose({ toggleModal })
               <template #suffix>
                 <template v-if="presetConv.used">
                   <NButton size="small" disabled>
-                    已使用
+                    {{ t('chat.used') }}
                   </NButton>
                 </template>
                 <template v-else>
                   <NButton size="small" @click="handleUsePresetConv(presetConv.uuid)">
-                    使用
+                    {{ t('chat.use') }}
                   </NButton>
                 </template>
               </template>

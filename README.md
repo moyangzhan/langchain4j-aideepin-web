@@ -29,7 +29,7 @@ AIDEEPIN
 * 后端服务 langchain4j-aideepin:
   * [github](https://github.com/moyangzhan/langchain4j-aideepin)
   * [gitee](https://gitee.com/moyangzhan/langchain4j-aideepin)
-* 用户端WEB langchain4j-aideepin-admin:
+* 管理端WEB langchain4j-aideepin-admin:
   * [github](https://github.com/moyangzhan/langchain4j-aideepin-admin)
   * [gitee](https://gitee.com/moyangzhan/langchain4j-aideepin-admin)
 

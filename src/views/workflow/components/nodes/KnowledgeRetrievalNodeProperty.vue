@@ -2,6 +2,7 @@
 import { NIcon, NIconWrapper, NInput, NRadio, NRadioGroup, NSlider, NTooltip } from 'naive-ui'
 import { AnimalCat24Regular, QuestionCircle16Regular } from '@vicons/fluent'
 import WfKnowledgeSelector from '../WfKnowledgeSelector.vue'
+import { t } from '@/locales'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -73,8 +74,8 @@ function onKnowledgeSelected(uuid: string, name: string) {
               <QuestionCircle16Regular />
             </NIcon>
           </template>
-          <div> 严格模式：严格匹配知识库，知识库中如无搜索结果，直接返回无答案</div>
-          <div> 宽松模式：知识库中如无搜索结果，将用户提问传给LLM继续请求答案</div>
+          <div>{{ t('knowledgeBase.strictModeDescShort') }}</div>
+          <div>{{ t('knowledgeBase.looseModeDescShort') }}</div>
         </NTooltip>
       </div>
       <div>
@@ -97,7 +98,7 @@ function onKnowledgeSelected(uuid: string, name: string) {
               <QuestionCircle16Regular />
             </NIcon>
           </template>
-          <div> 如果没有答案，则采用本内容</div>
+          <div>{{ t('workflow.noAnswerUseDefault') }}</div>
         </NTooltip>
       </div>
       <div>

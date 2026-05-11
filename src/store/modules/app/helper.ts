@@ -5,12 +5,12 @@ const LOCAL_NAME = 'appSetting'
 
 export type Theme = 'light' | 'dark' | 'auto'
 
-export type Language = 'zh-CN' | 'zh-TW' | 'en-US'
+export type Language = 'zh-CN' | 'en-US'
 
 export interface AppState {
   siderCollapsed: boolean
   theme: Theme
-  language: Language
+  language: Language | ''
 
   selectedSearchEngine: string
   selectedLLM: AiModelInfo
@@ -25,7 +25,7 @@ export function defaultSetting(): AppState {
   return {
     siderCollapsed: false,
     theme: 'light',
-    language: 'zh-CN',
+    language: '',
     selectedSearchEngine: '',
     selectedLLM: emptyAiModel(),
     selectedImageModel: emptyAiModel(),

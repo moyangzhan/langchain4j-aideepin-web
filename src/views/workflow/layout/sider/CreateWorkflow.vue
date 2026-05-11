@@ -5,6 +5,7 @@ import { SvgIcon } from '@/components/common'
 import defaultAvatar from '@/assets/avatar.jpg'
 import { useAuthStore, useUserStore, useWfStore } from '@/store'
 import api from '@/api'
+import { t } from '@/locales'
 import { emptyWorkflowInfo } from '@/utils/functions'
 
 const saving = ref<boolean>(false)
@@ -18,7 +19,7 @@ const ms = useMessage()
 async function handleSave(event?: KeyboardEvent) {
   event?.stopPropagation()
   if (!tmpWorkflow.value.title) {
-    ms.error('标题不能为空', {
+    ms.error(t('workflow.titleCannotEmpty'), {
       duration: 2000,
     })
     return
@@ -47,19 +48,19 @@ async function handleSave(event?: KeyboardEvent) {
   } finally {
     saving.value = false
     wfStore.setShowCreateView(false, '')
-    ms.success('保存成功')
+    ms.success(t('common.saveSuccessTip'))
   }
 }
 
 async function onDelete() {
   if (!tmpWorkflow.value.uuid) {
-    ms.error('删除失败，uuid为空')
+    ms.error(t('workflow.deleteFailedUuidEmpty'))
     return
   }
   await api.workflowDel(tmpWorkflow.value.uuid)
   wfStore.deleteWorkflow(tmpWorkflow.value.uuid)
   wfStore.setShowCreateView(false, '')
-  ms.success('删除成功')
+  ms.success(t('common.deleteSuccess'))
 }
 
 const viewStyle = computed(() => {
@@ -76,11 +77,11 @@ const viewStyle = computed(() => {
 
 const title = computed(() => {
   if (viewStyle.value === 'create')
-    return '新增'
+    return t('common.newAdd')
   else if (viewStyle.value === 'edit')
-    return '编辑'
+    return t('common.edit')
   else
-    return '查看'
+    return t('common.view')
 })
 
 onMounted(() => {
@@ -132,26 +133,26 @@ watch(() => wfStore.createOrEditWfUuid, (val) => {
                 </template>
               </NTag>
             </template>
-            节点
+            {{ t('workflow.nodeLabel') }}
           </NTooltip>
         </NFlex>
       </NFlex>
       <NDivider v-show="viewStyle === 'read'" />
       <div v-show="viewStyle !== 'read'">
         <NFlex class="grow" justify="space-between" vertical>
-          <NFormItem label="标题" :show-feedback="false" :show-require-mark="true">
-            <NInput v-model:value="tmpWorkflow.title" type="text" size="large" placeholder="如：翻译" />
+          <NFormItem :label="t('common.title')" :show-feedback="false" :show-require-mark="true">
+            <NInput v-model:value="tmpWorkflow.title" type="text" size="large" :placeholder="t('workflow.titlePlaceholder')" />
           </NFormItem>
-          <NFormItem label="备注" :show-feedback="false">
+          <NFormItem :label="t('workflow.remarkLabel')" :show-feedback="false">
             <NInput v-model:value="tmpWorkflow.remark" type="text" size="large" />
           </NFormItem>
-          <NFormItem label="是否公开" :show-feedback="false">
+          <NFormItem :label="t('workflow.isPublicLabel')" :show-feedback="false">
             <NSwitch v-model:value="tmpWorkflow.isPublic">
               <template #checked>
-                是
+                {{ t('common.yes') }}
               </template>
               <template #unchecked>
-                否
+                {{ t('common.no') }}
               </template>
             </NSwitch>
           </NFormItem>
@@ -160,21 +161,21 @@ watch(() => wfStore.createOrEditWfUuid, (val) => {
               v-show="tmpWorkflow.uuid" type="primary" :loading="saving" :disabled="saving"
               @click="handleSave()"
             >
-              更新
+              {{ t('workflow.updateLabel') }}
             </NButton>
             <NButton
               v-show="!tmpWorkflow.uuid" type="primary" :loading="saving" :disabled="saving"
               @click="handleSave()"
             >
-              新增
+              {{ t('common.newAdd') }}
             </NButton>
             <NPopconfirm placement="top" @positive-click.stop="onDelete">
               <template #trigger>
                 <NButton v-show="tmpWorkflow.uuid" :disabled="saving" type="error" ghost>
-                  删除
+                  {{ t('common.delete') }}
                 </NButton>
               </template>
-              删除确认
+              {{ t('workflow.deleteConfirmLabel') }}
             </NPopconfirm>
           </div>
         </NFlex>

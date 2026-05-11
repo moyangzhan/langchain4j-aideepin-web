@@ -48,7 +48,7 @@ const errorMsg = ref<string>('')
 const currWfUuid = props.workflow.uuid
 console.log('instance list currWfUuid', currWfUuid)
 const showCurrentExecution = ref<boolean>(false)
-const tabObj = ref<TabObj>({ name: 'runtimes', defaultTab: '流程执行详情', tab: '流程执行详情 ↓' })
+const tabObj = ref<TabObj>({ name: 'runtimes', defaultTab: t('workflow.flowRunDetail'), tab: `${t('workflow.flowRunDetail')} ↓` })
 const fileListLength = ref(0)
 const uploadRef = ref<UploadInst | null>(null)
 const uploadedFileUuids = ref<string[]>([])
@@ -89,7 +89,7 @@ async function run() {
 
   for (const input of userInputs.value) {
     if (input.required && input.content.type === 4 && input.content.value === null && fileListLength.value === 0) {
-      ms.warning('请上传文件')
+      ms.warning(t('workflow.pleaseUploadFile'))
       return
     }
   }
@@ -106,7 +106,7 @@ async function run() {
 
   if (userInputs.value.some(input => input.required && input.content.value === null)) {
     console.log('请输入所有必填参数')
-    ms.warning('请输入所有必填参数')
+    ms.warning(t('workflow.pleaseInputAllRequired'))
     return
   }
 
@@ -127,7 +127,7 @@ async function run() {
       signal: controller.signal,
       startCallback: (wfRuntimeJson) => {
         if (!wfRuntimeJson) {
-          ms.error('启动失败')
+          ms.error(t('workflow.startFailed'))
           return
         }
         const wfRuntime = JSON.parse(wfRuntimeJson) as Workflow.WorkflowRuntime
@@ -197,14 +197,14 @@ async function run() {
           resetInputs()
           wfStore.updateSuccess(currWfUuid, wfRuntimeUuid.value, chunk)
           runtimeErrorMsg.value = ''
-          ms.success('执行成功')
+          ms.success(t('workflow.runSuccess'))
           emit('runDone')
         })
       },
       errorCallback: (error) => {
         submitting.value = false
         resetInputs()
-        ms.error(`系统提示：${error}`)
+        ms.error(`${t('common.systemTip')}${error}`)
         wfStore.updateErrorMsg(currWfUuid, wfRuntimeUuid.value, error)
         runtimeErrorMsg.value = error || ''
         emit('runError', error)
@@ -226,7 +226,7 @@ async function resume() {
     },
     )
   } catch (e) {
-    ms.error(`系统提示：${e}`)
+    ms.error(`${t('common.systemTip')}${e}`)
   } finally {
     humanFeedback.value = false
     humanFeedbackTip.value = ''
@@ -301,7 +301,7 @@ onUnmounted(() => {
                 <template #icon>
                   <SvgIcon icon="ri:stop-circle-line" />
                 </template>
-                停止请求
+                {{ t('common.stopRequest') }}
               </NButton>
             </div>
           </div>
@@ -336,10 +336,10 @@ onUnmounted(() => {
           >
             <NUploadDragger>
               <NText style="font-size: 16px">
-                点击或者拖动文件到该区域来上传
+                {{ t('workflow.clickOrDragToUpload') }}
               </NText>
               <NP depth="2" style="margin: 4px 0 0 0">
-                文件格式: TXT、PDF、DOC、DOCX、XLS、XLXS、PPT、PPTX；文件大小：不超过10M
+                {{ t('workflow.fileFormatSizeLimit') }}
               </NP>
             </NUploadDragger>
           </NUpload>
@@ -348,7 +348,7 @@ onUnmounted(() => {
         </div>
         <div class="w-full flex justify-end">
           <NButton type="primary" :disabled="submitting" :loading="submitting" @click="run">
-            提交
+            {{ t('common.submit') }}
           </NButton>
         </div>
       </template>
@@ -357,18 +357,18 @@ onUnmounted(() => {
         <div class="flex flex-col p-2 w-full space-y-2">
           <div class="flex bg-gray-100 px-2 py-1 rounded-md">
             <div class="text-base text-red-500">
-              流程已暂停，等待用户输入中...
+              {{ t('workflow.flowPausedWaitingInput') }}
             </div>
           </div>
           <div class="flex flex-col w-full">
             <div v-if="humanFeedbackTip" class="text-sm leading-8">
-              提示：{{ humanFeedbackTip }}
+              {{ t('workflow.inputTip') }}{{ humanFeedbackTip }}
             </div>
             <NInput v-model:value="humanFeedbackContent" type="textarea" :autosize="{ minRows: 2, maxRows: 5 }" />
           </div>
           <div class="flex justify-end">
             <NButton type="primary" @click="resume">
-              提交
+              {{ t('common.submit') }}
             </NButton>
           </div>
         </div>

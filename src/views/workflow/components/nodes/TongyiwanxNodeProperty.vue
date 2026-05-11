@@ -5,6 +5,7 @@ import NodePropertyInput from '../NodePropertyInput.vue'
 import WfImageModelSelector from '../WfImageModelSelector.vue'
 import ReferComment from '../ReferComment.vue'
 import { TONGYI_WANX_SIZE_OPTIONS } from '@/utils/constant'
+import { t } from '@/locales'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -42,7 +43,7 @@ function selected(modelName: string) {
               <QuestionCircle16Regular />
             </NIcon>
           </template>
-          <div>为空则表示使用上一个节点的输出做为提示词</div>
+          <div>{{ t('workflow.promptEmptyUsePrevious') }}</div>
         </NTooltip>
       </div>
       <div class="flex flex-col">

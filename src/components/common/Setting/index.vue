@@ -77,7 +77,7 @@ onMounted(() => {
         <NTabPane name="ModifyPassword" tab="ModifyPassword">
           <template #tab>
             <SvgIcon class="text-lg" icon="carbon:password" />
-            <span class="ml-2">修改密码</span>
+            <span class="ml-2">{{ $t('setting.modifyPassword') }}</span>
           </template>
           <ModifyPassword />
         </NTabPane>

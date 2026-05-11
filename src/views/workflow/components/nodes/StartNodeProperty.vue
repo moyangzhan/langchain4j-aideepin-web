@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { SvgIcon } from '@/components/common'
 import { getNameByInputType } from '@/utils/workflow-util'
 import { useWfStore } from '@/store'
+import { t } from '@/locales'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -37,47 +38,47 @@ const tmpItem = reactive<Workflow.NodeIODefinition>({
 // const tmpPrologue = ref<string>((props.wfNode.nodeConfig as Workflow.NodeConfigStart).prologue || '')
 const options = [
   {
-    label: '文本',
+    label: t('workflow.variableTypeText'),
     value: 1,
   },
   {
-    label: '数字',
+    label: t('workflow.variableTypeNumber'),
     value: 2,
   },
   {
-    label: '文件',
+    label: t('workflow.variableTypeFile'),
     value: 4,
   },
   {
-    label: '布尔值',
+    label: t('workflow.variableTypeBoolean'),
     value: 5,
   },
 ]
 const columns = [
   {
-    title: '变量名',
+    title: t('workflow.variableName'),
     key: 'name',
   },
   {
-    title: '标题',
+    title: t('workflow.variableTitle'),
     key: 'title',
   },
   {
-    title: '类型',
+    title: t('workflow.variableType'),
     key: 'type',
     render(row: { type: number }) {
       return getNameByInputType(row.type)
     },
   },
   {
-    title: '必填',
+    title: t('workflow.variableRequired'),
     key: 'required',
     render(row: { required: boolean }) {
-      return row.required ? '是' : '否'
+      return row.required ? t('common.yes') : t('common.no')
     },
   },
   {
-    title: '操作',
+    title: t('common.operate'),
     key: 'actions',
     render(row: Workflow.NodeIODefinition) {
       return h(
@@ -169,7 +170,7 @@ function submitForm() {
       +新增
     </NButton>
   </div>
-  <NModal v-model:show="showModal" style="width: 90%; max-height: 700px; max-width: 600px" preset="card" title="变量设置">
+  <NModal v-model:show="showModal" style="width: 90%; max-height: 700px; max-width: 600px" preset="card" :title="t('workflow.nodeSetting')">
     <div class="flex flex-col w-full justify-between space-y-4">
       <div>
         类型

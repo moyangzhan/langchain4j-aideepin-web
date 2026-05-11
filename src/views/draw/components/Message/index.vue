@@ -49,13 +49,13 @@ const options = computed(() => {
   let setPublicOrPrivate = null
   if (props.draw.isPublic) {
     setPublicOrPrivate = {
-      label: '私有',
+      label: t('draw.privateLabel'),
       key: 'setPrivate',
       icon: iconRender({ icon: 'ri:lock-line' }),
     }
   } else {
     setPublicOrPrivate = {
-      label: '公开',
+      label: t('draw.publicLabel'),
       key: 'setPublic',
       icon: iconRender({ icon: 'ri:cloud-line' }),
     }
@@ -95,8 +95,8 @@ function handleSelect(key: 'copyText' | 'setPublic' | 'setPrivate' | 'delete') {
 
 function handleDelImage(imageUrl: string) {
   dialog.warning({
-    title: '删除图片确认',
-    content: '只删除该图片，不删除对应的提示图',
+    title: t('chat.deleteImageConfirmTitle'),
+    content: t('chat.deleteImageConfirmContent'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: async () => {
@@ -179,7 +179,7 @@ function openDetail(uuid: string) {
           </template>
           <template v-else>
             <template v-if="!imageUrls || imageUrls.length === 0">
-              <NEmpty description="找不到图片" />
+              <NEmpty :description="t('draw.imageNotFound')" />
             </template>
             <template v-if="imageUrls && imageUrls.length > 0">
               <NSpace>

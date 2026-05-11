@@ -3,6 +3,7 @@ import type { DataTableColumns } from 'naive-ui'
 import { NDataTable, NModal, NScrollbar } from 'naive-ui'
 import { h, reactive, ref, watch } from 'vue'
 import api from '@/api'
+import { t } from '@/locales'
 
 interface Props {
   kbItemUuid: string
@@ -26,7 +27,7 @@ const createColumns = (): DataTableColumns<KnowledgeBase.KbEmbedding> => {
       width: 200,
     },
     {
-      title: '嵌入',
+      title: t('knowledgeBase.embedding'),
       key: 'embedding',
       render(row) {
         return h('div', {
@@ -47,7 +48,7 @@ const createColumns = (): DataTableColumns<KnowledgeBase.KbEmbedding> => {
       },
     },
     {
-      title: '文档片段',
+      title: t('knowledgeBase.docFragment'),
       key: 'text',
       render(row) {
         return h('div', {
@@ -104,7 +105,7 @@ watch(
     :pagination="paginationReactive" :single-line="false" :bordered="true" @update:page="onHandlePageChange"
   />
 
-  <NModal v-model:show="showModal" style="width: 60%;" preset="card" title="详情">
+  <NModal v-model:show="showModal" style="width: 60%;" preset="card" :title="t('common.detail')">
     <NScrollbar style="max-height: 400px">
       {{ modalContent }}
     </NScrollbar>

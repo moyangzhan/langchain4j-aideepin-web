@@ -3,6 +3,7 @@ import { NAvatar, NButton, NFlex, NIcon, NImage, NImageGroup, NTag, useMessage }
 import { LockClosed24Regular, LockOpen24Regular, Star24Filled, Star24Regular } from '@vicons/fluent'
 import { ModelAlt } from '@vicons/carbon'
 import { useAuthStore, useDrawStore, useGalleryStore, useUserStore } from '@/store'
+import { t } from '@/locales'
 import defaultAvatar from '@/assets/avatar.jpg'
 import NoPic from '@/assets/no_pic.png'
 import api from '@/api'
@@ -94,19 +95,19 @@ async function handleStar(uuid: string) {
         </NTag>
       </NFlex>
     </NFlex>
-    <NFlex>提示词：{{ draw.prompt }}</NFlex>
+    <NFlex>{{ t('draw.promptLabel') }}{{ draw.prompt }}</NFlex>
     <template v-if="draw.interactingMethod === 4">
-      <NFlex>引用图片:</NFlex>
+      <NFlex>{{ t('draw.referenceImage') }}</NFlex>
       <NFlex>
         <NImageGroup>
           <NImage
             :src="`${getRealFileUrl(draw.dynamicParams.base_image_url)}?token=${authStore.token}`"
-            :fallback-src="NoPic" object-fit="cover" title="原图" width="100"
+            :fallback-src="NoPic" object-fit="cover" :title="t('draw.originalImage')" width="100"
           />
           <NImage
             v-if="draw.dynamicParams.ref_image_url"
             :src="`${getRealFileUrl(draw.dynamicParams.ref_image_url)}?token=${authStore.token}`" :fallback-src="NoPic"
-            object-fit="cover" title="引导图" width="100"
+            object-fit="cover" :title="t('draw.guideImage')" width="100"
           />
         </NImageGroup>
       </NFlex>

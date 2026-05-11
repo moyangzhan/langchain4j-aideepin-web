@@ -143,7 +143,7 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
   console.log('input editor chat')
   const conv = chatStore.getConvByUuid(props.conversationUuid)
   if (!conv) {
-    ms.error('会话不存在或已被删除')
+    ms.error(t('chat.conversationNotFound'))
     return
   }
   api.sseProcess({
@@ -247,7 +247,7 @@ const fetchChatAPIOnce = async (message: string, userAudioUuid: string, userAudi
       ms.warning(error)
       isChatting.value = false
       const question = messages.value[messages.value.length - 1]
-      updateMessageSomeFields(props.conversationUuid, question.children[0].uuid, { remark: `系统提示：${error}`, thinking: false, loading: false })
+      updateMessageSomeFields(props.conversationUuid, question.children[0].uuid, { remark: `${t('common.systemTip')}${error}`, thinking: false, loading: false })
       chattingMsg.value.state = new Map<string, string>()
     },
   })
@@ -276,7 +276,7 @@ async function createChatTask(userAudioUuid = '', userAudioUrl = '', audioDurati
 
     const conv = chatStore.getConvByUuid(props.conversationUuid)
     if (!conv) {
-      ms.error('会话不存在或已被删除')
+      ms.error(t('chat.conversationNotFound'))
       return
     }
     const answerContentType = chatStore.answerContentType(conv, userAudioUuid)
@@ -310,6 +310,7 @@ async function createChatTask(userAudioUuid = '', userAudioUrl = '', audioDurati
         attachmentUrls: [],
         isRefEmbedding: false,
         isRefGraph: false,
+        isRefMemoryEmbedding: false,
         audioPlayState: emptyAudioPlayState(),
       }],
       inversion: true,
@@ -317,6 +318,7 @@ async function createChatTask(userAudioUuid = '', userAudioUrl = '', audioDurati
       attachmentUrls: [],
       isRefEmbedding: false,
       isRefGraph: false,
+      isRefMemoryEmbedding: false,
       audioPlayState,
     }
     // add my question
@@ -364,7 +366,7 @@ const searchOptions = computed(() => {
 const placeholder = computed(() => {
   if (isMobile.value)
     return t('chat.placeholderMobile')
-  return 'Shift + Enter = 换行 ；/ 开头显示提示词'
+  return t('chat.placeholder')
 })
 
 defineExpose({
@@ -398,7 +400,7 @@ defineExpose({
       </template>
     </NButton>
     <NModal :show="showAudioRecorderModal">
-      <NCard style="max-width: 600px" title="语音对话" size="huge" :bordered="false" role="dialog" aria-modal="true">
+      <NCard style="max-width: 600px" :title="t('chat.voiceChat')" size="huge" :bordered="false" role="dialog" aria-modal="true">
         <AudioRecorder
           @recorded="handleAudioRecorded" @submitted="handleAudioSubmitted"
           @exit="showAudioRecorderModal = false"

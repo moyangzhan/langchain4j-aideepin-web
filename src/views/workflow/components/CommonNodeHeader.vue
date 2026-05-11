@@ -4,11 +4,12 @@ import { NDropdown } from 'naive-ui'
 import { SvgIcon } from '@/components/common'
 import { getIconByComponentName, getIconClassByComponentName } from '@/utils/workflow-util'
 import { useWfStore } from '@/store'
+import { t } from '@/locales'
 
 const props = defineProps<Props>()
 const options = [
   {
-    label: '删除',
+    label: t('common.delete'),
     key: 'delete',
     icon: renderIcon('ri:delete-bin-line'),
   },

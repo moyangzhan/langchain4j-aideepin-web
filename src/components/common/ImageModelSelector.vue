@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { NButton, NDropdown, NFlex } from 'naive-ui'
 import { useAppStore } from '@/store'
+import { t } from '@/locales'
 const appStore = useAppStore()
 
 function handleSelect(key: string | number) {
@@ -15,7 +16,7 @@ function handleSelect(key: string | number) {
     @select="handleSelect"
   >
     <NFlex>
-      当前模型：
+      {{ t('draw.currentModel') }}
       <NButton icon-placement="right" text tag="a" type="primary">
         {{ appStore.selectedImageModel.modelTitle || appStore.selectedImageModel.modelName }}
       </NButton>

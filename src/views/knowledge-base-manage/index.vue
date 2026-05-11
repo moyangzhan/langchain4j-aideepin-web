@@ -53,7 +53,7 @@ const changeShowModal = (selected: KnowledgeBase.Info = knowledgeBaseEmptyInfo()
 const createColumns = (): DataTableColumns<KnowledgeBase.Info> => {
   return [
     {
-      title: '标题',
+      title: t('common.title'),
       key: 'title',
       width: 200,
       render(row) {
@@ -73,23 +73,23 @@ const createColumns = (): DataTableColumns<KnowledgeBase.Info> => {
       },
     },
     {
-      title: '描述',
+      title: t('common.description'),
       key: 'remark',
     },
     {
-      title: '是否公开',
+      title: t('knowledgeBase.isPublic'),
       key: 'isPublic',
       width: 100,
       render(row) {
-        return row.isPublic ? '是' : '否'
+        return row.isPublic ? t('common.yes') : t('common.no')
       },
     },
     {
-      title: '严格模式',
+      title: t('knowledgeBase.isStrict'),
       key: 'isStrict',
       width: 100,
       render(row) {
-        return row.isStrict ? '是' : '否'
+        return row.isStrict ? t('common.yes') : t('common.no')
       },
     },
     {
@@ -109,7 +109,7 @@ const createColumns = (): DataTableColumns<KnowledgeBase.Info> => {
                 class: 'col-span-2',
                 onClick: () => router.push({ name: 'KnowledgeBaseManageDetail', params: { kbUuid: row.uuid } }),
               },
-              { default: () => '进入知识库' },
+              { default: () => t('knowledgeBase.enterKnowledgeBase') },
             ),
             h(
               NButton,
@@ -153,7 +153,7 @@ async function onKeyUpSearch(event: KeyboardEvent) {
 
 async function search(currentPage: number) {
   if (loading.value) {
-    ms.warning('正在加载，请稍候', {
+    ms.warning(t('common.loadingPleaseWait'), {
       duration: 2000,
     })
     return
@@ -193,16 +193,16 @@ async function saveOrUpdateKb() {
 
 function deleteKb(row: KnowledgeBase.Info) {
   dialog.warning({
-    title: '提示',
-    content: `删除后数据无法恢复，确定要删除知识库 ${row.title} 吗?`,
-    positiveText: '确定',
-    negativeText: '取消',
+    title: t('common.tip'),
+    content: t('knowledgeBase.deleteKbConfirm', { title: row.title }),
+    positiveText: t('common.confirm'),
+    negativeText: t('common.cancel'),
     onPositiveClick: () => {
       api.knowledgeBaseDelete(row.uuid)
       const index = infoList.value.findIndex(item => item.uuid === row.uuid)
       if (index !== -1)
         infoList.value.splice(index, 1)
-      ms.success('删除成功')
+      ms.success(t('common.deleteSuccess'))
     },
   })
 }
@@ -263,24 +263,24 @@ watch(
   </div>
 
   <NModal
-    v-model:show="showModal" :title="tmpKb.id === '0' ? '新建' : '编辑'" style="width: 90%; max-width: 700px; "
+    v-model:show="showModal" :title="tmpKb.id === '0' ? t('common.newCreate') : t('common.edit')" style="width: 90%; max-width: 700px; "
     preset="card"
   >
     <div class="max-h-[600px] overflow-y-auto pr-2">
       <div class="flex flex-col space-y-2">
         <div :class="itemBoxClass">
-          <div>标题<span class="text-red-400"> *</span></div>
+          <div>{{ t('common.title') }}<span class="text-red-400"> *</span></div>
           <NInput v-model:value="tmpKb.title" maxlength="100" :placeholder="t('store.title')" show-count />
         </div>
         <div :class="itemBoxClass">
-          <div>描述</div>
+          <div>{{ t('common.description') }}</div>
           <NInput
             v-model:value="tmpKb.remark" type="textarea" :placeholder="t('store.description')" maxlength="500"
             show-count :autosize="{ minRows: 3, maxRows: 10 }"
           />
         </div>
         <div :class="itemBoxClass">
-          <div>是否公开</div>
+          <div>{{ t('knowledgeBase.isPublic') }}</div>
           <NRadioGroup v-model:value="tmpKb.isPublic" name="radiogroup">
             <NRadio key="public_yes" :value="true">
               公开
@@ -299,8 +299,8 @@ watch(
                   <QuestionCircle16Regular />
                 </NIcon>
               </template>
-              <div> 严格模式：严格匹配知识库，知识库中如无搜索结果，直接返回无答案</div>
-              <div> 宽松模式：知识库中如无搜索结果，将用户提问传给LLM继续请求答案</div>
+              <div>{{ t('knowledgeBase.strictModeDescShort') }}</div>
+              <div>{{ t('knowledgeBase.looseModeDescShort') }}</div>
             </NTooltip>
           </div>
           <NRadioGroup v-model:value="tmpKb.isStrict" name="radiogroup">
@@ -313,10 +313,10 @@ watch(
           </NRadioGroup>
         </div>
         <NCollapse>
-          <NCollapseItem title="文档索引设置（向量）">
+          <NCollapseItem :title="t('knowledgeBase.docIndexSettingVector')">
             <div class="flex flex-col space-y-2">
               <div :class="itemBoxClass">
-                <div>文档切割时重叠数量（改动后对新索引生效）</div>
+                <div>{{ t('knowledgeBase.docOverlapCount') }}</div>
                 <NInputNumber v-model:value="tmpKb.ingestMaxOverlap" />
               </div>
               <div :class="itemBoxClass">
@@ -330,7 +330,7 @@ watch(
               </div>
             </div>
           </NCollapseItem>
-          <NCollapseItem title="文档索引设置（图谱）">
+          <NCollapseItem :title="t('knowledgeBase.docIndexSettingGraph')">
             <div class="flex flex-col space-y-2">
               <div :class="itemBoxClass">
                 <div>
@@ -341,36 +341,36 @@ watch(
                         <QuestionCircle16Regular />
                       </NIcon>
                     </template>
-                    <div> 抽取图数据时使用的模型，为空则使用第一个可用的模型</div>
+                    <div>{{ t('knowledgeBase.modelExtractTip') }}</div>
                   </NTooltip>
                 </div>
                 <NSelect :value="tmpKb.ingestModelName" :options="appStore.llms" :on-update:value="onModelChange" />
               </div>
             </div>
           </NCollapseItem>
-          <NCollapseItem title="文档召回设置">
+          <NCollapseItem :title="t('knowledgeBase.docRecallSetting')">
             <div class="flex flex-col space-y-2">
               <div :class="itemBoxClass">
-                <div>文档召回最大数量</div>
+                <div>{{ t('knowledgeBase.docRecallMaxCount') }}</div>
                 <NInputNumber v-model:value="tmpKb.retrieveMaxResults" />
               </div>
               <div :class="itemBoxClass">
-                <div>文档召回最小分数</div>
+                <div>{{ t('knowledgeBase.docRecallMinScore') }}</div>
                 <NInputNumber v-model:value="tmpKb.retrieveMinScore" :precision="1" :min="0" :max="1" />
               </div>
             </div>
           </NCollapseItem>
-          <NCollapseItem title="大模型参数设置">
+          <NCollapseItem :title="t('knowledgeBase.llmParamSetting')">
             <div class="flex flex-col space-y-2">
               <div :class="itemBoxClass">
-                <div>系统提示词（角色设定）</div>
+                <div>{{ t('knowledgeBase.systemPromptRole') }}</div>
                 <NInput
                   v-model:value="tmpKb.querySystemMessage" type="textarea"
                   :autosize="{ minRows: 2, maxRows: 5 }"
                 />
               </div>
               <div :class="itemBoxClass">
-                <div>响应时的创造性/随机性</div>
+                <div>{{ t('knowledgeBase.responseCreativity') }}</div>
                 <NInputNumber v-model:value="tmpKb.queryLlmTemperature" :precision="1" :min="0" :max="1" />
               </div>
             </div>

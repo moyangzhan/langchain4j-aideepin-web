@@ -37,15 +37,15 @@ const tmpConvKbIds = ref<string[]>([])
 async function beforeUpload(data: { file: UploadFileInfo; fileList: UploadFileInfo[] }) {
   const file = data.file.file
   if (!file) {
-    ms.error('文件不存在')
+    ms.error(t('chat.fileNotExist'))
     return false
   }
   if (allowedImageTypes.findIndex(item => item === file.type) === -1) {
-    ms.error('只能上传PNG/JPG格式的图片文件，请重新上传')
+    ms.error(t('chat.imageFormatError'))
     return false
   }
   if (file.size > 4 * 1024 * 1024) {
-    ms.error('不能超过4MB')
+    ms.error(t('chat.fileSizeExceed'))
     return false
   }
   return true
@@ -85,7 +85,7 @@ const isDeepSeekThinking = computed(() => {
 
 function handleMcpModalShow() {
   if (isDeepSeekThinking.value) {
-    ms.warning('DeepSeek 深度思考模式下不支持工具调用，请先关闭深度思考')
+    ms.warning(t('chat.deepThinkingIncompatibleWithTool'))
     return
   }
   mcpModalShow.value = true
@@ -140,12 +140,12 @@ async function toogleThinking() {
     if (isDeepSeekThinking.value && currConv.value.mcpIds.length > 0) {
       currConv.value.mcpIds = []
       await api.convEdit(currConv.value.uuid, { mcpIds: [] })
-      ms.warning('深度思考已开启，工具调用已自动关闭')
+      ms.warning(t('chat.deepThinkingAutoCloseTool'))
     } else {
-      ms.success('深度思考已开启')
+      ms.success(t('chat.deepThinkingEnabled'))
     }
   } else {
-    ms.warning('深度思考已关闭')
+    ms.warning(t('chat.deepThinkingDisabled'))
   }
 }
 
@@ -155,7 +155,7 @@ async function toogleWebSearch() {
     return
   }
   if (isDeepSeekThinking.value) {
-    ms.warning('DeepSeek 深度思考模式下不支持联网搜索，请先关闭深度思考')
+    ms.warning(t('chat.deepThinkingIncompatibleWithWebSearch'))
     return
   }
   currConv.value.isEnableWebSearch = !currConv.value.isEnableWebSearch
@@ -163,13 +163,13 @@ async function toogleWebSearch() {
     await api.convEdit(currConv.value.uuid, { isEnableWebSearch: currConv.value.isEnableWebSearch })
   } catch (err) {
     console.error('toogleWebSearch error', err)
-    ms.error(`操作失败${err}`, { duration: 2000 })
+    ms.error(`${t('chat.operationFailed')}${err}`, { duration: 2000 })
     return
   }
   if (currConv.value.isEnableWebSearch)
-    ms.success('联网搜索已开启')
+    ms.success(t('chat.webSearchEnabled'))
   else
-    ms.warning('联网搜索已关闭')
+    ms.warning(t('chat.webSearchDisabled'))
 }
 
 watch(
@@ -192,7 +192,7 @@ watch(isDeepSeekThinking, async (newVal) => {
     if (currConv.value.mcpIds.length > 0) {
       currConv.value.mcpIds = []
       await api.convEdit(currConv.value.uuid, { mcpIds: [] })
-      ms.warning('深度思考已开启，工具调用已自动关闭')
+      ms.warning(t('chat.deepThinkingAutoCloseTool'))
     }
     if (currConv.value.isEnableWebSearch) {
       currConv.value.isEnableWebSearch = false
@@ -201,7 +201,7 @@ watch(isDeepSeekThinking, async (newVal) => {
       } catch (err) {
         console.error('auto disable webSearch error', err)
       }
-      ms.warning('深度思考已开启，联网搜索已自动关闭')
+      ms.warning(t('chat.deepThinkingAutoCloseWebSearch'))
     }
   }
 }, { immediate: true })
@@ -219,29 +219,29 @@ watch(isDeepSeekThinking, async (newVal) => {
         @click="toogleThinking"
       >
         <template v-if="isReasoner && isThinkingClosable">
-          深度思考
+          {{ t('chat.deepThinking') }}
           <NSwitch :value="currConv.isEnableThinking" size="small" />
         </template>
         <template v-if="isReasoner && !isThinkingClosable">
           <NPopover trigger="hover">
             <template #trigger>
               <div>
-                深度思考
+                {{ t('chat.deepThinking') }}
                 <NSwitch :value="true" size="small" disabled />
               </div>
             </template>
-            <span> 模型不支持关闭深度思考功能 </span>
+            <span> {{ t('chat.deepThinkingCannotDisable') }} </span>
           </NPopover>
         </template>
         <template v-if="!isReasoner">
           <NPopover trigger="hover">
             <template #trigger>
               <div>
-                深度思考
+                {{ t('chat.deepThinking') }}
                 <NSwitch :value="false" size="small" disabled />
               </div>
             </template>
-            <span> 模型不支持深度思考功能 </span>
+            <span> {{ t('chat.deepThinkingNotSupported') }} </span>
           </NPopover>
         </template>
       </div>
@@ -251,18 +251,18 @@ watch(isDeepSeekThinking, async (newVal) => {
         @click="toogleWebSearch"
       >
         <template v-if="appStore.selectedLLM.isSupportWebSearch">
-          联网搜索
+          {{ t('chat.webSearch') }}
           <NSwitch :value="currConv.isEnableWebSearch" size="small" />
         </template>
         <template v-if="!appStore.selectedLLM.isSupportWebSearch">
           <NPopover trigger="hover">
             <template #trigger>
               <div>
-                联网搜索
+                {{ t('chat.webSearch') }}
                 <NSwitch :value="false" size="small" disabled />
               </div>
             </template>
-            <span> 模型不支持联网搜索功能 </span>
+            <span> {{ t('chat.webSearchNotSupported') }} </span>
           </NPopover>
         </template>
       </div>
@@ -290,7 +290,7 @@ watch(isDeepSeekThinking, async (newVal) => {
                 <SvgIcon icon="ri:image-line" />
               </span>
             </template>
-            <span> {{ canUploadImage ? '上传图片以识别其内容' : '模型不支持图片识别' }} </span>
+            <span> {{ canUploadImage ? t('chat.uploadImageTip') : t('chat.uploadImageNotSupported') }} </span>
           </NPopover>
         </NUpload>
       </div>
@@ -298,19 +298,19 @@ watch(isDeepSeekThinking, async (newVal) => {
         class="overflow-hidden rounded border hover:border-green-600 p-1 h-8 cursor-pointer"
         @click="handleKnowledgeModalShow"
       >
-        <span class="text-xs text-green-600">知识库：</span>
+        <span class="text-xs text-green-600">{{ t('chat.knowledgeBaseLabel') }}</span>
         <template v-for="knolwedge in currConv.convKnowledgeList" :key="knolwedge.uuid">
           <span class="text-xs mr-1">{{ knolwedge.title }}</span>
         </template>
-        <span v-if="currConv.convKnowledgeList.length === 0" class="text-xs mr-1">无</span>
+        <span v-if="currConv.convKnowledgeList.length === 0" class="text-xs mr-1">{{ t('common.none') }}</span>
       </div>
       <div class="flex-1 overflow-hidden rounded border hover:border-green-600 cursor-pointer p-1 h-8" @click="handleMcpModalShow">
-        <span class="text-xs text-green-600">工具：</span>
+        <span class="text-xs text-green-600">{{ t('chat.toolLabel') }}</span>
         <template v-for="userMcp in mcpStore.myUserMcpList" :key="userMcp.uuid">
           <span v-if="currConv.mcpIds.includes(userMcp.mcpInfo.id)" class="text-xs mr-1">{{ userMcp.mcpInfo.title
           }}</span>
         </template>
-        <span v-if="currConv.mcpIds.length === 0" class="text-xs mr-1">无</span>
+        <span v-if="currConv.mcpIds.length === 0" class="text-xs mr-1">{{ t('common.none') }}</span>
       </div>
     </div>
     <NList hoverable show-divider>
@@ -326,24 +326,24 @@ watch(isDeepSeekThinking, async (newVal) => {
     </NList>
     <NModal
       v-model:show="knowledgeModalShow" display-directive="show" style="width: 90%; max-width: 800px"
-      preset="card" title="配置会话使用的知识库"
+      preset="card" :title="t('chat.configConversationKnowledge')"
     >
       <ConvKnowledgeSelector :tmp-save="false" :conversation="currConv" @submitted="handleKnowledgeSave" />
     </NModal>
-    <NModal v-model:show="mcpModalShow" style="width: 90%; max-width: 640px" preset="card" title="配置会话使用的服务与工具">
+    <NModal v-model:show="mcpModalShow" style="width: 90%; max-width: 640px" preset="card" :title="t('chat.configMcp')">
       <NCheckboxGroup v-model:value="tmpMcpIds" class="my-2 flex flex-wrap space-x-2">
         <NCheckbox
           v-for="userMcp in mcpStore.myUserMcpList" :key="userMcp.uuid" :value="userMcp.mcpInfo.id"
           :label="userMcp.mcpInfo.title"
         />
       </NCheckboxGroup>
-      <span v-if="mcpStore.myUserMcpList.length === 0" class="mr-1">无数据</span>
+      <span v-if="mcpStore.myUserMcpList.length === 0" class="mr-1">{{ t('common.noData') }}</span>
       <NFlex justify="space-between" class="mt-4">
         <NButton type="primary" text tag="a" class="mt-4" @click="gotoMcp">
-          去启用更多AI工具
+          {{ t('chat.goEnableMoreTools') }}
         </NButton>
         <NButton type="primary" @click="handleSaveMcps()">
-          保存
+          {{ t('common.save') }}
         </NButton>
       </NFlex>
     </NModal>

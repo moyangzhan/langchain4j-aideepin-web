@@ -7,6 +7,7 @@ import { format } from 'date-fns'
 import { SvgIcon } from '@/components/common'
 import AudioWaveIcon from '@/icons/AudioWave.vue'
 import api from '@/api'
+import { t } from '@/locales'
 
 const emit = defineEmits<Emit>()
 interface Emit {
@@ -30,7 +31,7 @@ let port: any = null
 async function startRecording() {
   errorMsg.value = ''
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    errorMsg.value = '浏览器不支持音频录制'
+    errorMsg.value = t('audio.browserNotSupportRecord')
     return
   }
   console.log('Recording started')
@@ -53,12 +54,12 @@ async function startRecording() {
     console.error('startRecording error', exception)
     errorMsg.value = exception.message
     if (exception.message.includes('Permission denied'))
-      errorMsg.value = '获取录音设备失败，请检查浏览器权限设置'
+      errorMsg.value = t('audio.getRecordDeviceFailed')
     else if (exception.message.includes('Requested device not found'))
-      errorMsg.value = '没有找到录音设备，请检查设备连接'
+      errorMsg.value = t('audio.noRecordDevice')
 
     if (!errorMsg.value)
-      errorMsg.value = '获取录音设备失败，请检查浏览器权限设置'
+      errorMsg.value = t('audio.getRecordDeviceFailed')
   }
 }
 
@@ -88,11 +89,11 @@ async function stopRecording() {
 }
 async function submit() {
   if (audioChunks.value.length === 0) {
-    ms.error('没有录音可上传')
+    ms.error(t('audio.noRecordToUpload'))
     return
   }
   if (submitting.value) {
-    ms.warning('正在上传，请稍候')
+    ms.warning(t('audio.uploadingPleaseWait'))
     return
   }
   try {
@@ -102,7 +103,7 @@ async function submit() {
     if (resp.success)
       emit('submitted', resp.data.uuid, resp.data.url, recordingDuration.value / 1000)
     else
-      ms.error('上传音频失败')
+      ms.error(t('audio.uploadAudioFailed'))
   } catch (error) {
     ms.error('上传音频失败')
   } finally {
@@ -112,7 +113,7 @@ async function submit() {
 
 function exit() {
   if (submitting.value) {
-    ms.warning('正在上传，请稍候')
+    ms.warning(t('audio.uploadingPleaseWait'))
     return
   }
   audioUrl.value = ''
@@ -124,11 +125,11 @@ function exit() {
 
 function toggleRecording() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    ms.error('浏览器不支持音频录制')
+    ms.error(t('audio.browserNotSupportRecord'))
     return
   }
   if (submitting.value) {
-    ms.warning('正在上传，请稍候')
+    ms.warning(t('audio.uploadingPleaseWait'))
     return
   }
   if (recording.value)
@@ -144,12 +145,12 @@ function toggleRecording() {
       v-if="!recording" class="text-6xl cursor-pointer custom-hover" icon="pepicons-pop:microphone-circle-filled"
       @click="toggleRecording"
     />
-    <AudioWaveIcon v-if="recording" class="cursor-pointer" placeholder="对话中" @click="toggleRecording" />
+    <AudioWaveIcon v-if="recording" class="cursor-pointer" :placeholder="t('audio.dialogPlaceholder')" @click="toggleRecording" />
     <div v-if="!recording" class="text-sm text-gray-500">
-      点击开始对话
+      {{ t('audio.clickToStart') }}
     </div>
     <div v-if="recording" class="text-sm text-gray-500">
-      对话中({{ recordingDuration / 1000 }}秒)，点击图标结束
+      {{ t('audio.dialogCount', { count: recordingDuration / 1000 }) }}
     </div>
     <div v-if="errorMsg" class="text-sm text-red-500">
       {{ errorMsg }}
@@ -159,10 +160,10 @@ function toggleRecording() {
     </div>
     <div v-if="!recording" class="flex items-center space-x-2 justify-items-end pt-4">
       <NButton ghost class="mt-6" :loading="submitting" :disabled="submitting" @click="exit">
-        取消
+        {{ t('common.cancel') }}
       </NButton>
       <NButton v-if="audioUrl" ghost class="mt-6" :loading="submitting" :disabled="!audioUrl || submitting" @click="submit">
-        发送
+        {{ t('audio.sendLabel') }}
       </NButton>
     </div>
   </div>

@@ -5,6 +5,7 @@ import { NButton, NCollapse, NCollapseItem, NInput } from 'naive-ui'
 import NodeSelector from '../NodeSelector.vue'
 import WfLLMSelector from '../WfLLMSelector.vue'
 import { createNewEdge, deleteEdgesBySourceHandle, updateEdgeBySourceHandle } from '@/utils/workflow-util'
+import { t } from '@/locales'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -95,7 +96,7 @@ function onDeleteCategory(category: Workflow.NodeConfigClassifierCategory) {
             <div class="mb-2">
               <NInput v-model:value="category.category_name" type="textarea" :autosize="{ minRows: 1, maxRows: 3 }" />
             </div>
-            <div>下一步</div>
+            <div>{{ t('workflow.nextStep') }}</div>
             <div class="mb-3">
               <NodeSelector
                 :workflow="props.workflow" :wf-node="props.wfNode" :selected="category.target_node_uuid"

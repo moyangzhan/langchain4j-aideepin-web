@@ -7,6 +7,7 @@ import type { VNodeChild } from 'vue'
 import { debounce } from '@/utils/functions/debounce'
 import { useAuthStore, useUserStore } from '@/store'
 import api from '@/api'
+import { t } from '@/locales'
 
 interface Props {
   knowledgeBaseUuid: string
@@ -26,13 +27,13 @@ const currentPage = ref<number>(1)
 const pageSize = 10
 const mineGroup = ref<SelectGroupOption>({
   type: 'group',
-  label: '我的',
+  label: t('common.mine'),
   key: 'g_mine',
   children: [] as Array<{ label: string; value: string; is_public: boolean }>,
 })
 const publicGroup = ref<SelectGroupOption>({
   type: 'group',
-  label: '公开的',
+  label: t('common.publicAccess'),
   key: 'g_public',
   children: [] as Array<{ label: string; value: string; is_public: boolean }>,
 })
@@ -172,7 +173,7 @@ watch(
 
 <template>
   <NSelect
-    ref="selectInstRef" v-model:value="selectedKnowledgeUuid" filterable placeholder="搜索知识库" :options="options"
+    ref="selectInstRef" v-model:value="selectedKnowledgeUuid" filterable :placeholder="t('workflow.searchKnowledgeBase')" :options="options"
     clearable remote :render-label="renderLabel" @update:value="handleSelect" @search="handleSearch"
   />
 </template>

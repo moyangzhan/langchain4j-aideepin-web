@@ -4,6 +4,7 @@ import { useLoadingBar, useMessage } from 'naive-ui'
 import DrawList from './DrawList.vue'
 import Header from './Header.vue'
 import { useGalleryStore } from '@/store'
+import { t } from '@/locales'
 import api from '@/api'
 import { debounce } from '@/utils/functions/debounce'
 
@@ -39,7 +40,7 @@ async function loadNextPublicPage() {
       galleryStore.appendPublicDraws(data.draws)
     } else {
       loadedPublicAll.value = true
-      ms.warning('没有更多了', {
+      ms.warning(t('common.noMore'), {
         duration: 3000,
       })
     }
@@ -70,7 +71,7 @@ async function loadNextStarPage() {
       galleryStore.appendStarDraws(data.draws)
     } else {
       loadedFavAll.value = true
-      ms.warning('没有更多了', {
+      ms.warning(t('common.noMore'), {
         duration: 3000,
       })
     }

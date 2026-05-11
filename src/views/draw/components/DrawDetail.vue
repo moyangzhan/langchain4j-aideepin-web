@@ -45,7 +45,7 @@ interface Emit {
 function handleDelDraw(uuid: string, prompt: string) {
   dialog.warning({
     title: `删除绘图【${prompt.substring(0, 11)}】?`,
-    content: '删除内容: 1: 提示词; 2: 该提示词生成的所有图片',
+    content: t('draw.deleteDrawContent'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: async () => {
@@ -63,7 +63,7 @@ async function handleSetPublic(uuid: string, isPublic: boolean) {
     drawStore.setPublic(uuid, isPublic)
     galleryStore.setPublic(ret.data)
     currentDraw.value.isPublic = ret.data.isPublic
-    ms.warning(`该绘图任务已经${isPublic ? '可以公开访问' : '关闭外部访问权限'}`)
+    ms.warning(t('draw.publicAccessChanged', { status: isPublic ? t('draw.publicAccessEnabled') : t('draw.publicAccessDisabled') }))
   }
 }
 
@@ -113,7 +113,7 @@ async function fetchPrev() {
     if (resp && resp.data)
       assignNewToCurrentDraw(resp.data)
     else
-      ms.info('没有上一个了')
+      ms.info(t('draw.noPrevious'))
   } catch (e) {
     console.error(e)
   }
@@ -140,7 +140,7 @@ async function fetchNext() {
     if (resp && resp.data)
       assignNewToCurrentDraw(resp.data)
     else
-      ms.info('没有下一个了')
+      ms.info(t('draw.noNext'))
   } catch (e) {
     console.error(e)
   }
@@ -212,12 +212,12 @@ watch(
         </template>
         <template v-else>
           <template v-if="currentDraw.uuid === drawStore.loadingUuid && currentDraw.processStatus === 2">
-            <NEmpty :description="`异常：${currentDraw.processStatusRemark}`" />
+            <NEmpty :description="`${t('draw.errorPrefix')}${currentDraw.processStatusRemark}`" />
           </template>
           <template
             v-else-if="currentDraw.uuid !== drawStore.loadingUuid && (!currentDraw.imageUrls || currentDraw.imageUrls.length === 0)"
           >
-            <NEmpty description="找不到图片" />
+            <NEmpty :description="t('draw.imageNotFound')" />
           </template>
           <template v-else-if="currentDraw.imageUuids && currentDraw.imageUuids.length > 0">
             <NImageGroup>
@@ -248,7 +248,7 @@ watch(
         <div>
           <DrawDetailFuncBar :draw="currentDraw" @set-public="handleSetPublic" @del-draw="handleDelDraw" />
         </div>
-        <NCard title="评论" size="small" class="mt-10">
+        <NCard :title="t('draw.comment')" size="small" class="mt-10">
           <NFlex vertical>
             <div :style="`max-height: ${defaultImageHeight / 2}px`" class="overflow-y-auto">
               <NList hoverable>
@@ -279,7 +279,7 @@ watch(
               />
             </NFlex>
             <NInput
-              v-model:value="newComment" class="mt-3" type="textarea" placeholder="这张图片如何？发表你的看法吧~" :autosize="{
+              v-model:value="newComment" class="mt-3" type="textarea" :placeholder="t('draw.commentPlaceholder')" :autosize="{
                 minRows: 2,
               }"
             />

@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid'
 import WfVariableSelector from './WfVariableSelector.vue'
 import { SvgIcon } from '@/components/common'
 import { useWfStore } from '@/store'
+import { t } from '@/locales'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -28,7 +29,7 @@ const inputsCount = computed(() => {
 })
 function onAdd() {
   if (inputsCount.value > props.limit) {
-    ms.warning(`最多只能添加${props.limit}个输入`)
+    ms.warning(t('workflow.maxInputLimit', { limit: props.limit }))
     return
   }
 
@@ -70,7 +71,7 @@ function onVariableSelected(wfInput: Workflow.NodeIORefDinition, nodeUuidParamNa
 
 <template>
   <NCollapse :default-expanded-names="['1']">
-    <NCollapseItem title="输入" name="1" class="text-lg border border-gray-200 rounded-md m-2 px-3 pb-2">
+    <NCollapseItem :title="t('common.input')" name="1" class="text-lg border border-gray-200 rounded-md m-2 px-3 pb-2">
       <template #header>
         <div class="text-xl">
           输入

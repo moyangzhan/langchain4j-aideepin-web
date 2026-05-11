@@ -5,7 +5,7 @@ import { NButton, NIcon, NImage, NInput, NModal, NSpace, NTabPane, NTabs, NTag, 
 // import { useRouter } from 'vue-router'
 import { CheckmarkCircle } from '@vicons/ionicons5'
 import api from '@/api'
-import { useAuthStore, useUserStore } from '@/store'
+import { useAppStore, useAuthStore, useUserStore } from '@/store'
 import Icon403 from '@/icons/403.vue'
 
 interface LoginResp {
@@ -13,12 +13,14 @@ interface LoginResp {
   name: string
   email: string
   uuid: string
+  locale: string
   captchaId?: string
 }
 
 // const router = useRouter()
 const authStore = useAuthStore()
 const userStore = useUserStore()
+const appStore = useAppStore()
 const ms = useMessage()
 const loading = ref(false)
 const email = ref('')
@@ -65,6 +67,7 @@ async function handleLogin() {
     const result = await api.login<LoginResp>(email.value, pwd, loginCaptchaId.value, loginCaptchaCode.value)
     await authStore.setToken(result.data.token)
     await userStore.updateUserInfo(result.data)
+    appStore.applyUserLocale(result.data.locale)
     ms.success('success')
   } catch (error: any) {
     console.error('login error', error)

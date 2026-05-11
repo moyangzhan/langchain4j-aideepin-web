@@ -4,6 +4,7 @@ import { QuestionCircle16Regular } from '@vicons/fluent'
 import NodePropertyInput from '../NodePropertyInput.vue'
 import ReferComment from '../ReferComment.vue'
 import { GOOGLE_COUNTRY_OPTIONS, GOOGLE_LANGUAGE_OPTIONS } from '@/utils/constant'
+import { t } from '@/locales'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -25,7 +26,7 @@ const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigGoogleSearch
               <QuestionCircle16Regular />
             </NIcon>
           </template>
-          <div>为空则表示使用上一个节点的输出做为查询内容</div>
+          <div>{{ t('workflow.queryEmptyUsePrevious') }}</div>
         </NTooltip>
       </div>
       <div class="flex flex-col">

@@ -15,6 +15,7 @@ import { emptyWorkflowInfo } from '@/utils/functions'
 import { createNewEdge, createNewNode } from '@/utils/workflow-util'
 import { useUserStore, useWfStore } from '@/store'
 import api from '@/api'
+import { t } from '@/locales'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -33,9 +34,9 @@ const userStore = useUserStore()
 
 const saveDisabledTip = computed(() => {
   if (userStore.userInfo.uuid !== props.workflow.userUuid)
-    return '只有工作流的创建者才能保存'
+    return t('workflow.onlyCreatorCanSave')
   if (submitting.value)
-    return '正在保存中...'
+    return t('workflow.saving')
   return ''
 })
 
@@ -158,7 +159,7 @@ function onDrop(event: DragEvent) {
     return
   }
   if (comName === 'Start') {
-    ms.warning('开始节点只能有一个')
+    ms.warning(t('workflow.startNodeOnlyOne'))
     return
   }
 
@@ -220,7 +221,7 @@ async function onSave() {
   submitting.value = true
   try {
     const { data: updatedWorkflow } = await api.workflowUpdate(props.workflow)
-    ms.success('保存成功')
+    ms.success(t('common.saveSuccessTip'))
     // 只需要更新新增节点和边的id
     wfStore.updateNodesAndEdgesId(props.workflow.uuid, updatedWorkflow)
   } catch (e) {
@@ -337,7 +338,7 @@ onUnmounted(() => {
                     :disabled="submitting" text-color="black" color="white" style="margin-right:1.5rem"
                     class="shadow-lg" @click="onRun"
                   >
-                    运 行
+                    {{ t('workflow.run') }}
                   </NButton>
                   <NTooltip v-if="saveDisabledTip" :disabled="!saveDisabledTip">
                     <template #trigger>
@@ -345,7 +346,7 @@ onUnmounted(() => {
                         :disabled="!!saveDisabledTip" :loading="submitting"
                         type="info" class="shadow-lg" @click="onSave"
                       >
-                        保 存
+                        {{ t('workflow.save') }}
                       </NButton>
                     </template>
                     {{ saveDisabledTip }}
@@ -354,7 +355,7 @@ onUnmounted(() => {
                     v-else :loading="submitting"
                     type="info" class="shadow-lg" @click="onSave"
                   >
-                    保 存
+                    {{ t('workflow.save') }}
                   </NButton>
                 </div>
                 <WfDefineRightPanel

@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { NTab, NTabPane, NTabs } from 'naive-ui'
 import GenerateImage from './GenerateImage.vue'
+import { t } from '@/locales'
 
 interface Emit {
   (e: 'submitted'): void
@@ -13,7 +14,7 @@ interface TabObj {
 }
 const emit = defineEmits<Emit>()
 const tabObjs = ref<TabObj[]>([
-  { name: 'tab_generate_image', defaultTab: '文生图', tab: '文生图 ↓' },
+  { name: 'tab_generate_image', defaultTab: t('draw.textToImage'), tab: `${t('draw.textToImage')} ↓` },
 ])
 const tabPanelShow = ref<boolean>(true)
 

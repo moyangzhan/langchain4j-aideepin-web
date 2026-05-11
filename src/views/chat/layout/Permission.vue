@@ -7,6 +7,7 @@ import { CheckmarkCircle } from '@vicons/ionicons5'
 import api from '@/api'
 import { useAuthStore, useUserStore } from '@/store'
 import Icon403 from '@/icons/403.vue'
+import { t } from '@/locales'
 
 interface Props {
   visible: boolean
@@ -76,12 +77,12 @@ async function handleLogin() {
   const name = email.value.trim()
   const pwd = password.value.trim()
   if (!name || !pwd) {
-    ms.error('账号名或密码不能为空')
+    ms.error(t('common.emailOrPasswordEmpty'))
     return
   }
 
   if (loginCaptchaId.value && !loginCaptchaCode.value) {
-    ms.error('请输入验证码')
+    ms.error(t('common.pleaseInputCaptcha'))
     return
   }
   try {
@@ -111,7 +112,7 @@ async function handleRegister() {
   const confirmPwd = confirmPassword.value.trim()
 
   if (!mail || !pwd || !confirmPwd || pwd !== confirmPwd) {
-    ms.error('两次输入的密码不一致 | Passwords don\'t match')
+    ms.error(t('common.passwordNotMatch'))
     return
   }
 
@@ -162,7 +163,7 @@ async function handleForgotPassword() {
         <NTabs v-model:value="activeTab" default-value="login" type="line">
           <NTabPane name="login" :tab="$t('common.login')">
             <NSpace vertical>
-              <NInput v-model:value="email" type="text" placeholder="邮箱" :input-props="{ autocomplete: 'on' }" />
+              <NInput v-model:value="email" type="text" :placeholder="t('common.email')" :input-props="{ autocomplete: 'on' }" />
               <NInput
                 v-model:value="password" type="password" show-password-on="click"
                 :placeholder="$t('common.password')" @keypress="handlePress"
@@ -228,9 +229,9 @@ async function handleForgotPassword() {
             </NSpace>
           </NTabPane>
 
-          <NTabPane name="forgotPassword" tab="">
+          <NTabPane name="forgotPassword" :tab="t('common.findMyPassword')">
             <NSpace vertical>
-              <NInput v-model:value="email" type="text" size="large" placeholder="邮箱" />
+              <NInput v-model:value="email" type="text" size="large" :placeholder="t('common.email')" />
               <NTag v-if="resetPasswordReturnMsg" :type="resetPasswordReturnMsg ? 'success' : 'error'">
                 {{ resetPasswordReturnMsg }}
                 <template #icon>

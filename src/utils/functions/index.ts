@@ -266,6 +266,7 @@ export function emptyChatMessage(): Chat.ChatMessage {
       attachmentUrls: [],
       isRefEmbedding: false,
       isRefGraph: false,
+      isRefMemoryEmbedding: false,
       audioPlayState: emptyAudioPlayState(),
       contentType: CHAT_MESSAGE_CONTENT_TYPE.text, // 2: text, 3: audio
     }], // for reply
@@ -273,6 +274,7 @@ export function emptyChatMessage(): Chat.ChatMessage {
     attachmentUrls: [],
     isRefEmbedding: false,
     isRefGraph: false,
+    isRefMemoryEmbedding: false,
     audioPlayState: emptyAudioPlayState(),
     contentType: CHAT_MESSAGE_CONTENT_TYPE.text, // 2: text, 3: audio
   }
@@ -422,5 +424,6 @@ export function emptySysConfigInfo(): SysConfigInfo {
     asrSetting: emptyAsrSetting(),
     ttsSetting: emptyTtsSetting(),
     availableVoices: [],
+    defaultLocale: 'zh-CN',
   }
 }

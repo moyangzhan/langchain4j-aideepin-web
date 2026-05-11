@@ -3,6 +3,7 @@ import { onMounted, ref, watch } from 'vue'
 import { NInput } from 'naive-ui'
 import { AnswerNodeProperty, ClassifierNodeProperty, DocumentExtractorNodeProperty, EndNodeProperty, FaqExtractorNodeProperty, GoogleNodeProperty, HttpRequestNodeProperty, HumanFeedbackNodeProperty, KeywordExtractorNodeProperty, KnowledgeRetrievalNodeProperty, MailSendNodeProperty, OpenAiImageNodeProperty, StartNodeProperty, SwticherNodeProperty, TemplateNodeProperty, TongyiwanxNodeProperty } from './components/nodes'
 import { useWfStore } from '@/store'
+import { t } from '@/locales'
 import { SvgIcon } from '@/components/common'
 import { getIconByComponentName, getIconClassByComponentName } from '@/utils/workflow-util'
 import { emptyWorkflowNode } from '@/utils/functions'
@@ -56,7 +57,7 @@ onMounted(() => {
             :icon="getIconByComponentName(wfNode.wfComponent.name)"
           />
           <NInput
-            v-model:value="nodeTitle" placeholder="节点名称" class="h-8 border-gray-100"
+            v-model:value="nodeTitle" :placeholder="t('workflow.nodeNamePlaceholder')" class="h-8 border-gray-100"
             style="font-size: 1rem;line-height: 1.5rem;font-weight: 700;"
           />
         </div>
@@ -64,7 +65,7 @@ onMounted(() => {
                     <NInput v-model:value="selectedNode.data.remark" placeholder="该节点功能描述" />
                   </div> -->
         <div class="text-sm text-gray-500">
-          组件功能：{{ wfNode.wfComponent.remark }}
+          {{ t('workflow.componentFunction') }}{{ wfNode.wfComponent.remark }}
         </div>
       </div>
       <div class="overflow-y-auto" :style="`height:${innerHeight - 250}px`">

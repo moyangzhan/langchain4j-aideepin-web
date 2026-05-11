@@ -46,6 +46,7 @@ declare namespace User {
         secretKey?: string
         contextEnable?: boolean
         contextMsgPairNum?: number
+        locale?: string
         userQuota: UserQuota
         quotaCost: QuotaCost
     }

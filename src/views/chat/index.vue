@@ -146,7 +146,7 @@ const fetchChatAPIOnce = async (regenerateQuestionUuid: string, childAudioPlaySt
   const convUuid = currConv.value.uuid
   const conv = chatStore.getConvByUuid(convUuid)
   if (!conv) {
-    ms.error('会话不存在或已被删除')
+    ms.error(t('chat.conversationNotFound'))
     return
   }
   api.sseProcess({
@@ -173,7 +173,7 @@ const fetchChatAPIOnce = async (regenerateQuestionUuid: string, childAudioPlaySt
     thinkingDataReceived: (chunk) => {
       const question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
       if (!question) {
-        ms.error('找不到提问')
+        ms.error(t('chat.questionNotFound'))
         return
       }
       try {
@@ -195,7 +195,7 @@ const fetchChatAPIOnce = async (regenerateQuestionUuid: string, childAudioPlaySt
     messageReceived: (chunk) => {
       const question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
       if (!question) {
-        ms.error('找不到提问')
+        ms.error(t('chat.questionNotFound'))
         return
       }
       try {
@@ -227,7 +227,7 @@ const fetchChatAPIOnce = async (regenerateQuestionUuid: string, childAudioPlaySt
     doneCallback: (chunk) => {
       const question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
       if (!question) {
-        ms.error('找不到提问')
+        ms.error(t('chat.questionNotFound'))
         return
       }
       const answer = question.children[0]
@@ -252,10 +252,10 @@ const fetchChatAPIOnce = async (regenerateQuestionUuid: string, childAudioPlaySt
       ms.warning(error)
       const question = messages.value.find((q: { uuid: string }) => q.uuid === regenerateQuestionUuid)
       if (!question) {
-        ms.error('找不到提问')
+        ms.error(t('chat.questionNotFound'))
         return
       }
-      updateMessageSomeFields(convUuid, question.children[0].uuid, { remark: `系统提示：${error}`, loading: false })
+      updateMessageSomeFields(convUuid, question.children[0].uuid, { remark: `${t('common.systemTip')}${error}`, loading: false })
     },
   })
 }
@@ -333,7 +333,7 @@ async function loadMoreMessage(callback?: Function) {
 
     if (data.msgList.length < pageSize) {
       chatStore.updateConv(curConvUuid, { minMsgUuid: data.minMsgUuid, loadedAll: true })
-      ms.warning('没有更多了', {
+      ms.warning(t('common.noMore'), {
         duration: 3000,
       })
     } else {
@@ -371,7 +371,7 @@ function handleDelete(questionUuid: string, answerUuid: string, isQuestion = fal
 
   let tip = t('chat.deleteMessageConfirm')
   if (isQuestion)
-    tip = '删除提问也会把答案一起删除'
+    tip = t('chat.deleteQuestionAlsoDeleteAnswer')
 
   dialog.warning({
     title: t('chat.deleteMessage'),
@@ -522,7 +522,7 @@ onDeactivated(() => {
                 >
                   <NTabPane
                     v-for="(answer, index) of qaMessage.children" :key="`tab_${answer.uuid}`"
-                    :name="`tab_${answer.uuid}`" :tab="`答案${index + 1}`"
+                    :name="`tab_${answer.uuid}`" :tab="`${t('chat.answer')} ${index + 1}`"
                   >
                     <AudioMessage
                       v-if="answer.contentType === CHAT_MESSAGE_CONTENT_TYPE.audio" :conversation="currConv"
@@ -535,19 +535,19 @@ onDeactivated(() => {
                           v-if="!!answer && !answer.loading && answer.isRefMemoryEmbedding" size="tiny" text
                           type="primary" @click="handleMemoryRefClick(answer.uuid)"
                         >
-                          记忆
+                          {{ t('chat.memory') }}
                         </NButton>
                         <NButton
                           v-if="!!answer && !answer.loading && answer.isRefEmbedding" size="tiny" text
                           type="primary" @click="handleEmbeddingRefClick(answer.uuid)"
                         >
-                          引用
+                          {{ t('chat.reference') }}
                         </NButton>
                         <NButton
                           v-if="!!answer && !answer.loading && answer.isRefGraph" size="tiny" text type="primary"
                           @click="handleGraphClick(answer.uuid)"
                         >
-                          图谱
+                          {{ t('chat.graph') }}
                         </NButton>
                       </div>
                     </AudioMessage>
@@ -598,19 +598,19 @@ onDeactivated(() => {
                       v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefMemoryEmbedding" size="tiny" text
                       type="primary" @click="handleMemoryRefClick(qaMessage.children[0].uuid)"
                     >
-                      记忆
+                      {{ t('chat.memory') }}
                     </NButton>
                     <NButton
                       v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefEmbedding"
                       size="tiny" text type="primary" @click="handleEmbeddingRefClick(qaMessage.children[0].uuid)"
                     >
-                      引用
+                      {{ t('chat.reference') }}
                     </NButton>
                     <NButton
                       v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefGraph"
                       size="tiny" text type="primary" @click="handleGraphClick(qaMessage.children[0].uuid)"
                     >
-                      图谱
+                      {{ t('chat.graph') }}
                     </NButton>
                   </div>
                 </AudioMessage>
@@ -627,19 +627,19 @@ onDeactivated(() => {
                       v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefMemoryEmbedding" size="tiny" text
                       type="primary" @click="handleMemoryRefClick(qaMessage.children[0].uuid)"
                     >
-                      记忆
+                      {{ t('chat.memory') }}
                     </NButton>
                     <NButton
                       v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefEmbedding"
                       size="tiny" text type="primary" @click="handleEmbeddingRefClick(qaMessage.children[0].uuid)"
                     >
-                      引用
+                      {{ t('chat.reference') }}
                     </NButton>
                     <NButton
                       v-if="!!qaMessage.children[0] && !qaMessage.children[0].loading && qaMessage.children[0].isRefGraph"
                       size="tiny" text type="primary" @click="handleGraphClick(qaMessage.children[0].uuid)"
                     >
-                      图谱
+                      {{ t('chat.graph') }}
                     </NButton>
                   </div>
                 </Message>
@@ -662,7 +662,7 @@ onDeactivated(() => {
             <template #icon>
               <SvgIcon icon="ri:stop-circle-line" />
             </template>
-            停止请求
+            {{ t('common.stopRequest') }}
           </NButton>
         </div>
       </div>
@@ -678,14 +678,14 @@ onDeactivated(() => {
       </div>
     </footer>
 
-    <NModal v-model:show="showRefEmbeddingModal" style="max-width: 80%;" preset="card" title="引用资料">
+    <NModal v-model:show="showRefEmbeddingModal" style="max-width: 80%;" preset="card" :title="t('chat.referenceMaterial')">
       <div v-show="knowledgeEmbeddingRef.length === 0" class="flex items-center justify-center h-64">
-        <span v-show="!loaddingEmbeddingRef">无数据</span>
+        <span v-show="!loaddingEmbeddingRef">{{ t('common.noData') }}</span>
         <SvgIcon v-show="loaddingEmbeddingRef" icon="line-md:loading-loop" class="text-2xl text-green-800 w-12 h-12" />
       </div>
       <NCollapse v-show="knowledgeEmbeddingRef.length > 0" :default-expanded-names="['refer_0']">
         <NCollapseItem
-          v-for="(reference, idx) of knowledgeEmbeddingRef" :key="reference.embeddingId" :title="`引用${idx + 1}`"
+          v-for="(reference, idx) of knowledgeEmbeddingRef" :key="reference.embeddingId" :title="`${t('chat.reference')}${idx + 1}`"
           :name="`refer_${idx}`"
         >
           {{ reference.text }}
@@ -693,14 +693,14 @@ onDeactivated(() => {
       </NCollapse>
     </NModal>
 
-    <NModal v-model:show="showMemoryModal" style="max-width: 80%;" preset="card" title="命中的记忆">
+    <NModal v-model:show="showMemoryModal" style="max-width: 80%;" preset="card" :title="t('chat.hitMemory')">
       <div v-show="memoryEmbeddings.length === 0" class="flex items-center justify-center h-64">
-        <span v-show="!loaddingMemory">无数据</span>
+        <span v-show="!loaddingMemory">{{ t('common.noData') }}</span>
         <SvgIcon v-show="loaddingMemory" icon="line-md:loading-loop" class="text-2xl text-green-800 w-12 h-12" />
       </div>
       <NCollapse v-show="memoryEmbeddings.length > 0" :default-expanded-names="['refer_0']">
         <NCollapseItem
-          v-for="(reference, idx) of memoryEmbeddings" :key="reference.embeddingId" :title="`记忆${idx + 1}`"
+          v-for="(reference, idx) of memoryEmbeddings" :key="reference.embeddingId" :title="`${t('chat.memory')}${idx + 1}`"
           :name="`refer_${idx}`"
         >
           {{ reference.text }}
@@ -710,7 +710,7 @@ onDeactivated(() => {
 
     <NModal
       v-model:show="showRefGraphModal" display-directive="show" style="max-width: 80%;" preset="card"
-      title="引用图谱"
+      :title="t('chat.referenceGraph')"
     >
       <RefGraph :msg-uuid="showRefGraphMsgUuid" />
     </NModal>

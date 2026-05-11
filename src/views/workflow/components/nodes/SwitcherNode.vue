@@ -3,6 +3,7 @@ import { Handle, Position } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
 import CommonNodeHeader from '../CommonNodeHeader.vue'
 import { useWfStore } from '@/store'
+import { t } from '@/locales'
 import { getInputLabelFromParamName } from '@/utils/workflow-util'
 
 interface WfProps {
@@ -50,7 +51,7 @@ function inceaseYPosition() {
               v-if="cidx !== wfCase.conditions.length - 1" class="absolute text-blue-400 text-xs"
               :style="`right:10px;top: ${yposition + 12}px`"
             >
-              {{ wfCase.operator === 'and' ? '与' : '或' }}
+              {{ wfCase.operator === 'and' ? t('workflow.conditionAnd') : t('workflow.conditionOr') }}
             </div>
           </div>
         </div>

@@ -9,6 +9,7 @@ import { useBasicLayout } from '@/hooks/useBasicLayout'
 import LoginTip from '@/views/user/LoginTip.vue'
 import NoPic from '@/assets/no_pic.png'
 import { emptyDraw, getRealFileUrl } from '@/utils/functions'
+import { t } from '@/locales'
 
 const props = withDefaults(defineProps<Props>(), {
   draws: () => [],
@@ -87,12 +88,12 @@ defineExpose({ gotoTop, gotoBottom })
             </template>
             <template v-else>
               <template v-if="draw.uuid !== drawStore.loadingUuid && draw.processStatus === 2">
-                <NEmpty description="绘图失败" />
+                <NEmpty :description="t('draw.drawFailed')" />
               </template>
               <template
                 v-else-if="draw.uuid !== drawStore.loadingUuid && (!draw.imageUrls || draw.imageUrls.length === 0)"
               >
-                <NEmpty description="找不到图片" />
+                <NEmpty :description="t('draw.imageNotFound')" />
               </template>
               <template v-else-if="draw.imageUrls && draw.imageUrls.length > 0">
                 <template v-for="imageUrl in draw.imageUrls" :key="imageUrl">

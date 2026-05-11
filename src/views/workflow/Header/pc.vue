@@ -5,6 +5,7 @@ import { HoverButton, SvgIcon } from '@/components/common'
 import { emptyWorkflowInfo } from '@/utils/functions'
 import { useAuthStore, useUserStore, useWfStore } from '@/store'
 import api from '@/api'
+import { t } from '@/locales'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -26,14 +27,14 @@ const options = computed(() => {
   const mine = props.workflow.userUuid === userStore.userInfo.uuid
   const common = [
     {
-      label: mine ? '编辑' : '查看',
+      label: mine ? t('common.edit') : t('common.view'),
       key: 'edit',
       icon: renderIcon(mine ? 'carbon:edit' : 'carbon:information'),
     },
   ]
   if (authStore.token) {
     common.push({
-      label: '复制',
+      label: t('workflow.copyLabel'),
       key: 'copy',
       icon: renderIcon('ri:file-copy-2-line'),
     })
@@ -68,7 +69,7 @@ function showEditView() {
 async function onCopy() {
   const { data: newWorkflow } = await api.workflowCopy(props.workflow.uuid)
   wfStore.appendWorkflows([newWorkflow], true)
-  ms.success('复制成功')
+  ms.success(t('workflow.copySuccess'))
 }
 
 function handleSelect(key: string | number) {
@@ -101,17 +102,17 @@ function handleSelect(key: string | number) {
       <div class="flex items-center">
         <HoverButton
           placement="left" class="w-[70px] mr-2"
-          :tooltip="showViewType === 'instanceList' ? '切换到流程图' : '切换到请求列表'" @click="toogleView()"
+          :tooltip="showViewType === 'instanceList' ? t('workflow.switchToFlow') : t('workflow.switchToRequestList')" @click="toogleView()"
         >
           <div class="text-xl flex items-center space-x-2">
             <NTag v-if="showViewType === 'instanceList'" round :bordered="false" :style="{ cursor: 'pointer' }">
-              工作流
+              {{ t('workflow.workflowLabel') }}
               <template #avatar>
                 <SvgIcon class="text-xl" icon="carbon:flow" />
               </template>
             </NTag>
             <NTag v-if="showViewType !== 'instanceList'" round :bordered="false" :style="{ cursor: 'pointer' }">
-              请求列表
+              {{ t('workflow.requestList') }}
               <template #avatar>
                 <SvgIcon class="text-xl" icon="si:align-left-detailed-line" />
               </template>

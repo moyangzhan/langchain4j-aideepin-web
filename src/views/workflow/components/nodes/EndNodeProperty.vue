@@ -2,6 +2,7 @@
 import { NInput } from 'naive-ui'
 import NodePropertyInput from '../NodePropertyInput.vue'
 import ReferComment from '../ReferComment.vue'
+import { t } from '@/locales'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -11,7 +12,7 @@ interface Props {
 const props = defineProps<Props>()
 const nodeConfig = props.wfNode.nodeConfig as Workflow.NodeConfigEnd
 if (!nodeConfig.result)
-  nodeConfig.result = '任务执行完成'
+  nodeConfig.result = t('workflow.taskComplete')
 </script>
 
 <template>

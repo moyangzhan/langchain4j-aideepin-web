@@ -4,6 +4,7 @@ import { QuestionCircle16Regular } from '@vicons/fluent'
 import NodePropertyInput from '../NodePropertyInput.vue'
 import ReferComment from '../ReferComment.vue'
 import WfLLMSelector from '../WfLLMSelector.vue'
+import { t } from '@/locales'
 
 interface Props {
   workflow: Workflow.WorkflowInfo
@@ -40,7 +41,7 @@ function llmSelected(aiModel: AiModelInfo) {
               <QuestionCircle16Regular />
             </NIcon>
           </template>
-          <div>为空则表示使用上一个节点的输出做为提示词</div>
+          <div>{{ t('workflow.promptEmptyUsePrevious') }}</div>
         </NTooltip>
       </div>
       <div class="flex flex-col">
