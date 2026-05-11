@@ -179,6 +179,7 @@ export default {
     operationFailed: '操作失败',
     voiceChat: '语音对话',
     editConversation: '编辑',
+    memory: '记忆',
     reference: '引用',
     graph: '图谱',
     noAnswer: '[无答案]',
