@@ -48,7 +48,7 @@ let synthesis: SpeechSynthesis | null = null
 if ('speechSynthesis' in window)
   synthesis = window.speechSynthesis
 else
-  console.log('浏览器不支持语音合成')
+  console.log('Browser does not support speech synthesis')
 
 function playAudioByClick() {
   // 如果系统设置的是浏览器端合成音频，则调用浏览器的api播放文本，不需要检查是否有音频文件
@@ -59,7 +59,7 @@ function playAudioByClick() {
   // 查检音频文件是否存在
   const audioPlayState = props.audioPlayState
   if (!audioPlayState.audioUrl) {
-    ms.warning('音频文件不可用或已被删除')
+    ms.warning(t('chat.imageNotFoundOrDeleted'))
     return
   }
   if (!audioPlayState.playing) {
@@ -82,13 +82,13 @@ function playAudioByClick() {
       audioPlayState.playDuration = 0
       audioPlayState.playing = false
       audioPlayState.audio = null
-      ms.error('播放音频失败，请检查浏览器设置或音频文件是否可用')
+      ms.error(t('chat.audioPlayFailed'))
     })
   } else if (audioPlayState.playing && audioPlayState.audio) {
     audioPlayState.audio.pause()
     audioPlayState.playing = false
   } else if (audioPlayState.playing && !audioPlayState.audio) {
-    ms.warning('音频文件不可用或已被删除')
+    ms.warning(t('chat.imageNotFoundOrDeleted'))
   }
 }
 
@@ -103,7 +103,7 @@ function playAudioByClick() {
  */
 function speekText(text: string) {
   if (!synthesis) {
-    console.warn('浏览器不支持语音合成')
+    console.warn('Browser does not support speech synthesis')
     return
   }
   const utterance = new SpeechSynthesisUtterance(text)
@@ -118,7 +118,7 @@ function speekText(text: string) {
  */
 async function speekAudioFrame(audioFrame: string) {
   if (!synthesis) {
-    console.warn('浏览器不支持语音合成')
+    console.warn('Browser does not support speech synthesis')
     return
   }
   if (!audioFrame)
@@ -154,13 +154,13 @@ function playDurationCount() {
 
 const options = computed(() => {
   let txtOrAudio = {
-    label: '显示文字',
+    label: t('chat.showText'),
     key: 'showText',
     icon: iconRender({ icon: 'carbon:text-scale' }),
   }
   if (props.audioPlayState.showText) {
     txtOrAudio = {
-      label: '显示音频',
+      label: t('chat.showAudio'),
       key: 'showAudio',
       icon: iconRender({ icon: 'lucide:audio-lines' }),
     }

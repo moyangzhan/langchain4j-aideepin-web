@@ -142,24 +142,24 @@ async function handleSubmit(prompt: string) {
     <NSpace vertical>
       <NSwitch v-model:value="showTip">
         <template #checked>
-          使用说明
+          {{ t('draw.usageNote') }}
         </template>
         <template #unchecked>
-          使用说明
+          {{ t('draw.usageNote') }}
         </template>
       </NSwitch>
       <NCollapseTransition :show="showTip">
         <NCard :bordered="true" embedded>
-          主体图片：给该图片生成背景的主图，不可为空<br>
-          引导图片：给AI参考的图片<br>
-          提示词：背景描述，<br>
-          引导图片与提示词至少选择一个
+          {{ t('draw.mainImageDesc') }}<br>
+          {{ t('draw.guideImageDescShort') }}<br>
+          {{ t('draw.promptDesc') }}<br>
+          {{ t('draw.guideOrPromptRequired') }}
         </NCard>
       </NCollapseTransition>
     </NSpace>
     <NRow>
       <NCol :span="2" class="min-w-fit">
-        主图<span class="text-red-500">*</span>
+        {{ t('draw.mainImage') }}<span class="text-red-500">*</span>
         <NTooltip trigger="hover">
           <template #trigger>
             <NIcon style="padding-top: 0.1rem">
@@ -167,7 +167,7 @@ async function handleSubmit(prompt: string) {
             </NIcon>
           </template>
           <span>
-            背景透明的图像（带透明背景的RGBA四通道图像）
+            {{ t('draw.backgroundTransparent') }}
           </span>
         </NTooltip>
       </NCol>
@@ -177,13 +177,13 @@ async function handleSubmit(prompt: string) {
           list-type="image-card" :default-file-list="baseImageList" @before-upload="beforeUpload"
           @finish="handleBaseImageFinish" @remove="removeBaseImage"
         >
-          PNG图片，图像长边不超过2048像素
+          {{ t('draw.pngLimit') }}
         </NUpload>
       </NCol>
     </NRow>
     <NRow>
       <NCol :span="2" class="min-w-fit">
-        引导图
+        {{ t('draw.guideImageLabel') }}
         <NTooltip trigger="hover">
           <template #trigger>
             <NIcon style="padding-top: 0.1rem">
@@ -191,7 +191,7 @@ async function handleSubmit(prompt: string) {
             </NIcon>
           </template>
           <span>
-            图像要求：jpg、png、webp等常见格式。<br>引导图像可以是 RGB 图像或带透明背景的 RGBA 图像。对于RGBA图像，Alpha通道值为0的区域将不参与引导过程的生成，适用于带有主体的引导图。
+            {{ t('draw.imageRequirement') }}<br>{{ t('draw.guideImageDesc') }}
           </span>
         </NTooltip>
       </NCol>
@@ -201,7 +201,7 @@ async function handleSubmit(prompt: string) {
           list-type="image-card" :default-file-list="refImageList" @before-upload="beforeUpload2"
           @finish="handleRefImageFinish" @remove="removeRefImage"
         >
-          jpg、png、webp等常见格式
+          {{ t('draw.commonImageFormat') }}
         </NUpload>
       </NCol>
     </NRow>

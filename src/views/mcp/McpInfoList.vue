@@ -92,7 +92,7 @@ onMounted(() => {
         </div>
         <div class="flex justify-end space-x-2">
           <NButton size="tiny" quaternary type="primary" @click="onShowInfoModal(mcpInfo)">
-            详情
+            {{ t('common.detail') }}
           </NButton>
           <NButton size="tiny" quaternary type="primary" @click="onShowConfigModal(mcpInfo)">
             <span v-if="mcpInfo.configured">{{ t('mcp.configLabel') }}</span>

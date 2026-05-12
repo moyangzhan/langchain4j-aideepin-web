@@ -114,8 +114,8 @@ function handleRegenerate() {
 
 function handleDelImage(imageUrl: string) {
   dialog.warning({
-    title: '删除图片确认',
-    content: '只删除该图片，不删除对应的提示图',
+    title: t('chat.deleteImageConfirmTitle'),
+    content: t('chat.deleteImageConfirmContent'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: async () => {
@@ -173,13 +173,13 @@ watch(() => props.thinking, (thinking) => {
             v-if="thinkingContent" :default-expanded-names="['finalAnswer']" :expanded-names="expandedNames"
             @item-header-click="itemHeadClick"
           >
-            <NCollapseItem title="深度思考" name="thinking">
+            <NCollapseItem :title="t('chat.deepThinking')" name="thinking">
               <TextComponent
                 ref="textRef" :inversion="inversion" :error="error" :text="thinkingContent"
                 :loading="thinking" :as-raw-text="asRawText"
               />
             </NCollapseItem>
-            <NCollapseItem title="最终答案" name="finalAnswer">
+            <NCollapseItem :title="t('chat.finalAnswer')" name="finalAnswer">
               <TextComponent
                 ref="textRef" :inversion="inversion" :error="error" :text="text" :loading="loading"
                 :as-raw-text="asRawText"
@@ -223,7 +223,7 @@ watch(() => props.thinking, (thinking) => {
           </template>
           <template v-else>
             <template v-if="!imageUrls || imageUrls.length === 0">
-              <NEmpty description="找不到图片" />
+              <NEmpty :description="t('chat.imageNotFound')" />
             </template>
             <template v-if="imageUrls && imageUrls.length > 0">
               <!-- <NImageGroup :render-toolbar="renderToolbar"> -->

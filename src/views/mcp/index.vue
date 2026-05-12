@@ -124,10 +124,10 @@ watch(
         <div class="flex items-center flex-col mx-2">
           <NRadioGroup v-model:value="publicOrUser" name="displayStyleRadioGroup" size="small">
             <NRadio value="serversView">
-              服务与工具
+              {{ t('mcp.servicesAndTools') }}
             </NRadio>
             <NRadio value="userView">
-              我的工具
+              {{ t('mcp.myTools') }}
             </NRadio>
           </NRadioGroup>
         </div>
@@ -160,18 +160,18 @@ watch(
               <div class="w-full markdown-body" v-html="mdi.render(selectedMcp.remark)" />
             </div>
             <NAlert v-if="selectedMcp.website" :show-icon="false" type="info">
-              相关网址：{{ selectedMcp.website }}
+              {{ t('mcp.relatedWebsite') }}{{ selectedMcp.website }}
             </NAlert>
           </div>
         </NTabPane>
         <NTabPane name="configTab" :tab="t('mcp.configTab')">
           <div class="flex flex-col space-y-1 max-h-[720px] overflow-y-auto">
             <NAlert v-if="selectedMcp.customizedParamDefinitions.length === 0" :show-icon="false" type="info">
-              该服务无需配置参数即可使用。
+              {{ t('mcp.noConfigRequired') }}
             </NAlert>
             <div v-if="selectedMcp.customizedParamDefinitions.length > 0" class="flex flex-col space-y-2">
               <div class="font-bold text-base">
-                服务参数<span class="text-sm text-gray-500">{{ t('mcp.pleaseReferIntroConfig') }}</span>
+                {{ t('mcp.serviceParam') }}<span class="text-sm text-gray-500">{{ t('mcp.pleaseReferIntroConfig') }}</span>
               </div>
               <NTable :bordered="false" :single-line="false">
                 <thead>
@@ -179,7 +179,7 @@ watch(
                     <th>{{ t('common.param') }}</th>
                     <th>{{ t('common.value') }}</th>
                     <th class="flex justify-center">
-                      敏感信息
+                      {{ t('common.sensitiveInfo') }}
                       <NTooltip trigger="hover">
                         <template #trigger>
                           <NIcon style="padding-top: 0.1rem">
@@ -199,12 +199,12 @@ watch(
                     <td>
                       <NInput
                         v-model:value="uninitParam.value" class="flex-1"
-                        :placeholder="`请输入变量值${uninitParam.name}`"
+                        :placeholder="`${t('common.pleaseInputValue')}${uninitParam.name}`"
                       />
                     </td>
                     <td class="flex justify-center">
-                      <span v-if="uninitParam.require_encrypt">是</span>
-                      <span v-if="!uninitParam.require_encrypt">否</span>
+                      <span v-if="uninitParam.require_encrypt">{{ t('common.yes') }}</span>
+                      <span v-if="!uninitParam.require_encrypt">{{ t('common.no') }}</span>
                     </td>
                   </tr>
                 </tbody>
@@ -212,20 +212,20 @@ watch(
             </div>
             <div class="pt-4 flex flex-col space-y-2">
               <div class="font-bold text-base">
-                状态
+                {{ t('mcp.statusLabel') }}
               </div>
               <NRadioGroup v-model:value="selectedUserMcp.isEnable" name="enableGroup">
                 <NRadio :value="true">
-                  启用
+                  {{ t('mcp.statusEnable') }}
                 </NRadio>
                 <NRadio :value="false">
-                  暂存
+                  {{ t('mcp.statusDraft') }}
                 </NRadio>
               </NRadioGroup>
             </div>
             <div class="flex justify-end p-2">
               <NButton type="primary" @click="onSaveConfig">
-                确定
+                {{ t('common.confirm') }}
               </NButton>
             </div>
           </div>

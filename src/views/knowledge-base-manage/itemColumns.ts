@@ -10,35 +10,35 @@ export const createColumns = (showEmbeddingListFn: Function, showGraphFn: Functi
       type: 'selection',
     },
     {
-      title: '标题',
+      title: t('knowledgeBase.itemTitle'),
       key: 'title',
       width: 200,
     },
     {
-      title: '摘要',
+      title: t('knowledgeBase.brief'),
       key: 'brief',
       render(row) {
         return row.brief.substring(0, 50)
       },
     },
     {
-      title: '向量化',
+      title: t('knowledgeBase.vectorize'),
       key: 'embeddingStatus',
       width: 150,
       render(row) {
         const renderElements: VNode[] = []
         if (row.embeddingStatus === 'NONE') {
-          renderElements.push(createText('待处理'))
+          renderElements.push(createText(t('knowledgeBase.statusPending')))
         } else if (row.embeddingStatus === 'DOING') {
           renderElements.push(createShowListButton(showEmbeddingListFn, row))
-          renderElements.push(createText('处理中'))
+          renderElements.push(createText(t('knowledgeBase.statusProcessing')))
           renderElements.push(createText(row.embeddingStatusChangeTime))
         } else if (row.embeddingStatus === 'DONE') {
           renderElements.push(createShowListButton(showEmbeddingListFn, row))
-          renderElements.push(createText('已向量化'))
+          renderElements.push(createText(t('knowledgeBase.statusVectorized')))
           renderElements.push(createText(row.embeddingStatusChangeTime))
         } else if (row.embeddingStatus === 'FAIL') {
-          renderElements.push(createText('失败'))
+          renderElements.push(createText(t('knowledgeBase.statusFailed')))
           renderElements.push(createText(row.embeddingStatusChangeTime))
         }
         return h('div', { class: 'flex flex-col' }, {
@@ -47,23 +47,23 @@ export const createColumns = (showEmbeddingListFn: Function, showGraphFn: Functi
       },
     },
     {
-      title: '图谱',
+      title: t('knowledgeBase.graphLabel'),
       key: 'graphicalStatus',
       width: 150,
       render(row) {
         const renderElements: VNode[] = []
         if (row.graphicalStatus === 'NONE') {
-          renderElements.push(createText('待处理'))
+          renderElements.push(createText(t('knowledgeBase.statusPending')))
         } else if (row.graphicalStatus === 'DOING') {
           renderElements.push(createShowListButton(showGraphFn, row))
-          renderElements.push(createText('处理中'))
+          renderElements.push(createText(t('knowledgeBase.statusProcessing')))
           renderElements.push(createText(row.graphicalStatusChangeTime))
         } else if (row.graphicalStatus === 'DONE') {
           renderElements.push(createShowListButton(showGraphFn, row))
-          renderElements.push(createText('已图谱化'))
+          renderElements.push(createText(t('knowledgeBase.statusGraphitized')))
           renderElements.push(createText(row.graphicalStatusChangeTime))
         } else if (row.graphicalStatus === 'FAIL') {
-          renderElements.push(createText('失败'))
+          renderElements.push(createText(t('knowledgeBase.statusFailed')))
           renderElements.push(createText(row.graphicalStatusChangeTime))
         }
         return h('div', { class: 'flex flex-col' }, {
@@ -72,7 +72,7 @@ export const createColumns = (showEmbeddingListFn: Function, showGraphFn: Functi
       },
     },
     {
-      title: '附件',
+      title: t('knowledgeBase.attachment'),
       key: 'sourceFileName',
       width: 150,
       render(row) {
@@ -94,17 +94,17 @@ export const createColumns = (showEmbeddingListFn: Function, showGraphFn: Functi
             ],
           })
         } else {
-          return '无'
+          return t('common.none')
         }
       },
     },
     {
-      title: '创建时间',
+      title: t('knowledgeBase.createTime'),
       key: 'createTime',
       width: 180,
     },
     {
-      title: '更新时间',
+      title: t('knowledgeBase.updateTime'),
       key: 'updateTime',
       width: 180,
     },
@@ -152,7 +152,7 @@ function createShowListButton(showListFn: Function, row: KnowledgeBase.Item) {
       type: 'info',
       onClick: () => showListFn(row),
     },
-    { default: () => '查看' },
+    { default: () => t('common.view') },
   )
 }
 

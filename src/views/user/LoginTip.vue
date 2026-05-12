@@ -2,6 +2,7 @@
 import { NButton, NIcon } from 'naive-ui'
 import { Cat } from '@vicons/fa'
 import { useAuthStore } from '@/store'
+import { t } from '@/locales'
 const authStore = useAuthStore()
 </script>
 
@@ -10,7 +11,7 @@ const authStore = useAuthStore()
     <NIcon :component="Cat" size="32" />
     <span class="pl-1">~</span>
     <NButton text tag="a" type="primary" @click="authStore.setLoginView(true)">
-      &nbsp;&nbsp;点击登录
+      &nbsp;&nbsp;{{ t('common.clickToLogin') }}
     </NButton>
   </div>
 </template>

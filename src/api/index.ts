@@ -1,6 +1,7 @@
 import { EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event-source'
 import { get, getRawAxios, post } from '@/utils/request'
 import { useAuthStore, useUserStore } from '@/store'
+import { t } from '@/locales'
 
 class FatalError extends Error { }
 
@@ -120,12 +121,12 @@ function commonSseProcess(
       if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
         // everything's good
       } else if (response.status === 401) {
-        console.log('无登录权限')
+        console.log(t('api.noPermission'))
         const authStore = useAuthStore()
         authStore.removeToken()
         const userStore = useUserStore()
         userStore.resetUserInfo()
-        throw new FatalError('无登录权限')
+        throw new FatalError(t('api.noPermission'))
       } else {
         console.log('response', response)
         throw new FatalError()

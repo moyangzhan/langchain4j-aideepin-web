@@ -8,6 +8,7 @@ import { router } from '@/router'
 import { debounce } from '@/utils/functions/debounce'
 import { emptyConv } from '@/utils/functions'
 import api from '@/api'
+import { t } from '@/locales'
 
 interface Props {
   conversation: Chat.Conversation
@@ -42,13 +43,13 @@ function initEditConv(item: Chat.Conversation) {
 async function handleEdit(event?: KeyboardEvent) {
   event?.stopPropagation()
   if (submitting.value) {
-    ms.warning('正在提交，请稍候', {
+    ms.warning(t('chat.submitting'), {
       duration: 2000,
     })
     return
   }
   if (!tmpConv.value.title) {
-    ms.error('标题不能为空', {
+    ms.error(t('chat.titleRequired'), {
       duration: 2000,
     })
     return
@@ -125,39 +126,39 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
       <div class="flex flex-col space-y-3">
         <div>
           <div class="font-bold">
-            名称
+            {{ t('chat.editConv.nameLabel') }}
           </div>
-          <NInput v-model:value="tmpConv.title" type="text" size="large" placeholder="如：李白" />
+          <NInput v-model:value="tmpConv.title" type="text" size="large" :placeholder="t('chat.editConv.namePlaceholder')" />
         </div>
         <div>
           <div class="font-bold">
-            备注
+            {{ t('chat.editConv.remarkLabel') }}
           </div>
           <NInput
-            v-model:value="tmpConv.remark" type="textarea" placeholder="如：多年写诗经验"
+            v-model:value="tmpConv.remark" type="textarea" :placeholder="t('chat.editConv.remarkPlaceholder')"
             :autosize="{ minRows: 1, maxRows: 10 }"
           />
         </div>
         <div>
           <div class="font-bold">
-            角色设定
+            {{ t('chat.editConv.roleSettingLabel') }}
           </div>
           <NInput
-            v-model:value="tmpConv.aiSystemMessage" type="textarea" placeholder="如：你是唐朝的李白，诗才出众，被誉为诗仙"
+            v-model:value="tmpConv.aiSystemMessage" type="textarea" :placeholder="t('chat.editConv.roleSettingPlaceholder')"
             :autosize="{ minRows: 1, maxRows: 10 }"
           />
         </div>
         <div>
           <div class="font-bold">
-            深度思考
+            {{ t('chat.editConv.deepThinking') }}
             <NTooltip trigger="hover">
               <template #trigger>
                 <NIcon style="margin-top: 0.2rem">
                   <QuestionCircle16Regular />
                 </NIcon>
               </template>
-              <span>当选择的模型支持深度思考时，启用或关闭该功能<br></span>
-              <span>注意：部分模型如deepseek-reasoner不支持关闭该功能</span>
+              <span>{{ t('chat.editConv.deepThinkingTip1') }}<br></span>
+              <span>{{ t('chat.editConv.deepThinkingTip2') }}</span>
             </NTooltip>
           </div>
           <NRadioGroup
@@ -165,23 +166,23 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
             size="small" @update:value="(checked) => tmpConv.isEnableThinking = checked"
           >
             <NRadio :value="false">
-              关闭
+              {{ t('chat.editConv.off') }}
             </NRadio>
             <NRadio :value="true">
-              启用
+              {{ t('chat.editConv.on') }}
             </NRadio>
           </NRadioGroup>
         </div>
         <div class="flex flex-col space-y-2">
           <div class="flex space-x-2 font-bold">
-            <span>知识库</span>
+            <span>{{ t('chat.editConv.knowledgeBase') }}</span>
             <NButton type="primary" size="tiny" text tag="a" @click="knowledgeModalShow = !knowledgeModalShow">
-              添加更多知识库
+              {{ t('chat.editConv.addMoreKnowledge') }}
             </NButton>
           </div>
           <div v-if="!knowledgeModalShow">
             <div v-if="tmpConv.convKnowledgeList.length === 0" class="pl-6">
-              暂无数据
+              {{ t('common.noData') }}
             </div>
             <NTag
               v-for="convKnowledge in tmpConv.convKnowledgeList" :key="convKnowledge.uuid" closable class="mr-2"
@@ -199,17 +200,17 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
         </div>
         <div class="flex flex-col space-y-2">
           <div class="flex space-x-2 font-bold">
-            服务与工具(MCP)
+            {{ t('chat.editConv.mcpServices') }}
             <NTooltip trigger="hover">
               <template #trigger>
                 <NIcon style="margin-top: 0.2rem">
                   <QuestionCircle16Regular />
                 </NIcon>
               </template>
-              <span>选中项表示本角色可能会用到该服务中的各种工具</span>
+              <span>{{ t('chat.editConv.mcpTip') }}</span>
             </NTooltip>
             <NButton type="primary" size="tiny" text tag="a" @click="gotoMcp">
-              去启用更多AI工具
+              {{ t('chat.editConv.goEnableMoreTools') }}
             </NButton>
           </div>
           <NCheckboxGroup v-model:value="tmpConv.mcpIds" class="flex flex-wrap space-x-2">
@@ -221,7 +222,7 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
         </div>
         <div class="flex flex-col space-y-2">
           <div class="flex space-x-2 font-bold">
-            AI回复内容格式
+            {{ t('chat.editConv.aiReplyFormat') }}
             <NTooltip trigger="hover">
               <template #trigger>
                 <NIcon style="margin-top: 0.2rem">
@@ -229,10 +230,10 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
                 </NIcon>
               </template>
               <span>
-                自动：AI的回复内容格式跟用户一致，<br>
-                如用户以文字输入，则AI会以文字回复，如用户以语音输入，则AI以语音回复<br>
-                文字：AI以文字回复<br>
-                语音：AI以语音回复
+                {{ t('chat.editConv.formatAutoDesc1') }}<br>
+                {{ t('chat.editConv.formatAutoDesc2') }}<br>
+                {{ t('chat.editConv.formatTextDesc') }}<br>
+                {{ t('chat.editConv.formatAudioDesc') }}
               </span>
             </NTooltip>
           </div>
@@ -241,19 +242,19 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
             size="small" @update:value="(checked) => tmpConv.answerContentType = checked"
           >
             <NRadio :value="1">
-              自动
+              {{ t('chat.editConv.formatAuto') }}
             </NRadio>
             <NRadio :value="2">
-              文字
+              {{ t('chat.editConv.formatText') }}
             </NRadio>
             <NRadio :value="3">
-              语音
+              {{ t('chat.editConv.formatAudio') }}
             </NRadio>
           </NRadioGroup>
         </div>
         <div class="flex flex-col space-y-2">
           <div class="flex space-x-2 font-bold">
-            是否自动播放AI的回复语音
+            {{ t('chat.editConv.autoplayAudio') }}
             <NTooltip trigger="hover">
               <template #trigger>
                 <NIcon style="margin-top: 0.2rem">
@@ -261,18 +262,18 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
                 </NIcon>
               </template>
               <span>
-                当AI回复格式是语音时，是否需要自动播放内容
+                {{ t('chat.editConv.autoplayAudioTip') }}
               </span>
             </NTooltip>
           </div>
           <NCheckbox
-            :checked="tmpConv.isAutoplayAnswer" label="是"
+            :checked="tmpConv.isAutoplayAnswer" :label="t('common.yes')"
             @update:checked="(checked) => tmpConv.isAutoplayAnswer = checked"
           />
         </div>
         <div class="flex flex-col space-y-2">
           <div class="flex space-x-2 font-bold">
-            音色选择
+            {{ t('chat.editConv.voiceSelection') }}
             <NTooltip trigger="hover">
               <template #trigger>
                 <NIcon style="margin-top: 0.2rem">
@@ -280,12 +281,12 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
                 </NIcon>
               </template>
               <span>
-                指定AI语音回复时所使用的音色
+                {{ t('chat.editConv.voiceSelectionTip') }}
               </span>
             </NTooltip>
           </div>
           <div v-if="appStore.ttsSetting.synthesizer_side === 'client'">
-            当前音色来自于浏览器，无需指定
+            {{ t('chat.editConv.voiceFromBrowser') }}
           </div>
           <NRadioGroup
             v-else-if="appStore.availableVoices.length > 0" :value="tmpConv.audioConfig.voice.param_name"
@@ -299,7 +300,7 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
             </NRadio>
           </NRadioGroup>
           <div v-else>
-            系统没有可用的音色
+            {{ t('chat.editConv.noAvailableVoice') }}
           </div>
         </div>
       </div>
@@ -311,7 +312,7 @@ const handleDeleteDebounce = debounce(handleDelete, 600)
             {{ $t('common.delete') }}
           </NButton>
         </template>
-        确定删除 {{ tmpConv.title }} 角色？
+        {{ t('chat.editConv.confirmDeleteRole', { title: tmpConv.title }) }}
       </NPopconfirm>
       <NButton type="primary" :loading="submitting" :disabled="submitting" @click="handleEdit()">
         {{ $t('common.save') }}

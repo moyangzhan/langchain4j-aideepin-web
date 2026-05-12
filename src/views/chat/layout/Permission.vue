@@ -192,7 +192,7 @@ async function handleForgotPassword() {
 
           <NTabPane name="register" :tab="$t('common.register')">
             <NSpace vertical>
-              <NInput v-model:value="email" type="text" size="large" placeholder="邮箱" />
+              <NInput v-model:value="email" type="text" size="large" :placeholder="t('common.email')" />
               <NInput
                 v-model:value="password" type="password" size="large" show-password-on="click"
                 :placeholder="$t('common.password')"

@@ -2,6 +2,7 @@
 import { useWfStore } from '@/store'
 import { SvgIcon } from '@/components/common'
 import { getIconByComponentName, getIconClassByComponentName } from '@/utils/workflow-util'
+import { t } from '@/locales'
 const wfStore = useWfStore()
 
 function onDragStart(event: DragEvent, nodeType: string) {
@@ -26,7 +27,7 @@ function onDragStart(event: DragEvent, nodeType: string) {
             :icon="getIconByComponentName(component.name)"
           />
           <div class="leading-10">
-            {{ component.title }}
+            {{ t(`workflow.componentTitle.${component.name}`) }}
           </div>
         </div>
         <!-- <div v-else>

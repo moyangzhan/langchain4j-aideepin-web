@@ -67,7 +67,7 @@ watch(() => innerShow.value, (val) => {
                 </template>
               </NTag>
             </template>
-            知识点
+            {{ t('knowledgeBase.knowledgePoint') }}
           </NTooltip>
           <NTooltip trigger="hover">
             <template #trigger>
@@ -78,7 +78,7 @@ watch(() => innerShow.value, (val) => {
                 </template>
               </NTag>
             </template>
-            向量
+            {{ t('knowledgeBase.vector') }}
           </NTooltip>
           <NTag
             size="medium" :bordered="false" round :color="{ color: '#ff000000' }" checkable
@@ -102,8 +102,8 @@ watch(() => innerShow.value, (val) => {
               {{ knowledgeBase.isPublic ? t('common.public') : t('common.private') }}
             </NTag>
           </template>
-          公开：所有人可见并使用；<br>
-          私有：仅创建者可见并使用。
+          {{ t('knowledgeBase.publicDesc') }}<br>
+          {{ t('knowledgeBase.privateDesc') }}
         </NTooltip>
         <NTooltip trigger="hover">
           <template #trigger>
@@ -111,8 +111,8 @@ watch(() => innerShow.value, (val) => {
               {{ knowledgeBase.isStrict ? t('knowledgeBase.strictMode') : t('knowledgeBase.looseMode') }}
             </NTag>
           </template>
-          严格模式：严格匹配知识库，知识库中如无搜索结果，直接返回无答案；<br>
-          宽松模式：知识库中如无搜索结果，则将用户提问传给LLM继续请求答案。
+          {{ t('knowledgeBase.strictModeDescShort') }}<br>
+          {{ t('knowledgeBase.looseModeDescShort') }}
         </NTooltip>
         <NTooltip trigger="hover">
           <template #trigger>
@@ -120,7 +120,7 @@ watch(() => innerShow.value, (val) => {
               {{ t('knowledgeBase.maxRecallCount') }}{{ knowledgeBase.retrieveMaxResults === 0 ? '-' : knowledgeBase.retrieveMaxResults }}
             </NTag>
           </template>
-          向量搜索时，召回的文档数量不能超过该值<br>
+          {{ t('knowledgeBase.maxRecallCountTip') }}<br>
         </NTooltip>
         <NTooltip trigger="hover">
           <template #trigger>
@@ -128,7 +128,7 @@ watch(() => innerShow.value, (val) => {
               {{ t('knowledgeBase.minRecallScore') }}{{ knowledgeBase.retrieveMinScore === 0 ? '-' : knowledgeBase.retrieveMinScore }}
             </NTag>
           </template>
-          向量搜索时，召回的向量分数需大于该值
+          {{ t('knowledgeBase.minRecallScoreTip') }}
         </NTooltip>
       </NFlex>
       <NDivider />
@@ -138,10 +138,10 @@ watch(() => innerShow.value, (val) => {
       <NPopconfirm placement="top" @positive-click="clearHistory(knowledgeBase)">
         <template #trigger>
           <NButton size="small" text type="primary">
-            清除历史记录
+            {{ t('knowledgeBase.clearHistory') }}
           </NButton>
         </template>
-        删除后不可恢复，请谨慎操作
+        {{ t('knowledgeBase.deleteNotRecoverCaution') }}
       </NPopconfirm>
     </template>
   </NModal>

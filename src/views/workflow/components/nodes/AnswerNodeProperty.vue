@@ -26,7 +26,7 @@ function llmSelected(aiModel: AiModelInfo) {
     <NodePropertyInput :workflow="workflow" :wf-node="wfNode" />
     <div class="mt-6">
       <div class="text-xl mb-1">
-        模型
+        {{ t('common.model') }}
       </div>
       <div>
         <WfLLMSelector :model-platform="nodeConfig.model_platform" :model-name="nodeConfig.model_name" @llm-selected="llmSelected" />
@@ -34,7 +34,7 @@ function llmSelected(aiModel: AiModelInfo) {
     </div>
     <div class="mt-6">
       <div class="text-xl mb-1">
-        提示词
+        {{ t('common.prompt') }}
         <NTooltip trigger="hover">
           <template #trigger>
             <NIcon style="padding-top: 0.1rem">

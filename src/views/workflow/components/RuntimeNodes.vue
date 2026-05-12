@@ -18,7 +18,7 @@ const wfStore = useWfStore()
 const authStore = useAuthStore()
 const prologue = computed(() => {
   const startNode = wfStore.getStartNodeByWfId(props.workflow.id)
-  return (startNode?.nodeConfig as Workflow.NodeConfigStart).prologue || ''
+  return (startNode?.nodeConfig as Workflow.NodeConfigStart)?.prologue || ''
 })
 </script>
 
@@ -49,7 +49,7 @@ const prologue = computed(() => {
       </div>
       <div class="flex flex-col space-y-2">
         <div class="text-base border-b border-gray-200 py-1">
-          输入
+          {{ t('common.input') }}
         </div>
         <div v-for="(content, name) in node.input" :key="`input_${name}`" class="flex">
           <div class="min-w-24 pr-2">
@@ -60,7 +60,7 @@ const prologue = computed(() => {
           </div>
         </div>
         <div class="text-base border-b border-gray-200 py-1">
-          输出
+          {{ t('common.output') }}
         </div>
         <div v-for="(content, name) in node.output" :key="`onput_${name}`" class="flex">
           <template v-if="content.type === 4">

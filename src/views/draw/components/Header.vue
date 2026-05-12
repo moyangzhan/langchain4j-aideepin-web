@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { NRadio, NRadioGroup } from 'naive-ui'
 import { ImageModelSelector } from '@/components/common'
+import { t } from '@/locales'
 
 const emit = defineEmits<Emit>()
 const selectedDisplayStyle = ref<string>('chatStyle')
@@ -28,10 +29,10 @@ function handleDisplayChange(value: string) {
           @update:value="handleDisplayChange"
         >
           <NRadio value="chatStyle">
-            聊天风格
+            {{ t('draw.chatStyle') }}
           </NRadio>
           <NRadio value="galleryStyle">
-            画廊风格
+            {{ t('draw.galleryStyle') }}
           </NRadio>
         </NRadioGroup>
       </div>

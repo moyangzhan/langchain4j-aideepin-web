@@ -6,6 +6,7 @@ import SearchInput from '@/views/draw/components/SearchInput.vue'
 import { checkProcess } from '@/views/draw/helper'
 import { useAppStore, useDrawStore } from '@/store'
 import api from '@/api'
+import { t } from '@/locales'
 import { emptyDraw } from '@/utils/functions'
 
 interface Emit {
@@ -57,7 +58,7 @@ async function handleSubmit(prompt: string) {
   <div>
     <NRow class="pt-4 pb-4">
       <NCol :span="2" class="min-w-fit">
-        图片尺寸：
+        {{ t('common.imageSize') }}
       </NCol>
       <NCol :span="12">
         <NRadioGroup :value="selectedImageSize" name="radiogroup" :on-update:value="sizeChange">
@@ -71,7 +72,7 @@ async function handleSubmit(prompt: string) {
     </NRow>
     <NRow class="pb-4">
       <NCol :span="2" class="min-w-fit">
-        图片数量：
+        {{ t('common.imageCount') }}
       </NCol>
       <NCol :span="12">
         <NSlider :value="generateImageNumber" :step="1" :min="1" :max="4" :on-update:value="imageNumberChange">
@@ -81,18 +82,18 @@ async function handleSubmit(prompt: string) {
             </NIconWrapper>
           </template>
         </NSlider>
-        <span>{{ generateImageNumber }}张</span>
+        <span>{{ generateImageNumber }}{{ t('draw.imageUnit') }}</span>
       </NCol>
     </NRow>
     <NRow class="pb-4">
       <NCol :span="2" class="min-w-fit">
-        随机种子：
+        {{ t('common.randomSeed') }}
       </NCol>
       <NCol :span="12">
         <NFlex align="center">
           <NInputNumber v-model:value="randomSeed" :min="-1" :max="2147483647" class="grow" />
           <NButton type="primary" size="tiny" ghost @click="randomSeed = Math.floor(Math.random() * 2147483647)">
-            随机生成
+            {{ t('common.randomGenerate') }}
           </NButton>
         </NFlex>
       </NCol>

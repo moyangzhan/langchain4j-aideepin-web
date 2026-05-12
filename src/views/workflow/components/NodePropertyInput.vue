@@ -74,7 +74,7 @@ function onVariableSelected(wfInput: Workflow.NodeIORefDinition, nodeUuidParamNa
     <NCollapseItem :title="t('common.input')" name="1" class="text-lg border border-gray-200 rounded-md m-2 px-3 pb-2">
       <template #header>
         <div class="text-xl">
-          输入
+          {{ t('common.input') }}
         </div>
       </template>
       <div class="flex flex-col space-y-1">
@@ -99,7 +99,7 @@ function onVariableSelected(wfInput: Workflow.NodeIORefDinition, nodeUuidParamNa
           </NListItem>
         </NList>
         <NButton v-if="inputsCount < props.limit" dashed @click="onAdd">
-          +新增变量
+          {{ t('workflow.newVariable') }}
         </NButton>
       </div>
     </NCollapseItem>

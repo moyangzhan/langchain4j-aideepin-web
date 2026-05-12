@@ -234,13 +234,13 @@ watch(
   <div class="flex flex-col w-full p-4">
     <NBreadcrumb separator=">">
       <NBreadcrumbItem href="/">
-        首页
+        {{ t('common.home') }}
       </NBreadcrumbItem>
       <NBreadcrumbItem :href="`#/qa/${kbStore.activeKbUuid}`">
-        知识库
+        {{ t('menu.knowledgeBase') }}
       </NBreadcrumbItem>
       <NBreadcrumbItem :clickable="false">
-        我的知识库
+        {{ t('knowledgeBase.myKnowledgeBase') }}
       </NBreadcrumbItem>
     </NBreadcrumb>
     <div class="flex gap-3 mb-2 mt-1" :class="[isMobile ? 'flex-col' : 'flex-row justify-between']">
@@ -252,7 +252,7 @@ watch(
       <div class="flex justify-between">
         <NInput v-model:value="searchValue" style="width: 100%" @keyup="onKeyUpSearch" />
         <NButton type="primary" ghost @click="search(1)">
-          搜索
+          {{ t('common.search') }}
         </NButton>
       </div>
     </div>
@@ -283,16 +283,16 @@ watch(
           <div>{{ t('knowledgeBase.isPublic') }}</div>
           <NRadioGroup v-model:value="tmpKb.isPublic" name="radiogroup">
             <NRadio key="public_yes" :value="true">
-              公开
+              {{ t('common.public') }}
             </NRadio>
             <NRadio key="public_no" :value="false">
-              私有
+              {{ t('common.private') }}
             </NRadio>
           </NRadioGroup>
         </div>
         <div :class="itemBoxClass">
           <div>
-            严格模式
+            {{ t('knowledgeBase.strictMode') }}
             <NTooltip trigger="hover">
               <template #trigger>
                 <NIcon style="padding-top: 0.1rem">
@@ -305,10 +305,10 @@ watch(
           </div>
           <NRadioGroup v-model:value="tmpKb.isStrict" name="radiogroup">
             <NRadio key="strict_yes" :value="true">
-              是
+              {{ t('common.yes') }}
             </NRadio>
             <NRadio key="strict_no" :value="false">
-              否
+              {{ t('common.no') }}
             </NRadio>
           </NRadioGroup>
         </div>
@@ -321,7 +321,7 @@ watch(
               </div>
               <div :class="itemBoxClass">
                 <div>
-                  Token计数器
+                  {{ t('knowledgeBase.tokenCounter') }}
                 </div>
                 <NSelect
                   :value="tmpKb.ingestTokenEstimator" :options="TOKEN_ESTIMATOR"
@@ -334,7 +334,7 @@ watch(
             <div class="flex flex-col space-y-2">
               <div :class="itemBoxClass">
                 <div>
-                  模型名称
+                  {{ t('knowledgeBase.modelName') }}
                   <NTooltip trigger="hover">
                     <template #trigger>
                       <NIcon style="padding-top: 0.1rem">
@@ -384,7 +384,7 @@ watch(
           {{ t('common.confirm') }}
         </NButton>
         <NButton size="small" :disabled="inputStatus" @click="() => { showModal = false }">
-          取消
+          {{ t('common.cancel') }}
         </NButton>
       </div>
     </template>

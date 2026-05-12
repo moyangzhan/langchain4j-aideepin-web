@@ -1,6 +1,7 @@
 <script setup lang='ts'>
 import { ref } from 'vue'
 import { NRadio, NRadioGroup } from 'naive-ui'
+import { t } from '@/locales'
 
 const emit = defineEmits<Emit>()
 
@@ -24,10 +25,10 @@ function handleDisplayChange(value: string) {
           @update:value="handleDisplayChange"
         >
           <NRadio value="publicView">
-            公开图片
+            {{ t('gallery.publicImage') }}
           </NRadio>
           <NRadio value="favView">
-            我的点赞
+            {{ t('gallery.myLikes') }}
           </NRadio>
         </NRadioGroup>
       </div>

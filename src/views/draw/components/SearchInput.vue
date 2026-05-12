@@ -111,7 +111,7 @@ watch(
   <NRow>
     <NCol>
       <NButton type="primary" :disabled="buttonDisabled" @click="handleSubmit">
-        提交
+        {{ t('common.submit') }}
       </NButton>
     </NCol>
   </NRow>

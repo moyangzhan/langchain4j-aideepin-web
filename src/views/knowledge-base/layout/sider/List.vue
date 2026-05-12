@@ -89,7 +89,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <NTabs v-model:value="selectedKbType" tab-class="h-10" pane-class="h-full" type="line" justify-content="space-evenly">
+  <NTabs v-model:value="selectedKbType" tab-class="h-10" pane-class="h-full" type="line" justify-content="space-evenly" class="kb-sider-tabs">
     <NTabPane name="mine" :tab="t('common.mine')" size="small">
       <SubList :list="myKbInfos" :active-kb-uuid="activeKbUuid" />
     </NTabPane>
@@ -98,3 +98,23 @@ onMounted(() => {
     </NTabPane>
   </NTabs>
 </template>
+
+<style scoped>
+.kb-sider-tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+</style>
+
+<style>
+.kb-sider-tabs .n-tabs-pane-wrapper {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+.kb-sider-tabs .n-tab-pane {
+  height: 100% !important;
+  overflow: hidden !important;
+}
+</style>

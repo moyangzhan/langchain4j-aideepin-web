@@ -3,6 +3,7 @@ import { nextTick, onMounted, onUpdated, ref } from 'vue'
 import { NButton, NDivider, NFlex } from 'naive-ui'
 import cytoscape from 'cytoscape'
 import api from '@/api'
+import { t } from '@/locales'
 
 interface Props {
   kbItemUuid: string
@@ -148,32 +149,32 @@ function relayout() {
     <div id="itemGraphCy" style="width:80%; height: 400px;" class="border border-gray-300" />
     <div class="w-1/6 h-[400px] overflow-y-auto">
       <NButton v-show="!isEmpty" size="small" :loading="loading" type="info" ghost @click="relayout">
-        重新布局
+        {{ t('workflow.relayout') }}
       </NButton>
       <NButton v-show="isEmpty" size="small" type="warning" ghost>
-        无数据
+        {{ t('workflow.noData') }}
       </NButton>
       <NFlex v-if="selectedVertex" vertical>
         <NDivider title-placement="left">
-          实体
+          {{ t('workflow.entity') }}
         </NDivider>
         <div>{{ selectedVertex.id }}</div>
         <NDivider title-placement="left">
-          名称
+          {{ t('workflow.nameLabel') }}
         </NDivider>
         <div>{{ selectedVertex.name }}</div>
         <NDivider title-placement="left">
-          描述
+          {{ t('workflow.descriptionLabel') }}
         </NDivider>
         <div>{{ selectedVertex.description }}</div>
       </NFlex>
       <NFlex v-if="selectedEdge" vertical>
         <NDivider title-placement="left">
-          关系
+          {{ t('workflow.relation') }}
         </NDivider>
         <div>{{ selectedEdge.id }}</div>
         <NDivider title-placement="left">
-          描述
+          {{ t('workflow.descriptionLabel') }}
         </NDivider>
         <div>{{ selectedEdge.description }}</div>
       </NFlex>

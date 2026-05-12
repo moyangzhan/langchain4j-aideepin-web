@@ -62,7 +62,7 @@ async function handleSubmit() {
   prompt.value = ''
 
   const { data: qaRecord } = await api.knowledgeBaseQaRecordAdd<KnowledgeBase.QaRecordInfo>(currKbUuid, { question: message, modelName: appStore.selectedLLM.modelName })
-  qaRecord.answer = '生成中...'
+  qaRecord.answer = t('common.generating')
   qaRecord.loading = true
   qaRecord.aiModelPlatform = appStore.selectedLLM.modelPlatform
 
@@ -327,7 +327,7 @@ onActivated(async () => {
                 :inversion="true" :error="qaRecord.error" :loading="false" @delete="handleDelete(qaRecord.uuid)"
               />
               <Message
-                :date-time="qaRecord.createTime" :text="!!qaRecord.answer ? qaRecord.answer : '[无答案]'"
+                :date-time="qaRecord.createTime" :text="!!qaRecord.answer ? qaRecord.answer : t('aiSearch.noAnswer')"
                 :regenerate="false" type="text" :inversion="false" :error="qaRecord.error" :loading="qaRecord.loading"
                 :ai-model-platform="qaRecord.aiModelPlatform" @delete="handleDelete(qaRecord.uuid)"
               >
@@ -336,14 +336,14 @@ onActivated(async () => {
                     v-if="!!qaRecord.answer && !qaRecord.loading" size="tiny" text type="primary"
                     @click="handleReferenceClick(qaRecord.uuid)"
                   >
-                    引用
+                    {{ t('chat.reference') }}
                   </NButton>
 
                   <NButton
                     v-if="!!qaRecord.answer && !qaRecord.loading" size="tiny" text type="primary"
                     @click="handleGraphClick(qaRecord.uuid)"
                   >
-                    图谱
+                    {{ t('chat.graph') }}
                   </NButton>
                 </NFlex>
               </Message>
@@ -356,7 +356,7 @@ onActivated(async () => {
           <template #icon>
             <SvgIcon icon="ri:stop-circle-line" />
           </template>
-          停止请求
+          {{ t('common.stopRequest') }}
         </NButton>
       </div>
     </main>
@@ -383,11 +383,11 @@ onActivated(async () => {
 
     <NModal v-model:show="showReferenceModal" style="max-width: 80%;" preset="card" :title="t('chat.referenceMaterial')">
       <div v-show="references.length === 0">
-        无
+        {{ t('common.none') }}
       </div>
       <NCollapse v-show="references.length > 0" :default-expanded-names="['refer_0']">
         <NCollapseItem
-          v-for="(reference, idx) of references" :key="reference.embeddingId" :title="`引用${idx + 1}`"
+          v-for="(reference, idx) of references" :key="reference.embeddingId" :title="`${t('aiSearch.quote')}${idx + 1}`"
           :name="`refer_${idx}`"
         >
           {{ reference.text }}

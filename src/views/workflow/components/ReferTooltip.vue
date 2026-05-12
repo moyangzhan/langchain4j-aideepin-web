@@ -22,7 +22,7 @@ withDefaults(defineProps<Props>(), {
       <div>{{ t('workflow.variableUsage2') }}</div>
     </div>
     <div v-if="brief">
-      可引入变量，如：{x} 和 {y} 是好朋友
+      {{ t('workflow.variableExample') }}
     </div>
   </NTooltip>
 </template>

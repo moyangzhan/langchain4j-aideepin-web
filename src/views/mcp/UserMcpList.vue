@@ -4,6 +4,7 @@ import { Cat } from '@vicons/fa'
 import { useAuthStore, useMcpStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import LoginTip from '@/views/user/LoginTip.vue'
+import { t } from '@/locales'
 
 const emit = defineEmits<Emit>()
 const authStore = useAuthStore()
@@ -33,7 +34,7 @@ function onShowConfigModal(mcpInfo: Mcp.McpInfo) {
         v-if="authStore.token && mcpStore.myUserMcpList.length === 0"
         class="flex items-center justify-center mt-4 text-center text-neutral-400" :class="[isMobile ? 'p-2' : 'p-4']"
       >
-        <NIcon :component="Cat" size="32" />无数据
+        <NIcon :component="Cat" size="32" />{{ t('common.noData') }}
       </div>
       <div
         v-for="userMcp in mcpStore.myUserMcpList" :key="userMcp.uuid"
@@ -47,10 +48,10 @@ function onShowConfigModal(mcpInfo: Mcp.McpInfo) {
         </div>
         <div class="flex justify-end space-x-2">
           <NButton size="tiny" quaternary type="primary" @click="onShowInfoModal(userMcp.mcpInfo)">
-            详情
+            {{ t('common.detail') }}
           </NButton>
           <NButton size="tiny" quaternary type="primary" @click="onShowConfigModal(userMcp.mcpInfo)">
-            配置
+            {{ t('mcp.configLabel') }}
           </NButton>
         </div>
       </div>

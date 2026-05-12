@@ -66,7 +66,7 @@ function handleDeleted() {
 }
 function handleDelDraw(item: Chat.Draw) {
   dialog.warning({
-    title: `删除绘图【${item.prompt.substring(0, 11)}】?`,
+    title: `${t('draw.deleteDrawConfirm')}${item.prompt.substring(0, 11)}]?`,
     content: t('draw.deleteDrawContent'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),

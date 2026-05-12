@@ -58,7 +58,7 @@ async function handleSubmit() {
   const tmpRecord = aiSearchEmptyRecord()
   tmpRecord.uuid = tmpUuid
   tmpRecord.question = message
-  tmpRecord.answer = '生成中...'
+  tmpRecord.answer = t('aiSearch.generating')
   tmpRecord.loading = true
   tmpRecord.aiModelPlatform = appStore.selectedLLM.modelPlatform
 
@@ -115,8 +115,8 @@ async function handleSubmit() {
         aiSearchStore.setSseRequesting(false)
       },
       errorCallback: (error) => {
-        ms.warning(`系统提示：${error}`)
-        tmpRecord.answer = `系统提示：${error}`
+        ms.warning(`${t('aiSearch.systemTip')}${error}`)
+        tmpRecord.answer = `${t('aiSearch.systemTip')}${error}`
         tmpRecord.loading = false
         tmpRecord.error = true
         aiSearchStore.updateRecord(tmpRecord)
@@ -137,7 +137,7 @@ async function loadMoreMessage(event: any) {
     return
 
   loadingms = ms.loading(
-    '加载中...', {
+    t('aiSearch.loading'), {
       duration: 3000,
     })
   try {
@@ -156,7 +156,7 @@ async function loadMoreMessage(event: any) {
     if (data.records.length === 0) {
       aiSearchStore.setLoadedAll()
       loadingms.destroy()
-      loadingms = ms.warning('没有更多了', {
+      loadingms = ms.warning(t('aiSearch.noMore'), {
         duration: 1000,
       })
     }
@@ -179,7 +179,7 @@ async function handleScroll(event: any) {
 function handleDelete(recordUuid: string) {
   dialog.warning({
     title: t('chat.deleteMessage'),
-    content: '提问及对应的答案会一起删除，继续执行？',
+    content: t('aiSearch.deleteConfirmContent'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: () => {
@@ -294,14 +294,14 @@ onActivated(async () => {
                 :inversion="true" :error="record.error" :loading="false" @delete="handleDelete(record.uuid)"
               />
               <Message
-                :date-time="record.createTime" :text="!!record.answer ? record.answer : '[无答案]'"
+                :date-time="record.createTime" :text="!!record.answer ? record.answer : t('aiSearch.noAnswer')"
                 :regenerate="false" type="text" :inversion="false" :error="record.error" :loading="record.loading"
                 :ai-model-platform="record.aiModelPlatform"
                 @delete="handleDelete(record.uuid)"
               >
                 <div v-if="record.searchEngineResp.items.length > 0" class="search-quota">
                   <NCollapse>
-                    <NCollapseItem title="引用" name="quote">
+                    <NCollapseItem :title="t('aiSearch.quote')" name="quote">
                       <ul>
                         <li v-for="searchEngineItem of record.searchEngineResp.items" :key="searchEngineItem.link">
                           <NButton size="tiny" text tag="a" :href="searchEngineItem.link" target="_blank" type="primary">
@@ -322,7 +322,7 @@ onActivated(async () => {
           <template #icon>
             <SvgIcon icon="ri:stop-circle-line" />
           </template>
-          停止请求
+          {{ t('common.stopRequest') }}
         </NButton>
       </div>
     </main>
@@ -331,7 +331,7 @@ onActivated(async () => {
         <div class="flex items-center justify-between space-x-2">
           <HoverButton
             v-if="!isMobile"
-            :tooltip="isBrief ? '摘要模式' : '详细模式'"
+            :tooltip="isBrief ? t('aiSearch.briefMode') : t('aiSearch.detailMode')"
           >
             <span
               class="text-xl"

@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { emptyWorkflowNode } from './functions'
 import { useAppStore } from '@/store'
+import { t } from '@/locales'
 
 export function createNewNode(
   workflow: Workflow.WorkflowInfo,
@@ -10,7 +11,7 @@ export function createNewNode(
 ) {
   const newWfNode = emptyWorkflowNode()
   newWfNode.uuid = uuidv4().replace(/-/g, '')
-  newWfNode.title = component.title
+  newWfNode.title = t(`workflow.componentTitle.${component.name}`)
   newWfNode.workflowId = workflow.id
   newWfNode.workflowUuid = workflow.uuid
   newWfNode.wfComponent = component

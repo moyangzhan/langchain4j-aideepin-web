@@ -44,7 +44,7 @@ interface Emit {
 }
 function handleDelDraw(uuid: string, prompt: string) {
   dialog.warning({
-    title: `删除绘图【${prompt.substring(0, 11)}】?`,
+    title: `${t('draw.deleteDrawConfirm')}${prompt.substring(0, 11)}]?`,
     content: t('draw.deleteDrawContent'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
@@ -285,10 +285,10 @@ watch(
             />
             <div class="flex justify-between">
               <NButton type="primary" text tag="a" target="_blank" :disable="submitDisable" @click="openDrawTab">
-                我也要画一张
+                {{ t('draw.drawSame') }}
               </NButton>
               <NButton type="primary" ghost :disable="submitDisable" @click="handleSubmit">
-                提交
+                {{ t('common.submit') }}
               </NButton>
             </div>
           </NFlex>
@@ -306,7 +306,7 @@ watch(
           </NIcon>
         </NFloatButton>
       </template>
-      上一个绘图记录
+      {{ t('draw.previousDraw') }}
     </NTooltip>
     <NTooltip trigger="hover" placement="left">
       <template #trigger>
@@ -319,7 +319,7 @@ watch(
           </NIcon>
         </NFloatButton>
       </template>
-      下一个绘图记录
+      {{ t('draw.nextDraw') }}
     </NTooltip>
   </div>
 </template>

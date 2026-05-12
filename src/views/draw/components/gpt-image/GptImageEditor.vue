@@ -5,6 +5,7 @@ import SearchInput from '@/views/draw/components/SearchInput.vue'
 import { checkProcess } from '@/views/draw/helper'
 import { useAppStore, useDrawStore } from '@/store'
 import api from '@/api'
+import { t } from '@/locales'
 import { emptyDraw } from '@/utils/functions'
 
 interface Emit {
@@ -49,7 +50,7 @@ async function handleSubmit(prompt: string) {
   <div>
     <NRow class="pt-4 pb-4">
       <NCol :span="2" class="min-w-fit">
-        图片尺寸：
+        {{ t('common.imageSize') }}
       </NCol>
       <NCol :span="12">
         <NRadioGroup v-model:value="selectedImageSize" name="radiogroup">
@@ -63,7 +64,7 @@ async function handleSubmit(prompt: string) {
     </NRow>
     <NRow class="pb-4">
       <NCol :span="2" class="min-w-fit">
-        图片质量：
+        {{ t('common.imageQuality') }}
       </NCol>
       <NCol :span="12">
         <NRadioGroup v-model:value="selectedImageQuality" name="radiogroup">

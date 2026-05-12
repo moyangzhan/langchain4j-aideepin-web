@@ -346,10 +346,10 @@ watch(
   <div class="p-4">
     <NBreadcrumb separator=">">
       <NBreadcrumbItem href="/">
-        首页
+        {{ t('common.home') }}
       </NBreadcrumbItem>
       <NBreadcrumbItem href="/#/kb-manage">
-        我的知识库
+        {{ t('knowledgeBase.myKnowledgeBase') }}
       </NBreadcrumbItem>
       <NBreadcrumbItem :clickable="false">
         {{ curKnowledgeBase.title }}
@@ -369,22 +369,22 @@ watch(
       <div class="flex gap-3 mb-4" :class="[isMobile ? 'flex-col' : 'flex-row justify-between']">
         <div class="flex items-left gap-2">
           <NButton type="primary" size="small" @click="changeEditModal()">
-            新增（按表单）
+            {{ t('knowledgeBase.addByForm') }}
           </NButton>
           <NButton type="primary" size="small" @click="() => showUploadModal = !showUploadModal">
-            新增（按文件）
+            {{ t('knowledgeBase.addByFile') }}
           </NButton>
           <NButton type="primary" size="small" @click="changeIndexModal()">
-            索引选中内容
+            {{ t('knowledgeBase.indexSelected') }}
             <template v-if="checkedItemRowKeys.length > 0">
-              ({{ checkedItemRowKeys.length }}项)
+              ({{ checkedItemRowKeys.length }}{{ t('knowledgeBase.item') }})
             </template>
           </NButton>
         </div>
         <div class="flex items-center">
           <NInput v-model:value="searchValue" style="width: 100%" @keyup="onKeyUpSearch" />
           <NButton type="primary" ghost @click="search(1)">
-            搜索
+            {{ t('common.search') }}
           </NButton>
         </div>
       </div>
@@ -403,9 +403,9 @@ watch(
     <NSpace vertical>
       {{ t('store.title') }}
       <NInput v-model:value="tmpItem.title" maxlength="100" show-count />
-      摘要
+      {{ t('knowledgeBase.brief') }}
       <NInput v-model:value="tmpItem.brief" type="textarea" show-count :autosize="{ minRows: 2, maxRows: 5 }" />
-      内容
+      {{ t('common.content') }}
       <NInput v-model:value="tmpItem.remark" type="textarea" show-count :autosize="{ minRows: 5, maxRows: 20 }" />
       <div class="flex juestify-end">
         <NButton type="primary" :disabled="inputStatus" @click="() => { saveOrUpdate() }">
@@ -432,17 +432,17 @@ watch(
               </NIcon>
             </div>
             <NText style="font-size: 16px">
-              点击或者拖动文件到该区域来上传
+              {{ t('knowledgeBase.clickOrDragToUpload') }}
             </NText>
             <NP depth="3" style="margin: 8px 0 0 0">
-              支持的文件格式: TXT、PDF、DOC、DOCX、XLS、XLXS、PPT、PPTX<br>
-              文件大小：不超过10M
+              {{ t('knowledgeBase.supportedFileFormats') }}<br>
+              {{ t('knowledgeBase.fileSizeLimit') }}
             </NP>
           </NUploadDragger>
         </NUpload>
         <NFlex>
           <NButton type="primary" :disabled="!fileListLength" @click="onUploadSubmit">
-            上传并生成知识点
+            {{ t('knowledgeBase.uploadAndGenerate') }}
           </NButton>
         </NFlex>
       </NSpace>
@@ -458,7 +458,7 @@ watch(
   <NModal v-model:show="showIndexModal" style="width: 90%; max-width:550px" preset="card" :title="t('knowledgeBase.selectIndexType')">
     <NFlex vertical>
       <NAlert :title="t('common.tip')" type="info">
-        对文档进行<span style="font-weight: bold">图谱化</span>时会使用到大语言模型，需要消耗一定量的Token
+        {{ t('knowledgeBase.graphExplanation') }}
       </NAlert>
       <NCheckboxGroup v-model:value="indexTypeSelected" class="my-2">
         <NFlex vertical>
@@ -474,14 +474,14 @@ watch(
           {{ checkedItem.title }}
         </NTag>
         <NTag v-if="checkedItems.length === 0" :bordered="false" type="warning" size="small">
-          先选择知识点
+          {{ t('knowledgeBase.selectKnowledgeFirst') }}
         </NTag>
       </div>
       <NButton
         type="primary" size="small" :disabled="checkedItems.length === 0 || indexTypeSelected.length === 0"
         @click="textIndexing()"
       >
-        确定
+        {{ t('common.confirm') }}
       </NButton>
     </NFlex>
   </NModal>
@@ -499,7 +499,7 @@ watch(
     </div>
     <template #footer>
       <NButton type="primary" text tag="a" size="small" @click="openFileInNewTab(previewFileUrl)">
-        点击下载：{{ previewFileName }}
+        {{ t('workflow.clickToDownload') }}{{ previewFileName }}
       </NButton>
     </template>
   </NModal>

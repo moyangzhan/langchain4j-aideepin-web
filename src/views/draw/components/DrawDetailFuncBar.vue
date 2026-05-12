@@ -78,7 +78,7 @@ async function handleStar(uuid: string) {
           size="medium" :bordered="false" round :color="{ color: '#ff000000' }"
           :checkable="userStore.userInfo.uuid === draw.userUuid" @click="handleSetPublic(draw.uuid, !draw.isPublic)"
         >
-          {{ draw.isPublic ? "公开" : "私有" }}
+          {{ draw.isPublic ? t('draw.publicLabel') : t('draw.privateLabel') }}
           <template #icon>
             <NIcon :component="draw.isPublic ? LockOpen24Regular : LockClosed24Regular" />
           </template>
@@ -117,7 +117,7 @@ async function handleStar(uuid: string) {
         v-show="userStore.userInfo.uuid === draw.userUuid" quaternary type="error"
         @click="handleDelDraw(draw.uuid, draw.prompt)"
       >
-        删除
+        {{ t('common.delete') }}
       </NButton>
     </NFlex>
   </NFlex>

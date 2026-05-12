@@ -563,19 +563,19 @@ onDeactivated(() => {
                           v-if="!!answer && !answer.loading && answer.isRefMemoryEmbedding" size="tiny" text
                           type="primary" @click="handleMemoryRefClick(answer.uuid)"
                         >
-                          记忆
+                          {{ t('chat.memory') }}
                         </NButton>
                         <NButton
                           v-if="!!answer && !answer.loading && answer.isRefEmbedding" size="tiny" text
                           type="primary" @click="handleEmbeddingRefClick(answer.uuid)"
                         >
-                          引用
+                          {{ t('chat.reference') }}
                         </NButton>
                         <NButton
                           v-if="!!answer && !answer.loading && qaMessage.isRefGraph" size="tiny" text
                           type="primary" @click="handleGraphClick(answer.uuid)"
                         >
-                          图谱
+                          {{ t('chat.graph') }}
                         </NButton>
                       </div>
                     </Message>
@@ -652,7 +652,7 @@ onDeactivated(() => {
                 v-if="qaMessage.state && qaMessage.state.get('remark')"
                 class="my-2 text-sm bg-gray-200 px-2 py-1 rounded-md"
               >
-                {{ qaMessage.state.get('remark') }}
+                {{ t(qaMessage.state.get('remark')!) }}
               </div>
             </div>
           </template>
